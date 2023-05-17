@@ -17,6 +17,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="refresh_title">刷新</string>
-    <string name="copy_title">复制</string>
-    <string name="link_title">链接</string>
+    <string name="copy_title">复制内容</string>
+    <string name="link_title">复制帖子链接</string>
+    <string name="open_link_title">打开所选链接</string>
+    <string name="copy_link_title">复制所选链接</string>
 </resources>

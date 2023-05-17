@@ -11,6 +11,7 @@ import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
+import io.github.a13e300.ro_tieba.convertTiebaUrl
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
 const val AVATAR_ORIG = "http://tb.himg.baidu.com/sys/portraith/item/"
@@ -30,6 +31,8 @@ data class Post(
         val width: Int,
         val height: Int
     ) : Content()
+
+    data class LinkContent(val text: String, val link: String) : Content()
 }
 
 data class User(
@@ -58,15 +61,23 @@ class ThreadViewModel : ViewModel() {
                 { User(it.name, it.nameShow, it.id, it.portrait) })
             val posts = response.postListList.map { p ->
                 val content = p.contentList.map {
-                    if (it.type == 3 || it.type == 20) {
-                        val sizes = it.bsize.split(",")
-                        Post.ImageContent(
-                            it.cdnSrc,
-                            it.originSrc,
-                            sizes[0].toInt(),
-                            sizes[1].toInt()
-                        )
-                    } else Post.TextContent(it.text)
+                    when (it.type) {
+                        1 -> {
+                            Post.LinkContent(it.text, it.link.convertTiebaUrl())
+                        }
+
+                        3, 20 -> {
+                            val sizes = it.bsize.split(",")
+                            Post.ImageContent(
+                                it.cdnSrc,
+                                it.originSrc,
+                                sizes[0].toInt(),
+                                sizes[1].toInt()
+                            )
+                        }
+
+                        else -> Post.TextContent(it.text)
+                    }
                 }
                 Post(users[p.authorId] ?: User(), content, p.floor, p.id, response.thread.id)
             }

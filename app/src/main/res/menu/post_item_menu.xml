@@ -10,4 +10,16 @@
             android:title="@string/link_title"
             android:icon="@drawable/ic_link" />
     </group>
+    <group
+        android:id="@+id/group_link"
+        android:visible="false">
+        <item
+            android:id="@+id/open_link"
+            android:title="@string/open_link_title"
+            android:icon="@drawable/ic_link" />
+        <item
+            android:id="@+id/copy_link"
+            android:title="@string/copy_link_title"
+            android:icon="@drawable/ic_copy" />
+    </group>
 </menu>

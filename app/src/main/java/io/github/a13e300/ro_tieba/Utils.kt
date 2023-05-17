@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.view.ContextMenu
 import java.lang.reflect.Method
 
@@ -30,4 +31,9 @@ fun ContextMenu.forceShowIcon() {
     if (classMenuBuilder?.isInstance(this) == true) {
         methodSetOptionalIconsVisible?.invoke(this, true)
     }
+}
+
+fun String.convertTiebaUrl(): String {
+    if (!startsWith("https://tieba.baidu.com/mo/q/checkurl?url=")) return this
+    return Uri.parse(this).getQueryParameter("url") ?: this
 }

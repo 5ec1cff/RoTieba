@@ -2,7 +2,12 @@ package io.github.a13e300.ro_tieba.ui.thread
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.URLSpan
 import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.Menu
@@ -11,7 +16,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -28,6 +32,9 @@ import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.view.ItemView
+import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
+import io.github.a13e300.ro_tieba.view.PbContentTextView
+import io.github.a13e300.ro_tieba.view.SelectedLink
 import kotlinx.coroutines.launch
 
 class ThreadFragment : Fragment() {
@@ -82,10 +89,16 @@ class ThreadFragment : Fragment() {
         super.onCreateContextMenu(menu, v, menuInfo)
         MenuInflater(requireContext()).inflate(R.menu.post_item_menu, menu)
         menu.forceShowIcon()
+        val selected = (menuInfo as? ItemView.ContextMenuInfo)?.selectedData
+        if (selected is SelectedLink) {
+            menu.setGroupVisible(R.id.group_link, true)
+        }
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val post = (item.menuInfo as? ItemView.ContextMenuInfo)?.data as? Post
+        val info = item.menuInfo as? ItemView.ContextMenuInfo
+        val post = info?.data as? Post
+        val selected = info?.selectedData
         if (post != null) {
             when (item.itemId) {
                 R.id.copy_post_content -> {
@@ -94,6 +107,7 @@ class ThreadFragment : Fragment() {
                         when (it) {
                             is Post.TextContent -> it.text
                             is Post.ImageContent -> "[${it.src}]"
+                            is Post.LinkContent -> "[${it.text}](${it.link})"
                         }
                     }))
                     return true
@@ -107,6 +121,26 @@ class ThreadFragment : Fragment() {
                             "https://tieba.baidu.com/p/${post.tid}?p=${post.postId}"
                         )
                     )
+                    return true
+                }
+
+                R.id.open_link -> {
+                    (selected as? SelectedLink)?.url?.also {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+                    }
+                    return true
+                }
+
+                R.id.copy_link -> {
+                    (selected as? SelectedLink)?.url?.also {
+                        val cm = requireContext().getSystemService(ClipboardManager::class.java)
+                        cm.setPrimaryClip(
+                            ClipData.newPlainText(
+                                "",
+                                it
+                            )
+                        )
+                    }
                     return true
                 }
             }
@@ -129,26 +163,36 @@ class ThreadFragment : Fragment() {
                 post.user.nick.ifEmpty { post.user.name }.ifEmpty { "[${post.user.uid}]" }
             val contentView = holder.binding.content
             contentView.removeAllViews()
-            var lastString: StringBuilder? = null
+            var lastString: SpannableStringBuilder? = null
             val context = holder.binding.root.context
             Glide.with(context).load("$AVATAR_THUMBNAIL/${post.user.portrait}")
                 .into(holder.binding.avatar)
             fun addTextView() {
                 if (lastString == null) return
-                contentView.addView(AppCompatTextView(context).apply {
+                contentView.addView(PbContentTextView(context).apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
-                    text = lastString.toString()
+                    text = lastString
+                    movementMethod = MyLinkMovementMethod
                 })
                 lastString = null
             }
             for (content in post.content) {
                 when (content) {
                     is Post.TextContent -> {
-                        if (lastString == null) lastString = StringBuilder()
+                        if (lastString == null) lastString = SpannableStringBuilder()
                         lastString!!.append(content.text)
+                    }
+
+                    is Post.LinkContent -> {
+                        if (lastString == null) lastString = SpannableStringBuilder()
+                        lastString!!.append(
+                            content.text.ifEmpty { "[link]" },
+                            URLSpan(content.link),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
                     }
 
                     is Post.ImageContent -> {
@@ -164,6 +208,8 @@ class ThreadFragment : Fragment() {
                         }
                         contentView.addView(imageView)
                     }
+
+                    else -> {}
                 }
             }
             addTextView()

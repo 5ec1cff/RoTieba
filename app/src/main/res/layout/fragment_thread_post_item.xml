@@ -44,7 +44,7 @@
             app:layout_constraintTop_toBottomOf="@id/account_name"
             app:layout_constraintBottom_toBottomOf="@id/avatar" />
 
-        <LinearLayout
+        <io.github.a13e300.ro_tieba.view.PbContentView
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
