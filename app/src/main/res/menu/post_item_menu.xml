@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/group_post">
+        <item
+            android:id="@+id/copy_post_content"
+            android:title="@string/copy_title"
+            android:icon="@drawable/ic_copy" />
+        <item
+            android:id="@+id/copy_post_link"
+            android:title="@string/link_title"
+            android:icon="@drawable/ic_link" />
+    </group>
+</menu>

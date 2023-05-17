@@ -19,7 +19,8 @@ data class Post(
     val user: User,
     val content: List<Content>,
     val floor: Int,
-    val postId: Long
+    val postId: Long,
+    val tid: Long
 ) {
     sealed class Content
     data class TextContent(val text: String) : Content()
@@ -67,7 +68,7 @@ class ThreadViewModel : ViewModel() {
                         )
                     } else Post.TextContent(it.text)
                 }
-                Post(users[p.authorId] ?: User(), content, p.floor, p.id)
+                Post(users[p.authorId] ?: User(), content, p.floor, p.id, response.thread.id)
             }
             Logger.d("load thread : $page")
             return LoadResult.Page(
