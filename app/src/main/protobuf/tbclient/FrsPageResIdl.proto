@@ -1,0 +1,27 @@
+// tbclient.FrsPage.FrsPageResIdl
+syntax = "proto3";
+option java_package = "tbclient.FrsPage";
+import "Error.proto";
+import "Page.proto";
+import "ThreadInfo.proto";
+import "User.proto";
+import "FrsTabInfo.proto";
+
+message FrsPageResIdl {
+  Error error = 1;
+  message DataRes {
+    message ForumInfo {
+      int64 id = 1;
+      string name = 2;
+    }
+    ForumInfo forum = 2;
+    Page page = 4;
+    repeated ThreadInfo thread_list = 7;
+    repeated User user_list = 17;
+    message NavTabInfo {
+      repeated FrsTabInfo tab = 1;
+    }
+    NavTabInfo nav_tab_info = 37;
+  }
+  DataRes data = 2;
+}

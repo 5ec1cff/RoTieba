@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">RoTieba</string>
+    <string name="title_home">首页</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_settings">设置</string>
+    <string name="bduss_title">BDUSS</string>
+    <string name="bduss_summary">for login</string>
+    <string name="proxy_title">Proxy</string>
+    <string name="proxy_summary">HTTP Proxy</string>
+    <string name="account_label">账户</string>
+    <string name="anonymous">匿名</string>
+    <string name="anonymous_tips">点击右上角新增账号</string>
+    <string name="title_add">添加</string>
+    <string name="delete_title">删除</string>
+    <string name="search_title">搜索</string>
+    <string name="searchbar_hint">搜索</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="refresh_title">刷新</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="user"
+        android:title="user" />
+    <EditTextPreference
+        android:key="bduss"
+        android:title="@string/bduss_title"
+        android:summary="@string/bduss_summary" />
+    <EditTextPreference
+        android:key="proxy"
+        android:title="@string/proxy_title"
+        android:summary="@string/proxy_summary" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+    <Preference android:title="a" />
+
+</PreferenceScreen>

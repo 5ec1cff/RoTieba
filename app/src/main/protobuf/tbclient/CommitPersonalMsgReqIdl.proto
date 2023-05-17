@@ -1,0 +1,12 @@
+// protobuf.CommitPersonalMsg.CommitPersonalMsgReqIdl
+syntax = "proto3";
+option java_package = "tbclient.CommitPersonalMsg";
+message CommitPersonalMsgReqIdl {
+  message DataReq {
+    int64 toUid = 2;
+    int32 msgType = 3;
+    string content = 4;
+    int64 recordId = 6;
+  }
+  DataReq data = 1;
+}

@@ -1,0 +1,12 @@
+// tbclient.GetUserByTiebaUid.GetUserByTiebaUidReqIdl
+syntax = "proto3";
+option java_package = "tbclient.GetUserByTiebaUid";
+import "CommonReq.proto";
+
+message GetUserByTiebaUidReqIdl {
+  message DataReq {
+    CommonReq common = 1;
+    string tieba_uid = 2;
+  }
+  DataReq data = 1;
+}

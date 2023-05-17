@@ -1,0 +1,8 @@
+// protobuf.CommitReceivedPmsg.CommitReceivedPmsgResIdl
+syntax = "proto3";
+option java_package = "tbclient.CommitReceivedPmsg";
+import "Error.proto";
+
+message CommitReceivedPmsgResIdl {
+  Error error = 1;
+}

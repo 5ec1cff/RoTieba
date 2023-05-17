@@ -1,0 +1,7 @@
+// tbclient.SimpleForum
+syntax = "proto3";
+option java_package = "tbclient";
+message SimpleForum {
+  int64 id = 1;
+  string name = 2;
+}

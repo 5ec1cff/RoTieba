@@ -1,0 +1,9 @@
+// tbclient.GetUserInfo.GetUserInfoReqIdl
+syntax = "proto3";
+option java_package = "tbclient.GetUserInfo";
+message GetUserInfoReqIdl {
+  message DataReq {
+    int64 user_id = 2;
+  }
+  DataReq data = 1;
+}
