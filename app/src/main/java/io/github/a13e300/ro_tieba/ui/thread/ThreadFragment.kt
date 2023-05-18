@@ -31,6 +31,7 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
+import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.PbContentTextView
@@ -213,7 +214,8 @@ class ThreadFragment : Fragment() {
                 }
             }
             addTextView()
-            holder.binding.floorNum.text = "${post.floor}楼"
+            holder.binding.floorNum.text =
+                "${post.floor}楼·${post.time.toSimpleString()}·${post.user.location}"
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {

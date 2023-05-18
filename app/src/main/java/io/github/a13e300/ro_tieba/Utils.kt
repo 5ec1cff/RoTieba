@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.view.ContextMenu
 import java.lang.reflect.Method
+import java.text.SimpleDateFormat
+import java.util.Date
 
 fun ByteArray.toHexString() = this.joinToString("") {
     String.format("%02x", it)
@@ -36,4 +38,16 @@ fun ContextMenu.forceShowIcon() {
 fun String.convertTiebaUrl(): String {
     if (!startsWith("https://tieba.baidu.com/mo/q/checkurl?url=")) return this
     return Uri.parse(this).getQueryParameter("url") ?: this
+}
+
+fun Date.toSimpleString(): String {
+    val diff = (System.currentTimeMillis() - time) / 1000
+    if (diff >= 0) {
+        if (diff < 60) return "${diff}秒前"
+        else if (diff < 3600) return "${diff / 60}分钟前"
+        else if (diff < 24 * 3600) return "${diff / 3600}小时前"
+        else if (diff < 30 * 24 * 3600) return "${diff / (3600 * 24)}天前"
+    }
+    val ft = SimpleDateFormat("yyyy-MM-dd")
+    return ft.format(this)
 }

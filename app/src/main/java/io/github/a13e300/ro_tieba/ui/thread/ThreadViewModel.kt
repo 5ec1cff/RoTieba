@@ -12,6 +12,7 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.convertTiebaUrl
+import java.util.Date
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
 const val AVATAR_ORIG = "http://tb.himg.baidu.com/sys/portraith/item/"
@@ -21,7 +22,8 @@ data class Post(
     val content: List<Content>,
     val floor: Int,
     val postId: Long,
-    val tid: Long
+    val tid: Long,
+    val time: Date
 ) {
     sealed class Content
     data class TextContent(val text: String) : Content()
@@ -39,7 +41,8 @@ data class User(
     val name: String = "unknown",
     val nick: String = "unknown",
     val uid: Long = 0,
-    val portrait: String = ""
+    val portrait: String = "",
+    val location: String = ""
 )
 
 data class ThreadConfig(
@@ -58,7 +61,7 @@ class ThreadViewModel : ViewModel() {
             val response = client.getPosts(threadConfig.value!!.tid, page)
             threadTitle.value = response.thread.title
             val users = response.userListList.associateBy({ it.id },
-                { User(it.name, it.nameShow, it.id, it.portrait) })
+                { User(it.name, it.nameShow, it.id, it.portrait, it.ipAddress) })
             val posts = response.postListList.map { p ->
                 val content = p.contentList.map {
                     when (it.type) {
@@ -79,7 +82,14 @@ class ThreadViewModel : ViewModel() {
                         else -> Post.TextContent(it.text)
                     }
                 }
-                Post(users[p.authorId] ?: User(), content, p.floor, p.id, response.thread.id)
+                Post(
+                    users[p.authorId] ?: User(),
+                    content,
+                    p.floor,
+                    p.id,
+                    response.thread.id,
+                    Date(p.time.toLong() * 1000)
+                )
             }
             Logger.d("load thread : $page")
             return LoadResult.Page(

@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
+import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
 import kotlinx.coroutines.launch
 
@@ -54,9 +55,11 @@ class ForumFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val thread = getItem(position) ?: return
-            holder.binding.threadTitle.text = thread.title
+            holder.binding.threadTitle.text = thread.title.ifEmpty { "无标题" }
             holder.binding.threadContent.text = thread.content
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
+            holder.binding.threadInfo.text =
+                "${thread.time.toSimpleString()}·${thread.replyNum}回复"
             Glide.with(holder.binding.root)
                 .load("$AVATAR_THUMBNAIL/${thread.author.portrait}")
                 .into(holder.binding.threadAvatar)

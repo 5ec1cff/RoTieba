@@ -24,7 +24,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/thread_title"
+            android:id="@+id/thread_user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="user"
@@ -32,25 +32,35 @@
             android:textAppearance="?attr/textAppearanceListItem"
             app:layout_constraintStart_toEndOf="@id/thread_avatar"
             app:layout_constraintTop_toTopOf="@id/thread_avatar"
-            app:layout_constraintBottom_toTopOf="@id/thread_user_name" />
+            app:layout_constraintBottom_toTopOf="@id/thread_info" />
 
         <TextView
-            android:id="@+id/thread_user_name"
+            android:id="@+id/thread_info"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             tools:text="time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@id/thread_title"
-            app:layout_constraintTop_toBottomOf="@id/thread_title"
+            app:layout_constraintStart_toStartOf="@id/thread_user_name"
+            app:layout_constraintTop_toBottomOf="@id/thread_user_name"
             app:layout_constraintBottom_toBottomOf="@id/thread_avatar" />
+
+        <TextView
+            android:id="@+id/thread_title"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="title"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/thread_avatar"
+            app:layout_constraintBottom_toTopOf="@id/thread_content" />
 
         <TextView
             android:id="@+id/thread_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/thread_avatar" />
+            app:layout_constraintTop_toBottomOf="@id/thread_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
