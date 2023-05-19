@@ -10,6 +10,8 @@ import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
+import io.github.a13e300.ro_tieba.toPostContent
+import io.github.a13e300.ro_tieba.ui.thread.Post
 import io.github.a13e300.ro_tieba.ui.thread.User
 import java.util.Date
 
@@ -17,7 +19,7 @@ data class TiebaThread(
     val tid: Long,
     val title: String,
     val author: User,
-    val content: String,
+    val content: List<Post.Content>,
     val time: Date,
     val replyNum: Int
 )
@@ -35,12 +37,11 @@ class ForumViewModel : ViewModel() {
             val users = response.userListList.associateBy({ it.id },
                 { User(it.name, it.nameShow, it.id, it.portrait) })
             val posts = response.threadListList.map { p ->
-                val content = p.firstPostContentList.joinToString("") { it.text }
                 TiebaThread(
                     p.id,
                     p.title,
                     users[p.authorId] ?: User(),
-                    content,
+                    p.firstPostContentList.toPostContent(),
                     Date(p.createTime.toLong() * 1000),
                     p.replyNum
                 )

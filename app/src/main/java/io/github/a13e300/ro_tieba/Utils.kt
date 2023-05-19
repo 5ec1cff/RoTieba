@@ -3,6 +3,8 @@ package io.github.a13e300.ro_tieba
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.view.ContextMenu
+import io.github.a13e300.ro_tieba.ui.thread.Post
+import tbclient.PbContentOuterClass
 import java.lang.reflect.Method
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,4 +52,25 @@ fun Date.toSimpleString(): String {
     }
     val ft = SimpleDateFormat("yyyy-MM-dd")
     return ft.format(this)
+}
+
+fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Post.Content> = map {
+    // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/api/get_posts/_classdef.py
+    when (it.type) {
+        1 -> Post.LinkContent(it.text, it.link.convertTiebaUrl())
+
+        2, 11 -> Post.EmojiContent(it.text)
+
+        3, 20 -> {
+            val sizes = it.bsize.split(",")
+            Post.ImageContent(
+                it.cdnSrc,
+                it.originSrc,
+                sizes[0].toInt(),
+                sizes[1].toInt()
+            )
+        }
+
+        else -> Post.TextContent(it.text)
+    }
 }

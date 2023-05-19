@@ -1,9 +1,13 @@
 package io.github.a13e300.ro_tieba.ui.forum
 
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -14,11 +18,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
+import io.github.a13e300.ro_tieba.ui.thread.Post
 import kotlinx.coroutines.launch
 
 class ForumFragment : Fragment() {
@@ -56,7 +62,34 @@ class ForumFragment : Fragment() {
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val thread = getItem(position) ?: return
             holder.binding.threadTitle.text = thread.title.ifEmpty { "无标题" }
-            holder.binding.threadContent.text = thread.content
+            holder.binding.threadContent.text = SpannableStringBuilder().apply {
+                thread.content.forEach {
+                    when (it) {
+                        is Post.TextContent -> append(it.text)
+                        is Post.LinkContent -> append(it.link)
+                        is Post.EmojiContent -> {
+                            val emoji = Emotions.emotionMap.get(it.id)
+                            if (emoji == null) {
+                                append("[$emoji]")
+                            } else {
+                                val drawable = AppCompatResources.getDrawable(
+                                    requireContext(),
+                                    emoji.resource
+                                )!!.apply {
+                                    setBounds(0, 0, 50, 50)
+                                }
+                                append(
+                                    emoji.name,
+                                    ImageSpan(drawable),
+                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                                )
+                            }
+                        }
+
+                        is Post.ImageContent -> append("[图片]")
+                    }
+                }
+            }
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
             holder.binding.threadInfo.text =
                 "${thread.time.toSimpleString()}·${thread.replyNum}回复"

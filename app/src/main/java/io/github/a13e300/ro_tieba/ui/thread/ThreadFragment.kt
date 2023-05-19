@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.text.style.URLSpan
 import android.view.ContextMenu
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -26,6 +28,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
@@ -109,6 +112,7 @@ class ThreadFragment : Fragment() {
                             is Post.TextContent -> it.text
                             is Post.ImageContent -> "[${it.src}]"
                             is Post.LinkContent -> "[${it.text}](${it.link})"
+                            is Post.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
                         }
                     }))
                     return true
@@ -168,6 +172,7 @@ class ThreadFragment : Fragment() {
             val context = holder.binding.root.context
             Glide.with(context).load("$AVATAR_THUMBNAIL/${post.user.portrait}")
                 .into(holder.binding.avatar)
+            // TODO: refactor this to use single TextView
             fun addTextView() {
                 if (lastString == null) return
                 contentView.addView(PbContentTextView(context).apply {
@@ -208,6 +213,25 @@ class ThreadFragment : Fragment() {
                                 .override(content.width, content.height).into(this)
                         }
                         contentView.addView(imageView)
+                    }
+
+                    is Post.EmojiContent -> {
+                        if (lastString == null) lastString = SpannableStringBuilder()
+                        val emoji = Emotions.emotionMap.get(content.id)
+                        if (emoji == null) {
+                            lastString!!.append("[${content.id}]")
+                        } else {
+                            val drawable =
+                                AppCompatResources.getDrawable(requireContext(), emoji.resource)!!
+                                    .apply {
+                                        setBounds(0, 0, 50, 50)
+                                    }
+                            lastString!!.append(
+                                emoji.name,
+                                ImageSpan(drawable),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
                     }
 
                     else -> {}

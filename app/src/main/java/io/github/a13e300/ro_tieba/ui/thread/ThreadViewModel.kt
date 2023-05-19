@@ -11,7 +11,7 @@ import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
-import io.github.a13e300.ro_tieba.convertTiebaUrl
+import io.github.a13e300.ro_tieba.toPostContent
 import java.util.Date
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
@@ -32,6 +32,10 @@ data class Post(
         val src: String,
         val width: Int,
         val height: Int
+    ) : Content()
+
+    data class EmojiContent(
+        val id: String
     ) : Content()
 
     data class LinkContent(val text: String, val link: String) : Content()
@@ -63,28 +67,9 @@ class ThreadViewModel : ViewModel() {
             val users = response.userListList.associateBy({ it.id },
                 { User(it.name, it.nameShow, it.id, it.portrait, it.ipAddress) })
             val posts = response.postListList.map { p ->
-                val content = p.contentList.map {
-                    when (it.type) {
-                        1 -> {
-                            Post.LinkContent(it.text, it.link.convertTiebaUrl())
-                        }
-
-                        3, 20 -> {
-                            val sizes = it.bsize.split(",")
-                            Post.ImageContent(
-                                it.cdnSrc,
-                                it.originSrc,
-                                sizes[0].toInt(),
-                                sizes[1].toInt()
-                            )
-                        }
-
-                        else -> Post.TextContent(it.text)
-                    }
-                }
                 Post(
                     users[p.authorId] ?: User(),
-                    content,
+                    p.contentList.toPostContent(),
                     p.floor,
                     p.id,
                     response.thread.id,
