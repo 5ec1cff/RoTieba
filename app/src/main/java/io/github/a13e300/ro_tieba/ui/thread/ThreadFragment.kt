@@ -21,13 +21,17 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
@@ -39,6 +43,7 @@ import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.PbContentTextView
 import io.github.a13e300.ro_tieba.view.SelectedLink
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ThreadFragment : Fragment() {
@@ -78,8 +83,17 @@ class ThreadFragment : Fragment() {
             }
         })
         lifecycleScope.launch {
-            viewModel.flow.collect { data ->
-                postAdapter.submitData(data)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val currentUid = App.instance.accountManager.currentAccount.first().uid
+                if (viewModel.currentUid == null)
+                    viewModel.currentUid = currentUid
+                else if (currentUid != viewModel.currentUid) {
+                    findNavController().navigateUp()
+                    return@repeatOnLifecycle
+                }
+                viewModel.flow.collect { data ->
+                    postAdapter.submitData(data)
+                }
             }
         }
         return binding.root

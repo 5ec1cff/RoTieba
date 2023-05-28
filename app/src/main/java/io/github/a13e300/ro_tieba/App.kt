@@ -38,6 +38,5 @@ class App : Application() {
         appScope.launch {
             accountManager.initAccount()
         }
-        client = TiebaClient()
     }
 }

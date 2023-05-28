@@ -25,6 +25,7 @@ data class TiebaThread(
 )
 
 class ForumViewModel : ViewModel() {
+    var currentUid: String? = null
     lateinit var forumName: String
 
     inner class ThreadPagingSource(

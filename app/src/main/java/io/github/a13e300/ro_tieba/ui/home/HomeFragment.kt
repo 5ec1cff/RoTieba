@@ -19,11 +19,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBinding
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -63,19 +65,12 @@ class HomeFragment : Fragment() {
         }
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    App.instance.accountManager.currentAccount.collect {
-                        if (it.uid != viewModel.uid.value) {
-                            viewModel.uid.value = it.uid
-                            barAdapter.refresh()
-                        }
-                    }
+                val currentUid = App.instance.accountManager.currentAccount.first().uid
+                Logger.d("home fragment started currentUid=$currentUid")
+                viewModel.updateUid(currentUid)
+                viewModel.flow.collect {
+                    barAdapter.submitData(it)
                 }
-            }
-        }
-        lifecycleScope.launch {
-            viewModel.flow.collect {
-                barAdapter.submitData(it)
             }
         }
         return binding.root

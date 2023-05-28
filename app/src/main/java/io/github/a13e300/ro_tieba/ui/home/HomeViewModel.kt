@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
@@ -12,14 +13,14 @@ import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 
 class HomeViewModel : ViewModel() {
-    val uid = MutableStateFlow(AccountManager.ACCOUNT_ANONYMOUS)
+    private var currentUid: String? = null
 
     inner class BarPagingSource(
         private val client: TiebaClient,
-        private val uid: String
+        private val uid: String = client.account.uid
     ) : PagingSource<Int, GetFollowForums.Forum>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GetFollowForums.Forum> {
             val page = params.key ?: 1
@@ -46,11 +47,17 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    val flow = Pager(
-        PagingConfig(pageSize = 50)
-    ) {
-        BarPagingSource(App.instance.client, uid.value)
-    }.flow
-        .cachedIn(viewModelScope)
+    lateinit var flow: Flow<PagingData<GetFollowForums.Forum>>
+
+    fun updateUid(uid: String) {
+        if (uid == currentUid) return
+        currentUid = uid
+        flow = Pager(
+            PagingConfig(pageSize = 50)
+        ) {
+            BarPagingSource(App.instance.client)
+        }.flow
+            .cachedIn(viewModelScope)
+    }
 
 }

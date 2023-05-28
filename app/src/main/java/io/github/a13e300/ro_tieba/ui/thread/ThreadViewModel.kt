@@ -54,6 +54,7 @@ data class ThreadConfig(
 )
 
 class ThreadViewModel : ViewModel() {
+    var currentUid: String? = null
     val threadConfig = MutableLiveData<ThreadConfig>()
     val threadTitle = MutableLiveData<String>()
 
