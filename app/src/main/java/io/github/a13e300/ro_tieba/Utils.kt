@@ -60,24 +60,29 @@ fun Date.toSimpleString(): String {
     return ft.format(this)
 }
 
-fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Post.Content> = map {
-    // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/api/get_posts/_classdef.py
-    when (it.type) {
-        1 -> Post.LinkContent(it.text, it.link.convertTiebaUrl())
+fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Post.Content> {
+    var imageOrder = 0
+    return map {
+        // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/api/get_posts/_classdef.py
+        when (it.type) {
+            1 -> Post.LinkContent(it.text, it.link.convertTiebaUrl())
 
-        2, 11 -> Post.EmojiContent(it.text)
+            2, 11 -> Post.EmojiContent(it.text)
 
-        3, 20 -> {
-            val sizes = it.bsize.split(",")
-            Post.ImageContent(
-                it.cdnSrc,
-                it.originSrc,
-                sizes[0].toInt(),
-                sizes[1].toInt()
-            )
+            3, 20 -> {
+                imageOrder += 1
+                val sizes = it.bsize.split(",")
+                Post.ImageContent(
+                    it.cdnSrc,
+                    it.originSrc,
+                    sizes[0].toInt(),
+                    sizes[1].toInt(),
+                    imageOrder
+                )
+            }
+
+            else -> Post.TextContent(it.text)
         }
-
-        else -> Post.TextContent(it.text)
     }
 }
 

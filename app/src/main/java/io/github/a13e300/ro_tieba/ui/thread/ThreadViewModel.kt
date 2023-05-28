@@ -12,7 +12,9 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.toPostContent
+import io.github.a13e300.ro_tieba.ui.photo.Photo
 import java.util.Date
+import java.util.TreeMap
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
 const val AVATAR_ORIG = "http://tb.himg.baidu.com/sys/portraith/item/"
@@ -31,7 +33,8 @@ data class Post(
         val previewSrc: String,
         val src: String,
         val width: Int,
-        val height: Int
+        val height: Int,
+        val order: Int
     ) : Content()
 
     data class EmojiContent(
@@ -57,6 +60,13 @@ class ThreadViewModel : ViewModel() {
     var currentUid: String? = null
     val threadConfig = MutableLiveData<ThreadConfig>()
     val threadTitle = MutableLiveData<String>()
+    val photos = TreeMap<Pair<Int, Int>, Photo> { p0, p1 ->
+        if (p0.first < p1.first) -1
+        else if (p0.first > p1.first) 1
+        else if (p0.second < p1.second) -1
+        else if (p0.second > p1.second) 1
+        else 0
+    }
 
     inner class PostPagingSource(
         private val client: TiebaClient
@@ -77,6 +87,13 @@ class ThreadViewModel : ViewModel() {
                     Date(p.time.toLong() * 1000)
                 )
             }
+            posts.forEach { p ->
+                p.content.forEach { c ->
+                    if (c is Post.ImageContent) {
+                        photos[p.floor to c.order] = Photo(c.src)
+                    }
+                }
+            }
             Logger.d("load thread : $page")
             return LoadResult.Page(
                 data = posts,
@@ -94,10 +111,9 @@ class ThreadViewModel : ViewModel() {
     }
 
     val flow = Pager(
-        // Configure how data is loaded by passing additional properties to
-        // PagingConfig, such as prefetchDistance.
         PagingConfig(pageSize = 30)
     ) {
+        photos.clear()
         PostPagingSource(App.instance.client)
     }.flow
         .cachedIn(viewModelScope)

@@ -34,11 +34,13 @@ import com.bumptech.glide.Glide
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
+import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.PbContentTextView
@@ -49,6 +51,7 @@ import kotlinx.coroutines.launch
 class ThreadFragment : Fragment() {
 
     private val viewModel: ThreadViewModel by viewModels()
+    private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
     private val args: ThreadFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -225,6 +228,12 @@ class ThreadFragment : Fragment() {
                             adjustViewBounds = true
                             Glide.with(contentView).load(content.previewSrc)
                                 .override(content.width, content.height).into(this)
+                            setOnClickListener {
+                                photoViewModel.photos = viewModel.photos.values.toList()
+                                val idx = viewModel.photos.keys.indexOf(post.floor to content.order)
+                                photoViewModel.currentIndex.value = idx
+                                findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                            }
                         }
                         contentView.addView(imageView)
                     }

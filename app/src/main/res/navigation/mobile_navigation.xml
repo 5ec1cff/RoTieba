@@ -51,4 +51,12 @@
             android:name="fname"
             app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_photo"
+        android:name="io.github.a13e300.ro_tieba.ui.photo.PhotoFragment" />
+
+    <action
+        android:id="@+id/view_photos"
+        app:destination="@id/navigation_photo" />
 </navigation>

@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.LayoutInflaterCompat
+import androidx.core.view.WindowCompat
 import rikka.insets.WindowInsetsHelper
 import rikka.layoutinflater.view.LayoutInflaterFactory
 
@@ -17,10 +18,14 @@ abstract class BaseActivity : AppCompatActivity() {
             window.isStatusBarContrastEnforced = false
             window.isNavigationBarContrastEnforced = false
         }
+        */
+        val ta = obtainStyledAttributes(intArrayOf(androidx.appcompat.R.attr.isLightTheme))
+        val isLight = ta.getBoolean(0, false)
+        ta.recycle()
         WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightNavigationBars = true
-            isAppearanceLightStatusBars = true
-        }*/
+            // isAppearanceLightNavigationBars = isLight
+            isAppearanceLightStatusBars = isLight
+        }
         LayoutInflaterCompat.setFactory2(
             layoutInflater, LayoutInflaterFactory(delegate)
                 .addOnViewCreatedListener(WindowInsetsHelper.LISTENER)
