@@ -17,7 +17,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -30,7 +29,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
@@ -38,7 +37,9 @@ import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
+import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
+import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.view.ItemView
@@ -187,8 +188,7 @@ class ThreadFragment : Fragment() {
             contentView.removeAllViews()
             var lastString: SpannableStringBuilder? = null
             val context = holder.binding.root.context
-            Glide.with(context).load("$AVATAR_THUMBNAIL/${post.user.portrait}")
-                .into(holder.binding.avatar)
+            holder.binding.avatar.displayImage("$AVATAR_THUMBNAIL/${post.user.portrait}")
             // TODO: refactor this to use single TextView
             fun addTextView() {
                 if (lastString == null) return
@@ -220,21 +220,28 @@ class ThreadFragment : Fragment() {
 
                     is Post.ImageContent -> {
                         addTextView()
-                        val imageView = AppCompatImageView(context).apply {
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
-                            )
-                            adjustViewBounds = true
-                            Glide.with(contentView).load(content.previewSrc)
-                                .override(content.width, content.height).into(this)
-                            setOnClickListener {
-                                photoViewModel.photos = viewModel.photos.values.toList()
-                                val idx = viewModel.photos.keys.indexOf(post.floor to content.order)
-                                photoViewModel.currentIndex.value = idx
-                                findNavController().navigate(MobileNavigationDirections.viewPhotos())
-                            }
-                        }
+
+
+                        val imageView =
+                            ImageContentBinding.inflate(layoutInflater, contentView, false)
+                                .root.apply {
+                                    displayImage(content.previewSrc) {
+                                        placeholder(
+                                            PlaceHolderDrawable(
+                                                content.width,
+                                                content.height
+                                            )
+                                        )
+                                        resize(content.width, content.height)
+                                    }
+                                    setOnClickListener {
+                                        photoViewModel.photos = viewModel.photos.values.toList()
+                                        val idx =
+                                            viewModel.photos.keys.indexOf(post.floor to content.order)
+                                        photoViewModel.currentIndex.value = idx
+                                        findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                                    }
+                                }
                         contentView.addView(imageView)
                     }
 

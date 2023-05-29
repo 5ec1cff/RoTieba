@@ -19,7 +19,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
@@ -106,9 +106,9 @@ class ForumFragment : Fragment() {
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
             holder.binding.threadInfo.text =
                 "${thread.time.toSimpleString()}·${thread.replyNum}回复"
-            Glide.with(holder.binding.root)
-                .load("$AVATAR_THUMBNAIL/${thread.author.portrait}")
-                .into(holder.binding.threadAvatar)
+            holder.binding.threadAvatar.displayImage(
+                "$AVATAR_THUMBNAIL/${thread.author.portrait}"
+            )
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid.toString()))
             }

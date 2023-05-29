@@ -95,11 +95,6 @@ dependencies {
     implementation(libs.androidx.paging.runtime.ktx)
 
     implementation(libs.bundles.sketch)
-
-    implementation(libs.glide)
-    implementation(libs.glide.rv) {
-        isTransitive = false
-    }
 }
 
 protobuf {

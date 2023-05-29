@@ -1,7 +1,6 @@
 [versions]
 com-android-application = "8.1.0-alpha11"
 datastore = "1.0.0"
-glide = "4.15.1"
 gson = "2.10.1"
 okhttp = "4.11.0"
 kotlin = "1.8.21"
@@ -35,11 +34,8 @@ androidx-preference-ktx = { module = "androidx.preference:preference-ktx", versi
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room-runtime" }
 androidx-room-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room-runtime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room-runtime" }
-glide-ksp = { module = "com.github.bumptech.glide:ksp", version.ref = "glide" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-glide-rv = { module = "com.github.bumptech.glide:recyclerview-integration", version.ref = "glide" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle-livedata-ktx" }
@@ -71,6 +67,7 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 sketch-main = { module = "io.github.panpf.sketch3:sketch", version.ref = "sketch" }
 sketch-okhttp = { module = "io.github.panpf.sketch3:sketch-okhttp", version.ref = "sketch" }
 sketch-zoom = { module = "io.github.panpf.sketch3:sketch-zoom", version.ref = "sketch" }
+sketch-movie = { module = "io.github.panpf.sketch3:sketch-gif-movie", version.ref = "sketch" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "com-android-application" }
@@ -95,5 +92,6 @@ http = [
 sketch = [
     "sketch-main",
     "sketch-okhttp",
-    "sketch-zoom"
+    "sketch-zoom",
+    "sketch-movie"
 ]
