@@ -21,4 +21,6 @@
     <string name="link_title">复制帖子链接</string>
     <string name="open_link_title">打开所选链接</string>
     <string name="copy_link_title">复制所选链接</string>
+    <string name="download_photo_title">下载图片</string>
+    <string name="saved_to_gallery">已保存到相册</string>
 </resources>

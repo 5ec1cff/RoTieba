@@ -4,7 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 data class Photo(
-    val url: String
+    val url: String,
+    val key: String
 )
 
 class PhotoViewModel : ViewModel() {

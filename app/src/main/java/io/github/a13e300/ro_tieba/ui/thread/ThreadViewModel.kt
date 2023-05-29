@@ -90,7 +90,8 @@ class ThreadViewModel : ViewModel() {
             posts.forEach { p ->
                 p.content.forEach { c ->
                     if (c is Post.ImageContent) {
-                        photos[p.floor to c.order] = Photo(c.src)
+                        photos[p.floor to c.order] =
+                            Photo(c.src, "t${p.tid}_p${p.postId}_f${p.floor}_c${c.order}")
                     }
                 }
             }

@@ -6,7 +6,9 @@ import android.view.ContextMenu
 import io.github.a13e300.ro_tieba.ui.thread.Post
 import okhttp3.OkHttpClient
 import tbclient.PbContentOuterClass
+import java.io.InputStream
 import java.lang.reflect.Method
+import java.net.URLConnection
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.text.SimpleDateFormat
@@ -102,4 +104,13 @@ fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
     sslSocketFactory(insecureSocketFactory, naiveTrustManager)
     hostnameVerifier { _, _ -> true }
     return this
+}
+
+fun InputStream.guessExtension(): String {
+    val type = URLConnection.guessContentTypeFromStream(this)
+    return when (type) {
+        "image/png" -> "png"
+        "image/gif" -> "gif"
+        else -> "jpg"
+    }
 }

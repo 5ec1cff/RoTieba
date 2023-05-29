@@ -26,7 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             app:layout_collapseMode="pin"
-            app:titleTextColor="@color/white" />
+            app:titleTextColor="@color/white"
+            style="@style/PhotoAppBarStyle" />
     </com.google.android.material.appbar.AppBarLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
