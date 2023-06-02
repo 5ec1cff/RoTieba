@@ -59,4 +59,19 @@
     <action
         android:id="@+id/view_photos"
         app:destination="@id/navigation_photo" />
+
+    <fragment
+        android:id="@+id/navigation_comment"
+        android:name="io.github.a13e300.ro_tieba.ui.comment.CommentFragment">
+        <argument
+            android:name="tid"
+            app:argType="long" />
+        <argument
+            android:name="pid"
+            app:argType="long" />
+    </fragment>
+
+    <action
+        android:id="@+id/show_comments"
+        app:destination="@id/navigation_comment" />
 </navigation>

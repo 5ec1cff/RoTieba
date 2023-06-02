@@ -13,6 +13,7 @@ import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.toPostContent
 import io.github.a13e300.ro_tieba.ui.photo.Photo
+import tbclient.UserOuterClass
 import java.util.Date
 import java.util.TreeMap
 
@@ -25,7 +26,9 @@ data class Post(
     val floor: Int,
     val postId: Long,
     val tid: Long,
-    val time: Date
+    val time: Date,
+    val comments: List<Comment>,
+    val commentCount: Int
 ) {
     sealed class Content
     data class TextContent(val text: String) : Content()
@@ -44,6 +47,16 @@ data class Post(
     data class LinkContent(val text: String, val link: String) : Content()
 }
 
+data class Comment(
+    val user: User,
+    val content: List<Post.Content>,
+    val floor: Int,
+    val postId: Long,
+    val tid: Long,
+    val time: Date,
+    val ppid: Long
+)
+
 data class User(
     val name: String = "unknown",
     val nick: String = "unknown",
@@ -51,6 +64,10 @@ data class User(
     val portrait: String = "",
     val location: String = ""
 )
+
+fun UserOuterClass.User.toUser() = this.let { user ->
+    User(user.name, user.nameShow, user.id, user.portrait, user.ipAddress)
+}
 
 data class ThreadConfig(
     val tid: Long
@@ -72,35 +89,52 @@ class ThreadViewModel : ViewModel() {
         private val client: TiebaClient
     ) : PagingSource<Int, Post>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Post> {
-            val page = params.key ?: 1
-            val response = client.getPosts(threadConfig.value!!.tid, page)
-            threadTitle.value = response.thread.title
-            val users = response.userListList.associateBy({ it.id },
-                { User(it.name, it.nameShow, it.id, it.portrait, it.ipAddress) })
-            val posts = response.postListList.map { p ->
-                Post(
-                    users[p.authorId] ?: User(),
-                    p.contentList.toPostContent(),
-                    p.floor,
-                    p.id,
-                    response.thread.id,
-                    Date(p.time.toLong() * 1000)
-                )
-            }
-            posts.forEach { p ->
-                p.content.forEach { c ->
-                    if (c is Post.ImageContent) {
-                        photos[p.floor to c.order] =
-                            Photo(c.src, "t${p.tid}_p${p.postId}_f${p.floor}_c${c.order}")
+            try {
+                val page = params.key ?: 1
+                val response = client.getPosts(threadConfig.value!!.tid, page)
+                threadTitle.value = response.thread.title
+                val users = response.userListList.associateBy({ it.id },
+                    { it.toUser() })
+                val posts = response.postListList.map { p ->
+                    val comments = p.subPostList.subPostListList.map { sp ->
+                        Comment(
+                            user = users[sp.authorId] ?: User(),
+                            content = sp.contentList.toPostContent(),
+                            floor = sp.floor,
+                            postId = p.id,
+                            tid = p.tid,
+                            time = Date(sp.time.toLong() * 1000),
+                            ppid = p.id
+                        )
+                    }
+                    Post(
+                        users[p.authorId] ?: User(),
+                        p.contentList.toPostContent(),
+                        p.floor,
+                        p.id,
+                        response.thread.id,
+                        Date(p.time.toLong() * 1000),
+                        comments,
+                        p.subPostNumber
+                    )
+                }
+                posts.forEach { p ->
+                    p.content.forEach { c ->
+                        if (c is Post.ImageContent) {
+                            photos[p.floor to c.order] =
+                                Photo(c.src, "t${p.tid}_p${p.postId}_f${p.floor}_c${c.order}")
+                        }
                     }
                 }
+                Logger.d("load thread : $page")
+                return LoadResult.Page(
+                    data = posts,
+                    prevKey = if (page == 1) null else (page - 1),
+                    nextKey = if (response.page.hasMore != 0) page + 1 else null
+                )
+            } catch (t: Throwable) {
+                return LoadResult.Error(t)
             }
-            Logger.d("load thread : $page")
-            return LoadResult.Page(
-                data = posts,
-                prevKey = null,
-                nextKey = if (response.page.hasMore != 0) page + 1 else null
-            )
         }
 
         override fun getRefreshKey(state: PagingState<Int, Post>): Int? {

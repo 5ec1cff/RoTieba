@@ -2,7 +2,7 @@
 <io.github.a13e300.ro_tieba.view.ItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/Widget.RoTieba.FilledCardPrimary"
+    style="@style/Widget.RoTieba.FilledCardSecondary"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
@@ -33,10 +33,10 @@
             android:textAppearance="?attr/textAppearanceListItem"
             app:layout_constraintStart_toEndOf="@id/avatar"
             app:layout_constraintTop_toTopOf="@id/avatar"
-            app:layout_constraintBottom_toTopOf="@id/floor_num" />
+            app:layout_constraintBottom_toTopOf="@id/description" />
 
         <TextView
-            android:id="@+id/floor_num"
+            android:id="@+id/description"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             tools:text="floor"
             android:layout_width="wrap_content"
@@ -45,30 +45,14 @@
             app:layout_constraintTop_toBottomOf="@id/account_name"
             app:layout_constraintBottom_toBottomOf="@id/avatar" />
 
-        <io.github.a13e300.ro_tieba.view.PbContentView
-            android:id="@+id/content"
+        <TextView
+            android:id="@+id/comment_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginTop="16dp"
-            app:layout_constraintBottom_toTopOf="@id/comments_box"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/avatar" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/comments_box"
-            style="@style/Widget.RoTieba.FilledCardSecondary"
-            app:layout_constraintTop_toBottomOf="@id/content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_margin="8dp"
-                android:id="@+id/comments_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </io.github.a13e300.ro_tieba.view.ItemView>

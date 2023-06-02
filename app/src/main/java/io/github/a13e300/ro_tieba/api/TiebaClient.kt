@@ -5,7 +5,7 @@ import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
 import io.github.a13e300.ro_tieba.db.Account
 import io.github.a13e300.ro_tieba.fromJson
-import io.github.a13e300.ro_tieba.ignoreAllSSLErrors
+import io.github.a13e300.ro_tieba.ignoreAllSSLErrorsIfDebug
 import okhttp3.FormBody
 import okhttp3.Interceptor
 import okhttp3.MultipartBody
@@ -18,6 +18,9 @@ import tbclient.CommonReqOuterClass
 import tbclient.FrsPage.FrsPageReqIdlOuterClass.FrsPageReqIdl
 import tbclient.FrsPage.FrsPageResIdlOuterClass.FrsPageResIdl
 import tbclient.FrsPage.errorOrNull
+import tbclient.PbFloor.PbFloorReqIdlOuterClass.PbFloorReqIdl
+import tbclient.PbFloor.PbFloorResIdlOuterClass.PbFloorResIdl
+import tbclient.PbFloor.errorOrNull
 import tbclient.PbPage.PbPageReqIdlOuterClass.PbPageReqIdl
 import tbclient.PbPage.PbPageResIdlOuterClass.PbPageResIdl
 import tbclient.PbPage.errorOrNull
@@ -35,8 +38,8 @@ class TiebaClient(val account: Account = Account()) {
     }
     private val mClient: OkHttpClient = OkHttpClient.Builder().apply {
         if (BuildConfig.DEBUG)
-            this.ignoreAllSSLErrors()
-        // TODO: Only Web API require cookies
+            this.ignoreAllSSLErrorsIfDebug()
+        // Only Web API require cookies, and we may not use Web APIs
         /*
         this.cookieJar(object : CookieJar {
             override fun loadForRequest(url: HttpUrl): List<Cookie> =
@@ -89,7 +92,8 @@ class TiebaClient(val account: Account = Account()) {
                     .setRn(30) // post count
                     .setSort(0)
                     .setOnlyThreadAuthor(0)
-                    .setWithComments(0)
+                    .setWithComments(1)
+                    .setCommentRn(4) // sub floors
                     .setIsFold(0)
             ).build()
         val part =
@@ -124,6 +128,31 @@ class TiebaClient(val account: Account = Account()) {
             MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
         val result = protobufAPI.getThreads(part).let {
             FrsPageResIdl.parseFrom(it.byteStream())
+        }
+        if (result.errorOrNull?.errorno != 0) throw TiebaApiError(
+            result.error.errorno,
+            result.error.errmsg
+        )
+        return result.data
+    }
+
+    suspend fun getComments(tid: Long, pid: Long, pn: Int): PbFloorResIdl.DataRes {
+        val req = PbFloorReqIdl.newBuilder()
+            .setData(
+                PbFloorReqIdl.DataReq.newBuilder()
+                    .setCommon(
+                        CommonReqOuterClass.CommonReq.newBuilder()
+                            .setClientType(2)
+                            .setClientVersion(MAIN_VERSION)
+                    )
+                    .setTid(tid)
+                    .setPid(pid)
+                    .setPn(pn)
+            ).build()
+        val part =
+            MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
+        val result = protobufAPI.getComments(part).let {
+            PbFloorResIdl.parseFrom(it.byteStream())
         }
         if (result.errorOrNull?.errorno != 0) throw TiebaApiError(
             result.error.errorno,

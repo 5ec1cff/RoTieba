@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 
 class App : Application(), SketchFactory {
     companion object {
@@ -56,7 +57,7 @@ class App : Application(), SketchFactory {
                     }
                 )
             }
-            httpStack(OkHttpStack.Builder().build())
+            httpStack(OkHttpStack(OkHttpClient.Builder().ignoreAllSSLErrorsIfDebug().build()))
         }.build()
     }
 }

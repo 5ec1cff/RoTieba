@@ -18,6 +18,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.MenuProvider
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -25,19 +27,24 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
+import androidx.paging.LoadStateAdapter
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
+import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
+import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.toSimpleString
@@ -65,17 +72,27 @@ class ThreadFragment : Fragment() {
             Logger.d("update thread config")
         }
         val postAdapter = PostAdapter(PostComparator)
+        postAdapter.addLoadStateListener { state ->
+            (state.refresh as? LoadState.Error)?.error?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("error")
+                    .setMessage(it.message)
+                    .show()
+            }
+        }
         binding.list.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = postAdapter
+            adapter = postAdapter.withLoadStateFooter(FooterAdapter())
         }
         viewModel.threadTitle.observe(viewLifecycleOwner) {
             binding.toolbar.title = it
         }
+        binding.toolbar.setOnClickListener {
+            binding.list.scrollToPosition(0)
+        }
         binding.toolbar.addMenuProvider(object : MenuProvider {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 if (menuItem.itemId == R.id.refresh) {
-                    binding.list.scrollToPosition(0)
                     postAdapter.refresh()
                     return true
                 }
@@ -171,6 +188,23 @@ class ThreadFragment : Fragment() {
         return super.onContextItemSelected(item)
     }
 
+    class FooterHolder(val binding: ThreadListFooterBinding) : RecyclerView.ViewHolder(binding.root)
+
+    inner class FooterAdapter : LoadStateAdapter<FooterHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): FooterHolder {
+            return FooterHolder(ThreadListFooterBinding.inflate(layoutInflater, parent, false))
+        }
+
+        override fun onBindViewHolder(holder: FooterHolder, loadState: LoadState) {
+            val isErr = loadState is LoadState.Error
+            holder.binding.retryButton.isVisible = isErr
+            holder.binding.errorMessage.isVisible = isErr
+            if (loadState is LoadState.Error) {
+                holder.binding.errorMessage.text = loadState.error.message
+            }
+        }
+    }
+
     class PostViewHolder(val binding: FragmentThreadPostItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
@@ -181,7 +215,17 @@ class ThreadFragment : Fragment() {
 
         override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
             val post = getItem(position) ?: return
-            holder.binding.root.setData(post)
+            holder.binding.root.apply {
+                setData(post)
+                setOnClickListener {
+                    findNavController().navigate(
+                        MobileNavigationDirections.showComments(
+                            post.tid,
+                            post.postId
+                        )
+                    )
+                }
+            }
             holder.binding.accountName.text =
                 post.user.nick.ifEmpty { post.user.name }.ifEmpty { "[${post.user.uid}]" }
             val contentView = holder.binding.content
@@ -270,6 +314,18 @@ class ThreadFragment : Fragment() {
             addTextView()
             holder.binding.floorNum.text =
                 "${post.floor}楼·${post.time.toSimpleString()}·${post.user.location}"
+            val hasComment = post.commentCount != 0
+            holder.binding.commentsBox.isGone = !hasComment
+            if (hasComment) {
+                val sb = SpannableStringBuilder()
+                post.comments.forEach {
+                    sb.append("${it.user.name}: ")
+                    sb.appendSimpleContent(it.content, requireContext())
+                    sb.append("\n")
+                }
+                sb.append("共${post.commentCount}条回复")
+                holder.binding.commentsContent.text = sb
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {

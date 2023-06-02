@@ -9,4 +9,12 @@
     <style name="ThemeOverlay.App.Toolbar" parent="">
         <item name="colorControlNormal">@color/white</item>
     </style>
+
+    <style name="Widget.RoTieba.FilledCardPrimary" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">?attr/colorPrimaryContainer</item>
+    </style>
+
+    <style name="Widget.RoTieba.FilledCardSecondary" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">?attr/colorSecondaryContainer</item>
+    </style>
 </resources>

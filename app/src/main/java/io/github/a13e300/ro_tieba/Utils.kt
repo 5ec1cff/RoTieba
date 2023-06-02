@@ -1,8 +1,13 @@
 package io.github.a13e300.ro_tieba
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.view.ContextMenu
+import androidx.appcompat.content.res.AppCompatResources
 import io.github.a13e300.ro_tieba.ui.thread.Post
 import okhttp3.OkHttpClient
 import tbclient.PbContentOuterClass
@@ -88,6 +93,40 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Post.Content> {
     }
 }
 
+fun SpannableStringBuilder.appendSimpleContent(
+    contents: List<Post.Content>,
+    context: Context
+): SpannableStringBuilder {
+    contents.forEach { content ->
+        when (content) {
+            is Post.TextContent -> append(content.text)
+            is Post.LinkContent -> append(content.link)
+            is Post.EmojiContent -> {
+                val emoji = Emotions.emotionMap.get(content.id)
+                if (emoji == null) {
+                    append("[$emoji]")
+                } else {
+                    val drawable = AppCompatResources.getDrawable(
+                        context,
+                        emoji.resource
+                    )!!.apply {
+                        setBounds(0, 0, 50, 50)
+                    }
+                    append(
+                        emoji.name,
+                        ImageSpan(drawable),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
+            }
+
+            is Post.ImageContent -> append("[图片]")
+            else -> {}
+        }
+    }
+    return this
+}
+
 @SuppressLint("CustomX509TrustManager")
 fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
     val naiveTrustManager = object : X509TrustManager {
@@ -105,6 +144,10 @@ fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
     hostnameVerifier { _, _ -> true }
     return this
 }
+
+fun OkHttpClient.Builder.ignoreAllSSLErrorsIfDebug(): OkHttpClient.Builder =
+    if (BuildConfig.DEBUG) ignoreAllSSLErrors()
+    else this
 
 fun InputStream.guessExtension(): String {
     val type = URLConnection.guessContentTypeFromStream(this)
