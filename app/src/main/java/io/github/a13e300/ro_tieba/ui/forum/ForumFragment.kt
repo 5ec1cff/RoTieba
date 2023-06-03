@@ -1,10 +1,12 @@
 package io.github.a13e300.ro_tieba.ui.forum
 
 import android.os.Bundle
+import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,9 +21,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
+import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
+import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
@@ -75,8 +79,31 @@ class ForumFragment : Fragment() {
             holder.binding.threadContent.text = SpannableStringBuilder()
                 .appendSimpleContent(thread.content, requireContext())
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
-            holder.binding.threadInfo.text =
-                "${thread.time.toSimpleString()}·${thread.replyNum}回复"
+            holder.binding.threadInfo.text = SpannableStringBuilder().apply {
+                append(
+                    "发帖时间 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_time
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.time.toSimpleString())
+                append(" ")
+                append(
+                    "回复数 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_comment
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.replyNum.toString())
+            }
             holder.binding.threadAvatar.displayImage(
                 "$AVATAR_THUMBNAIL/${thread.author.portrait}"
             )

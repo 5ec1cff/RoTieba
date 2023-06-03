@@ -5,18 +5,11 @@ import io.github.a13e300.ro_tieba.databinding.ActivityMainBinding
 
 class MainActivity : BaseActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        Logger.d("created: $this")
+        Logger.d("density:${resources.displayMetrics.density}")
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Logger.d("destroyed $this")
     }
 }

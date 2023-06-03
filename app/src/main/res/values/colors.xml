@@ -62,5 +62,7 @@
     <color name="md_theme_dark_scrim">#000000</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
+    <color name="user_span_background">#8FD4F4</color>
+    <color name="user_span_text">#2196F3</color>
     <color name="photo_view_background">#77000000</color>
 </resources>

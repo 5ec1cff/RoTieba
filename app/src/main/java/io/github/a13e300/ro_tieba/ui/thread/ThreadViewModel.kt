@@ -14,6 +14,7 @@ import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.toPostContent
 import io.github.a13e300.ro_tieba.ui.photo.Photo
@@ -35,7 +36,7 @@ data class ThreadConfig(
 class ThreadViewModel : ViewModel() {
     var currentUid: String? = null
     val threadConfig = MutableLiveData<ThreadConfig>()
-    val threadTitle = MutableLiveData<String>()
+    val threadInfo = MutableLiveData<TiebaThread>()
     val photos = TreeMap<Pair<Int, Int>, Photo> { p0, p1 ->
         if (p0.first < p1.first) -1
         else if (p0.first > p1.first) 1
@@ -51,7 +52,14 @@ class ThreadViewModel : ViewModel() {
             try {
                 val page = params.key ?: 1
                 val response = client.getPosts(threadConfig.value!!.tid, page)
-                threadTitle.value = response.thread.title
+                threadInfo.value = TiebaThread(
+                    tid = response.thread.id,
+                    title = response.thread.title,
+                    author = response.thread.author.toUser(),
+                    content = listOf(),
+                    replyNum = response.thread.replyNum,
+                    time = Date(response.thread.createTime.toLong() * 1000)
+                )
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })
                 val posts = response.postListList.map { p ->

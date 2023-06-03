@@ -7,8 +7,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.style.ImageSpan
 import android.text.style.URLSpan
+import android.util.TypedValue
 import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.Menu
@@ -46,11 +46,14 @@ import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
+import io.github.a13e300.ro_tieba.misc.EmojiSpan
+import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.utils.appendUser
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.PbContentTextView
@@ -86,8 +89,8 @@ class ThreadFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = postAdapter.withLoadStateFooter(FooterAdapter())
         }
-        viewModel.threadTitle.observe(viewLifecycleOwner) {
-            binding.toolbar.title = it
+        viewModel.threadInfo.observe(viewLifecycleOwner) {
+            binding.toolbar.title = it.title
         }
         binding.toolbar.setOnClickListener {
             binding.list.scrollToPosition(0)
@@ -228,12 +231,16 @@ class ThreadFragment : Fragment() {
                     )
                 }
             }
-            holder.binding.accountName.text =
-                post.user.nick.ifEmpty { post.user.name }.ifEmpty { "[${post.user.uid}]" }
+            val context = requireContext()
+            holder.binding.accountName.text = SpannableStringBuilder().appendUser(
+                post.user, post.user.uid == viewModel.threadInfo.value?.author?.uid,
+                context
+            )
             val contentView = holder.binding.content
+            val fontSize = context.resources.getDimensionPixelSize(R.dimen.content_text_size)
+            val emojiSize = (fontSize * 1.2).toInt()
             contentView.removeAllViews()
             var lastString: SpannableStringBuilder? = null
-            val context = holder.binding.root.context
             holder.binding.avatar.displayImage("$AVATAR_THUMBNAIL/${post.user.portrait}")
             // TODO: refactor this to use single TextView
             fun addTextView() {
@@ -245,6 +252,7 @@ class ThreadFragment : Fragment() {
                     )
                     text = lastString
                     movementMethod = MyLinkMovementMethod
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize.toFloat())
                 })
                 lastString = null
             }
@@ -266,8 +274,6 @@ class ThreadFragment : Fragment() {
 
                     is Content.ImageContent -> {
                         addTextView()
-
-
                         val imageView =
                             ImageContentBinding.inflate(layoutInflater, contentView, false)
                                 .root.apply {
@@ -299,12 +305,9 @@ class ThreadFragment : Fragment() {
                         } else {
                             val drawable =
                                 AppCompatResources.getDrawable(requireContext(), emoji.resource)!!
-                                    .apply {
-                                        setBounds(0, 0, 50, 50)
-                                    }
                             lastString!!.append(
                                 emoji.name,
-                                ImageSpan(drawable),
+                                EmojiSpan(drawable),
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                         }
@@ -314,14 +317,43 @@ class ThreadFragment : Fragment() {
                 }
             }
             addTextView()
-            holder.binding.floorNum.text =
-                "${post.floor}楼·${post.time.toSimpleString()}·${post.user.location}"
+            holder.binding.floorNum.text = SpannableStringBuilder().apply {
+                append("${post.floor}楼·")
+                append(
+                    "时间 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_time
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(post.time.toSimpleString())
+                append("·")
+                append(
+                    "地理位置 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_location
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(post.user.location)
+            }
             val hasComment = post.commentCount != 0
             holder.binding.commentsBox.isGone = !hasComment
             if (hasComment) {
                 val sb = SpannableStringBuilder()
                 post.comments.forEach {
-                    sb.append("${it.user.name}: ")
+                    sb.appendUser(
+                        it.user,
+                        it.user.uid == viewModel.threadInfo.value?.author?.uid,
+                        requireContext()
+                    )
+                    sb.append(": ")
                     sb.appendSimpleContent(it.content, requireContext())
                     sb.append("\n")
                 }

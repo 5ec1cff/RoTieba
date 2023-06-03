@@ -5,9 +5,9 @@ import android.content.Context
 import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.style.ImageSpan
 import android.view.ContextMenu
 import androidx.appcompat.content.res.AppCompatResources
+import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.models.Content
 import okhttp3.OkHttpClient
 import tbclient.PbContentOuterClass
@@ -109,12 +109,10 @@ fun SpannableStringBuilder.appendSimpleContent(
                     val drawable = AppCompatResources.getDrawable(
                         context,
                         emoji.resource
-                    )!!.apply {
-                        setBounds(0, 0, 50, 50)
-                    }
+                    )!!
                     append(
                         emoji.name,
-                        ImageSpan(drawable),
+                        EmojiSpan(drawable),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 }
