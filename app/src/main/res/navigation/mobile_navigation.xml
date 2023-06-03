@@ -10,7 +10,7 @@
 
     <fragment
         android:id="@+id/navigation_accounts"
-        android:name="io.github.a13e300.ro_tieba.ui.AccountFragment"
+        android:name="io.github.a13e300.ro_tieba.ui.account.AccountFragment"
         android:label="@string/account_label" />
 
     <fragment

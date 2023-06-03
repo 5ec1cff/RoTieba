@@ -11,6 +11,10 @@ import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
+import io.github.a13e300.ro_tieba.models.Comment
+import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.toPostContent
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import tbclient.UserOuterClass
@@ -19,51 +23,6 @@ import java.util.TreeMap
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
 const val AVATAR_ORIG = "http://tb.himg.baidu.com/sys/portraith/item/"
-
-data class Post(
-    val user: User,
-    val content: List<Content>,
-    val floor: Int,
-    val postId: Long,
-    val tid: Long,
-    val time: Date,
-    val comments: List<Comment>,
-    val commentCount: Int
-) {
-    sealed class Content
-    data class TextContent(val text: String) : Content()
-    data class ImageContent(
-        val previewSrc: String,
-        val src: String,
-        val width: Int,
-        val height: Int,
-        val order: Int
-    ) : Content()
-
-    data class EmojiContent(
-        val id: String
-    ) : Content()
-
-    data class LinkContent(val text: String, val link: String) : Content()
-}
-
-data class Comment(
-    val user: User,
-    val content: List<Post.Content>,
-    val floor: Int,
-    val postId: Long,
-    val tid: Long,
-    val time: Date,
-    val ppid: Long
-)
-
-data class User(
-    val name: String = "unknown",
-    val nick: String = "unknown",
-    val uid: Long = 0,
-    val portrait: String = "",
-    val location: String = ""
-)
 
 fun UserOuterClass.User.toUser() = this.let { user ->
     User(user.name, user.nameShow, user.id, user.portrait, user.ipAddress)
@@ -120,7 +79,7 @@ class ThreadViewModel : ViewModel() {
                 }
                 posts.forEach { p ->
                     p.content.forEach { c ->
-                        if (c is Post.ImageContent) {
+                        if (c is Content.ImageContent) {
                             photos[p.floor to c.order] =
                                 Photo(c.src, "t${p.tid}_p${p.postId}_f${p.floor}_c${c.order}")
                         }

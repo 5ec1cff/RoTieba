@@ -22,6 +22,7 @@ import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
+import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
 import kotlinx.coroutines.flow.first

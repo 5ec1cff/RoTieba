@@ -17,9 +17,9 @@ import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentItemBinding
+import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
-import io.github.a13e300.ro_tieba.ui.thread.Comment
 import kotlinx.coroutines.launch
 
 class CommentFragment : Fragment() {

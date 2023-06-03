@@ -1,4 +1,4 @@
-package io.github.a13e300.ro_tieba.ui
+package io.github.a13e300.ro_tieba.ui.account
 
 import android.os.Bundle
 import android.view.LayoutInflater

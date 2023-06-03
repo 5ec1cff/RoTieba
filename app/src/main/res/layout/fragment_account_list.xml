@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:paddingHorizontal="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".ui.AccountFragment"
+        tools:context=".ui.account.AccountFragment"
         tools:listitem="@layout/fragment_account_item"
         android:paddingTop="?actionBarSize"
         app:fitsSystemWindowsInsets="top" />

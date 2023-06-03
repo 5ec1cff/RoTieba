@@ -47,6 +47,8 @@ import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
+import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.view.ItemView
@@ -144,10 +146,10 @@ class ThreadFragment : Fragment() {
                     val cm = requireContext().getSystemService(ClipboardManager::class.java)
                     cm.setPrimaryClip(ClipData.newPlainText("", post.content.joinToString("") {
                         when (it) {
-                            is Post.TextContent -> it.text
-                            is Post.ImageContent -> "[${it.src}]"
-                            is Post.LinkContent -> "[${it.text}](${it.link})"
-                            is Post.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
+                            is Content.TextContent -> it.text
+                            is Content.ImageContent -> "[${it.src}]"
+                            is Content.LinkContent -> "[${it.text}](${it.link})"
+                            is Content.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
                         }
                     }))
                     return true
@@ -248,12 +250,12 @@ class ThreadFragment : Fragment() {
             }
             for (content in post.content) {
                 when (content) {
-                    is Post.TextContent -> {
+                    is Content.TextContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         lastString!!.append(content.text)
                     }
 
-                    is Post.LinkContent -> {
+                    is Content.LinkContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         lastString!!.append(
                             content.text.ifEmpty { "[link]" },
@@ -262,7 +264,7 @@ class ThreadFragment : Fragment() {
                         )
                     }
 
-                    is Post.ImageContent -> {
+                    is Content.ImageContent -> {
                         addTextView()
 
 
@@ -289,7 +291,7 @@ class ThreadFragment : Fragment() {
                         contentView.addView(imageView)
                     }
 
-                    is Post.EmojiContent -> {
+                    is Content.EmojiContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         val emoji = Emotions.emotionMap.get(content.id)
                         if (emoji == null) {

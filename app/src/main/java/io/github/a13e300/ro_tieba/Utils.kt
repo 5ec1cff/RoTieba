@@ -8,7 +8,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import android.view.ContextMenu
 import androidx.appcompat.content.res.AppCompatResources
-import io.github.a13e300.ro_tieba.ui.thread.Post
+import io.github.a13e300.ro_tieba.models.Content
 import okhttp3.OkHttpClient
 import tbclient.PbContentOuterClass
 import java.io.InputStream
@@ -67,19 +67,19 @@ fun Date.toSimpleString(): String {
     return ft.format(this)
 }
 
-fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Post.Content> {
+fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
     var imageOrder = 0
     return map {
         // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/api/get_posts/_classdef.py
         when (it.type) {
-            1 -> Post.LinkContent(it.text, it.link.convertTiebaUrl())
+            1 -> Content.LinkContent(it.text, it.link.convertTiebaUrl())
 
-            2, 11 -> Post.EmojiContent(it.text)
+            2, 11 -> Content.EmojiContent(it.text)
 
             3, 20 -> {
                 imageOrder += 1
                 val sizes = it.bsize.split(",")
-                Post.ImageContent(
+                Content.ImageContent(
                     it.cdnSrc,
                     it.originSrc,
                     sizes[0].toInt(),
@@ -88,20 +88,20 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Post.Content> {
                 )
             }
 
-            else -> Post.TextContent(it.text)
+            else -> Content.TextContent(it.text)
         }
     }
 }
 
 fun SpannableStringBuilder.appendSimpleContent(
-    contents: List<Post.Content>,
+    contents: List<Content>,
     context: Context
 ): SpannableStringBuilder {
     contents.forEach { content ->
         when (content) {
-            is Post.TextContent -> append(content.text)
-            is Post.LinkContent -> append(content.link)
-            is Post.EmojiContent -> {
+            is Content.TextContent -> append(content.text)
+            is Content.LinkContent -> append(content.link)
+            is Content.EmojiContent -> {
                 val emoji = Emotions.emotionMap.get(content.id)
                 if (emoji == null) {
                     append("[$emoji]")
@@ -120,7 +120,7 @@ fun SpannableStringBuilder.appendSimpleContent(
                 }
             }
 
-            is Post.ImageContent -> append("[图片]")
+            is Content.ImageContent -> append("[图片]")
             else -> {}
         }
     }
