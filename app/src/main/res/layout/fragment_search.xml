@@ -28,12 +28,16 @@
             android:hint="@string/searchbar_hint" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.search.SearchView
+    <io.github.a13e300.ro_tieba.view.MySearchView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="@string/searchbar_hint"
         android:id="@+id/search_view"
         app:layout_anchor="@id/search_bar">
-        <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
-    </com.google.android.material.search.SearchView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/search_suggestions" />
+    </io.github.a13e300.ro_tieba.view.MySearchView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -108,7 +108,7 @@ class ForumFragment : Fragment() {
                 "$AVATAR_THUMBNAIL/${thread.author.portrait}"
             )
             holder.binding.root.setOnClickListener {
-                findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid.toString()))
+                findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid))
             }
         }
 

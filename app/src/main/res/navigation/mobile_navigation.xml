@@ -30,7 +30,7 @@
         android:name="io.github.a13e300.ro_tieba.ui.thread.ThreadFragment">
         <argument
             android:name="tid"
-            app:argType="string" />
+            app:argType="long" />
         <deepLink
             app:uri="tieba.baidu.com/p/{tid}"
             app:action="android.intent.action.VIEW" />
