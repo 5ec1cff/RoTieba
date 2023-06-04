@@ -52,7 +52,7 @@ class HomeFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 if (menuItem.itemId == R.id.search) {
                     findMainNavController()
-                        .navigate(R.id.navigation_search)
+                        .navigate(MobileNavigationDirections.homeSearch())
                     return true
                 }
                 return false

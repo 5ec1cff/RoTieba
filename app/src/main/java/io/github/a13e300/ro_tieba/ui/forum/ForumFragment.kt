@@ -14,11 +14,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
@@ -42,9 +44,22 @@ class ForumFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentForumBinding.inflate(inflater, container, false)
-        binding.toolbar.title = args.fname
         viewModel.forumName = args.fname
+        viewModel.forumInfo.observe(viewLifecycleOwner) {
+            binding.toolbar.title = it.name
+        }
         val threadAdapter = ThreadAdapter(ThreadComparator)
+        threadAdapter.addLoadStateListener { state ->
+            (state.refresh as? LoadState.Error)?.error?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error_dialog_title)
+                    .setMessage(it.message)
+                    .setOnDismissListener {
+                        findNavController().navigateUp()
+                    }
+                    .show()
+            }
+        }
         binding.threadList.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = threadAdapter

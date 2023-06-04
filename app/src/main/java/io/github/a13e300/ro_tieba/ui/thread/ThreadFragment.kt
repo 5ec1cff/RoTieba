@@ -80,8 +80,11 @@ class ThreadFragment : Fragment() {
         postAdapter.addLoadStateListener { state ->
             (state.refresh as? LoadState.Error)?.error?.let {
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("error")
+                    .setTitle(R.string.error_dialog_title)
                     .setMessage(it.message)
+                    .setOnDismissListener {
+                        findNavController().navigateUp()
+                    }
                     .show()
             }
         }

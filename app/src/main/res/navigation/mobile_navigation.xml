@@ -18,6 +18,14 @@
         android:name="io.github.a13e300.ro_tieba.ui.search.SearchFragment" />
 
     <action
+        android:id="@+id/home_search"
+        app:destination="@id/navigation_search"
+        app:enterAnim="@anim/nav_default_enter_anim"
+        app:exitAnim="@anim/nav_default_exit_anim"
+        app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+        app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+
+    <action
         android:id="@+id/go_to_thread"
         app:destination="@id/navigation_thread_fragment"
         app:enterAnim="@anim/nav_default_enter_anim"
