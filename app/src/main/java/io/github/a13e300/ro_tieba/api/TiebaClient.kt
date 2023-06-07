@@ -1,7 +1,6 @@
 package io.github.a13e300.ro_tieba.api
 
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
 import io.github.a13e300.ro_tieba.db.Account
 import io.github.a13e300.ro_tieba.fromJson
@@ -24,6 +23,7 @@ import tbclient.PbFloor.errorOrNull
 import tbclient.PbPage.PbPageReqIdlOuterClass.PbPageReqIdl
 import tbclient.PbPage.PbPageResIdlOuterClass.PbPageResIdl
 import tbclient.PbPage.errorOrNull
+import java.net.URLEncoder
 
 class TiebaClient(val account: Account = Account()) {
     companion object {
@@ -36,45 +36,28 @@ class TiebaClient(val account: Account = Account()) {
         const val APP_BASE_HOST = "tiebac.baidu.com"
         const val WEB_BASE_HOST = "tieba.baidu.com"
     }
-    private val mClient: OkHttpClient = OkHttpClient.Builder().apply {
-        if (BuildConfig.DEBUG)
-            this.ignoreAllSSLErrorsIfDebug()
-        // Only Web API require cookies, and we may not use Web APIs
-        /*
-        this.cookieJar(object : CookieJar {
-            override fun loadForRequest(url: HttpUrl): List<Cookie> =
-                account.bduss?.let {
-                    listOf(
-                        Cookie.Builder()
-                            .domain("baidu.com")
-                            .path("/")
-                            .name("BDUSS")
-                            .value(it)
-                            .build()
-                    )
-                } ?: listOf()
 
-            override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-            }
-
-        })*/
-        this.addInterceptor(JsonAPIInterceptor())
-    }.build()
     val jsonAPI: TiebaJsonAPI = Retrofit.Builder()
         .baseUrl("$APP_SECURE_SCHEME://$APP_BASE_HOST")
         .addConverterFactory(GsonConverterFactory.create(App.gson))
-        .client(mClient)
+        .client(
+            OkHttpClient.Builder().ignoreAllSSLErrorsIfDebug().addInterceptor(JsonAPIInterceptor())
+                .build()
+        )
         .build()
         .create(TiebaJsonAPI::class.java)
-    private val webAPI: TiebaWebAPI = Retrofit.Builder()
-        .baseUrl("$APP_INSECURE_SCHEME://$WEB_BASE_HOST")
-        .addConverterFactory(GsonConverterFactory.create(App.gson))
-        .client(mClient)
+    val webAPI: TiebaWebAPI = Retrofit.Builder()
+        .baseUrl("$APP_SECURE_SCHEME://$WEB_BASE_HOST")
+        .addConverterFactory(WebAPIResultConverterFactory(App.gson))
+        .client(
+            OkHttpClient.Builder().ignoreAllSSLErrorsIfDebug().addInterceptor(JsonAPIInterceptor())
+                .build()
+        )
         .build()
         .create(TiebaWebAPI::class.java)
     private val protobufAPI: TiebaProtobufAPI = Retrofit.Builder()
         .baseUrl("$APP_SECURE_SCHEME://$APP_BASE_HOST")
-        .client(mClient)
+        .client(OkHttpClient.Builder().ignoreAllSSLErrorsIfDebug().build())
         .build()
         .create(TiebaProtobufAPI::class.java)
 
@@ -117,7 +100,7 @@ class TiebaClient(val account: Account = Account()) {
                             .setClientType(2)
                             .setClientVersion(MAIN_VERSION)
                     )
-                    .setFname(fname)
+                    .setFname(URLEncoder.encode(fname, "UTF-8"))
                     .setPn(pn)
                     .setRn(30)
                     .setRnNeed(30)

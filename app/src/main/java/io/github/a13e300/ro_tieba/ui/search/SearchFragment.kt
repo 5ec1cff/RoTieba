@@ -1,15 +1,19 @@
 package io.github.a13e300.ro_tieba.ui.search
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.search.SearchView
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
@@ -23,8 +27,10 @@ class SearchFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        binding.searchView.show()
-        binding.searchView.requestFocusAndShowKeyboard()
+        if (viewModel.needShowSearch) {
+            binding.searchView.show()
+            binding.searchView.requestFocusAndShowKeyboard()
+        }
     }
 
     override fun onCreateView(
@@ -33,9 +39,34 @@ class SearchFragment : Fragment() {
     ): View {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
         binding.searchView.editText.setOnEditorActionListener { textView, i, keyEvent ->
-            binding.searchBar.text = textView.text
+            if (i != EditorInfo.IME_ACTION_SEARCH &&
+                !(keyEvent?.action == KeyEvent.ACTION_DOWN
+                        && keyEvent.keyCode in intArrayOf(
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER
+                )
+                        )
+            )
+                return@setOnEditorActionListener false
+            val t = textView.text
+            binding.searchBar.text = t
+            viewModel.fetchBars(t.toString())
             binding.searchView.hide()
-            false
+            true
+        }
+        binding.searchView.addTransitionListener { searchView, previousState, newState ->
+            if (newState == SearchView.TransitionState.HIDDEN) viewModel.needShowSearch = false
+            else if (newState == SearchView.TransitionState.SHOWN) viewModel.needShowSearch = true
+        }
+        binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int {
+                return 1
+            }
+
+            override fun createFragment(position: Int): Fragment {
+                return SearchResultFragment()
+            }
+
         }
         binding.searchView.onBackPressedListener = MySearchView.OnBackPressedListener {
             findNavController().navigateUp()

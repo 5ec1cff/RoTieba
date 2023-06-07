@@ -30,7 +30,8 @@ class ForumViewModel : ViewModel() {
             Logger.d("load thread : $forumName $page")
             try {
                 val response = client.getThreads(forumName, page)
-                forumInfo.value = Forum(response.forum.name, response.forum.id)
+                // TODO: get more bar info
+                forumInfo.value = Forum(response.forum.name, response.forum.id, "", "")
                 val users = response.userListList.associateBy({ it.id },
                     { User(it.name, it.nameShow, it.id, it.portrait) })
                 val posts = response.threadListList.map { p ->
