@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -18,6 +19,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
@@ -89,6 +91,8 @@ class HomeFragment : Fragment() {
             holder.binding.root.setOnClickListener {
                 findMainNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
             }
+            holder.binding.forumAvatar.displayImage(bar.avatar)
+            ViewCompat.setTooltipText(holder.binding.root, bar.name)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BarViewHolder {

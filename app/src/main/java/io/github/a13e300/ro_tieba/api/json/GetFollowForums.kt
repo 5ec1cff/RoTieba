@@ -19,6 +19,8 @@ data class GetFollowForums(
         val id: String,
         val name: String,
         @SerializedName("level_id")
-        val levelId: String
+        val levelId: String,
+        val avatar: String,
+        val slogan: String
     )
 }
