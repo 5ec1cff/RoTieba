@@ -7,6 +7,7 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.web.SearchForum
 import io.github.a13e300.ro_tieba.models.Forum
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -25,27 +26,38 @@ enum class LoadState {
     LOADED, FETCHING, FETCHED
 }
 
+sealed class SearchResult<T> {
+    data class Result<T>(val data: T) : SearchResult<T>()
+    data class Error<T>(val error: Throwable) : SearchResult<T>()
+}
+
 fun SearchForum.ForumInfo.toForum(): Forum = Forum(forumName, forumId.toLong(), avatar, intro)
 
 class SearchViewModel : ViewModel() {
     var needShowSearch = true
-    val searchedBars = MutableLiveData<List<Forum>>()
+    var searchedForums: SearchResult<List<Forum>> = SearchResult.Result(emptyList())
     val barLoadState = MutableLiveData<LoadState>()
     var suggestions: List<Operation> = emptyList()
-    private var searchBarJob: Job? = null
+    private var searchForumJob: Job? = null
 
     fun fetchBars(keyword: String) {
-        searchBarJob?.cancel()
+        searchForumJob?.cancel()
         barLoadState.value = LoadState.FETCHING
-        searchBarJob = viewModelScope.launch {
-            Logger.d("search $keyword")
+        searchForumJob = viewModelScope.launch {
             val list = mutableListOf<Forum>()
-            withContext(Dispatchers.IO) {
-                val r = App.instance.client.webAPI.searchForum(keyword)
-                r.exactMatch?.toForum()?.let { list.add(it) }
-                r.fuzzyMatch.forEach { list.add(it.toForum()) }
+            kotlin.runCatching {
+                withContext(Dispatchers.IO) {
+                    val r = App.instance.client.webAPI.searchForum(keyword)
+                    r.exactMatch?.toForum()?.let { list.add(it) }
+                    r.fuzzyMatch.forEach { list.add(it.toForum()) }
+                }
+                searchedForums = SearchResult.Result(list)
+            }.onFailure {
+                if (it !is CancellationException) {
+                    Logger.e("failed to search forum $keyword", it)
+                    searchedForums = SearchResult.Error(it)
+                }
             }
-            searchedBars.value = list
             barLoadState.value = LoadState.FETCHED
         }
     }

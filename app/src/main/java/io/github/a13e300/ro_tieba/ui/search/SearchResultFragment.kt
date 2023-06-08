@@ -12,18 +12,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
+import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchResultBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchResultBinding
 
 class SearchResultFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() })
+    private val myAdapter = Adapter()
+    private lateinit var binding: FragmentSearchResultBinding
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentSearchResultBinding.inflate(inflater, container, false)
-        val myAdapter = Adapter()
+        binding = FragmentSearchResultBinding.inflate(inflater, container, false)
         binding.resultList.apply {
             adapter = myAdapter
             layoutManager = LinearLayoutManager(requireContext())
@@ -33,13 +35,38 @@ class SearchResultFragment : Fragment() {
                 LoadState.FETCHED -> {
                     binding.resultList.scrollToPosition(0)
                     myAdapter.notifyDataSetChanged()
+                    updateData()
                     viewModel.barLoadState.value = LoadState.LOADED
                 }
 
                 else -> {}
             }
         }
+        updateData()
         return binding.root
+    }
+
+    private fun updateData() {
+        viewModel.searchedForums.also { frs ->
+            when (frs) {
+                is SearchResult.Result -> {
+                    if (frs.data.isEmpty()) {
+                        binding.resultList.visibility = View.GONE
+                        binding.resultTips.visibility = View.VISIBLE
+                        binding.resultTips.setText(R.string.no_result_tips)
+                    } else {
+                        binding.resultList.visibility = View.VISIBLE
+                        binding.resultTips.visibility = View.GONE
+                    }
+                }
+
+                is SearchResult.Error -> {
+                    binding.resultList.visibility = View.GONE
+                    binding.resultTips.visibility = View.VISIBLE
+                    binding.resultTips.text = frs.error.message
+                }
+            }
+        }
     }
 
     class ViewHolder(val binding: FragmentSearchResultBarItemBinding) :
@@ -52,10 +79,12 @@ class SearchResultFragment : Fragment() {
             )
         )
 
-        override fun getItemCount(): Int = viewModel.searchedBars.value?.size ?: 0
+        override fun getItemCount(): Int =
+            (viewModel.searchedForums as? SearchResult.Result)?.data?.size ?: 0
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = viewModel.searchedBars.value?.get(position) ?: return
+            val item =
+                (viewModel.searchedForums as? SearchResult.Result)?.data?.get(position) ?: return
             holder.binding.barName.text = item.name
             item.avatarUrl?.let { holder.binding.barAvatar.displayImage(it) }
             holder.binding.barDesc.apply {
