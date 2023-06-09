@@ -10,9 +10,12 @@ import "FrsTabInfo.proto";
 message FrsPageResIdl {
   Error error = 1;
   message DataRes {
+    // https://github.com/n0099/tbclient.protobuf/blob/main/proto/FrsPage/ForumInfo.proto
     message ForumInfo {
       int64 id = 1;
       string name = 2;
+      string avatar = 24;
+      string slogan = 25;
     }
     ForumInfo forum = 2;
     Page page = 4;

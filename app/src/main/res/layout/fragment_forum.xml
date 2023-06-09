@@ -10,14 +10,71 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="top">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            app:layout_collapseMode="pin" />
+            android:layout_height="match_parent"
+            android:id="@+id/toolbarLayout"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.RoTieba.FilledCardSecondary"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="?actionBarSize">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <androidx.constraintlayout.utils.widget.ImageFilterView
+                        app:round="5dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_margin="8dp"
+                        android:id="@+id/forum_avatar"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/forum_name" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        style="?textAppearanceTitleLarge"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/forum_desc"
+                        app:layout_constraintStart_toEndOf="@id/forum_avatar"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:id="@+id/forum_name"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        style="?textAppearanceBodyMedium"
+                        app:layout_constraintTop_toBottomOf="@id/forum_name"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/forum_name"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:id="@+id/forum_desc"
+                        android:layout_marginEnd="8dp" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.appbar.MaterialToolbar
+                app:menu="@menu/home_menu"
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                app:layout_collapseMode="pin" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -36,6 +36,7 @@ import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 class ForumFragment : Fragment() {
 
@@ -50,7 +51,14 @@ class ForumFragment : Fragment() {
         val binding = FragmentForumBinding.inflate(inflater, container, false)
         viewModel.forumName = args.fname
         viewModel.forumInfo.observe(viewLifecycleOwner) {
-            binding.toolbar.title = it.name
+            // binding.toolbar.title = it.name
+            binding.forumName.text = it.name
+            binding.forumDesc.text = it.desc
+            binding.forumAvatar.displayImage(it.avatarUrl)
+        }
+        binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+            binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
+                viewModel.forumInfo.value?.name else null
         }
         val threadAdapter = ThreadAdapter(ThreadComparator)
         threadAdapter.addLoadStateListener { state ->

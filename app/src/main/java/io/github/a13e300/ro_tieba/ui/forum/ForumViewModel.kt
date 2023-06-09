@@ -29,8 +29,12 @@ class ForumViewModel : ViewModel() {
             val page = params.key ?: 1
             try {
                 val response = client.getThreads(forumName, page)
-                // TODO: get more bar info
-                forumInfo.value = Forum(response.forum.name, response.forum.id, "", "")
+                forumInfo.value = Forum(
+                    response.forum.name,
+                    response.forum.id,
+                    response.forum.avatar,
+                    response.forum.slogan
+                )
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })
                 val posts = response.threadListList.map { p ->
