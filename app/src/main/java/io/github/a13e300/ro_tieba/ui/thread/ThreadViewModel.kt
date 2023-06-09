@@ -15,18 +15,14 @@ import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
+import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.toPostContent
 import io.github.a13e300.ro_tieba.ui.photo.Photo
-import tbclient.UserOuterClass
 import java.util.Date
 import java.util.TreeMap
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
 const val AVATAR_ORIG = "http://tb.himg.baidu.com/sys/portraith/item/"
-
-fun UserOuterClass.User.toUser() = this.let { user ->
-    User(user.name, user.nameShow, user.id, user.portrait, user.ipAddress)
-}
 
 data class ThreadConfig(
     val tid: Long

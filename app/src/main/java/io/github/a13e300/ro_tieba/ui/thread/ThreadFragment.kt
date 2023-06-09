@@ -235,7 +235,8 @@ class ThreadFragment : Fragment() {
             val context = requireContext()
             holder.binding.accountName.text = SpannableStringBuilder().appendUser(
                 post.user, post.user.uid == viewModel.threadInfo.value?.author?.uid,
-                context
+                context,
+                showLevel = true
             )
             val contentView = holder.binding.content
             val fontSize = context.resources.getDimensionPixelSize(R.dimen.content_text_size)

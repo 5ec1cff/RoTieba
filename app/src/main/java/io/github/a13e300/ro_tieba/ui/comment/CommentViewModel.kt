@@ -12,8 +12,8 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
+import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.toPostContent
-import io.github.a13e300.ro_tieba.ui.thread.toUser
 import java.util.Date
 
 class CommentViewModel : ViewModel() {

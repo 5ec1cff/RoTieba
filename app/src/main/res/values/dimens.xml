@@ -4,4 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="content_text_size">16sp</dimen>
+    <dimen name="level_span_width">20sp</dimen>
+    <dimen name="round_span_default_padding">1sp</dimen>
 </resources>

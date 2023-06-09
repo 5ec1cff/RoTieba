@@ -13,6 +13,7 @@ import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
+import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.toPostContent
 import java.util.Date
 
@@ -31,7 +32,7 @@ class ForumViewModel : ViewModel() {
                 // TODO: get more bar info
                 forumInfo.value = Forum(response.forum.name, response.forum.id, "", "")
                 val users = response.userListList.associateBy({ it.id },
-                    { User(it.name, it.nameShow, it.id, it.portrait) })
+                    { it.toUser() })
                 val posts = response.threadListList.map { p ->
                     TiebaThread(
                         p.id,

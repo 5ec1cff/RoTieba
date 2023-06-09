@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.home
 
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -26,6 +27,7 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBinding
+import io.github.a13e300.ro_tieba.utils.appendLevelSpan
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -85,7 +87,8 @@ class HomeFragment : Fragment() {
         override fun onBindViewHolder(holder: BarViewHolder, position: Int) {
             val bar = getItem(position) ?: return
             holder.binding.barName.text = bar.name
-            holder.binding.barLevel.text = bar.levelId
+            holder.binding.barLevel.text =
+                SpannableStringBuilder().appendLevelSpan(requireContext(), bar.levelId.toInt())
             holder.binding.root.setOnClickListener {
                 findMainNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
             }
