@@ -166,7 +166,7 @@ class ThreadFragment : Fragment() {
                     cm.setPrimaryClip(
                         ClipData.newPlainText(
                             "",
-                            "https://tieba.baidu.com/p/${post.tid}?p=${post.postId}"
+                            "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
                         )
                     )
                     return true
@@ -241,11 +241,9 @@ class ThreadFragment : Fragment() {
             )
             val contentView = holder.binding.content
             val fontSize = context.resources.getDimensionPixelSize(R.dimen.content_text_size)
-            val emojiSize = (fontSize * 1.2).toInt()
             contentView.removeAllViews()
             var lastString: SpannableStringBuilder? = null
             holder.binding.avatar.displayImage("$AVATAR_THUMBNAIL/${post.user.portrait}")
-            // TODO: refactor this to use single TextView
             fun addTextView() {
                 if (lastString == null) return
                 contentView.addView(PbContentTextView(context).apply {
