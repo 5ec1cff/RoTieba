@@ -9,7 +9,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
@@ -24,7 +23,6 @@ class HomeViewModel : ViewModel() {
     ) : PagingSource<Int, GetFollowForums.Forum>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GetFollowForums.Forum> {
             val page = params.key ?: 1
-            Logger.d("load bar for uif $uid: $page")
             if (uid == AccountManager.ACCOUNT_ANONYMOUS) {
                 return LoadResult.Page(data = emptyList(), prevKey = null, nextKey = null)
             }

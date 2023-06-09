@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
@@ -68,7 +67,6 @@ class HomeFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val currentUid = App.instance.accountManager.currentAccount.first().uid
-                Logger.d("home fragment started currentUid=$currentUid")
                 viewModel.updateUid(currentUid)
                 viewModel.flow.collect {
                     barAdapter.submitData(it)

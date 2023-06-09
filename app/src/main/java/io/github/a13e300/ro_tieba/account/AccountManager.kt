@@ -1,7 +1,6 @@
 package io.github.a13e300.ro_tieba.account
 
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.TiebaLoginClient
 import io.github.a13e300.ro_tieba.datastore.copy
@@ -39,7 +38,6 @@ class AccountManager {
     }
 
     suspend fun switchAccount(uid: String) {
-        Logger.d("switch to $uid")
         withContext(Dispatchers.IO) {
             val account =
                 if (uid != ACCOUNT_ANONYMOUS) {
@@ -49,16 +47,13 @@ class AccountManager {
                 } else Account()
             updateAccount(account)
         }
-        Logger.d("switch to $uid done")
     }
 
     suspend fun addAccount(bduss: String) {
-        Logger.d("add account")
         withContext(Dispatchers.IO) {
             val account = TiebaLoginClient().login(bduss)
             updateAccount(account)
         }
-        Logger.d("add account done")
     }
 
     suspend fun deleteAccount(account: Account) {

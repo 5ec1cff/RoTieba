@@ -40,7 +40,6 @@ class CommentViewModel : ViewModel() {
                         ppid = sp.id
                     )
                 }
-                Logger.d("load comment of $pid $tid : $page")
                 return LoadResult.Page(
                     data = comments,
                     prevKey = null,

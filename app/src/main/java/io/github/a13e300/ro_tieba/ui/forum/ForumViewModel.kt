@@ -9,7 +9,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.TiebaThread
@@ -27,7 +26,6 @@ class ForumViewModel : ViewModel() {
     ) : PagingSource<Int, TiebaThread>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, TiebaThread> {
             val page = params.key ?: 1
-            Logger.d("load thread : $forumName $page")
             try {
                 val response = client.getThreads(forumName, page)
                 // TODO: get more bar info

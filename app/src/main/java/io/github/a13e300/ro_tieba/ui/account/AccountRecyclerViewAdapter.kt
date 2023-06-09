@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.databinding.FragmentAccountItemBinding
@@ -42,7 +41,6 @@ class AccountRecyclerViewAdapter(
                 false
             ).apply {
                 root.setOnClickListener { v ->
-                    Logger.d("clicked")
                     (v.getTag(R.id.tag_recycler_view_item) as? Account)?.also {
                         if (it.uid != mChecked)
                             listener?.onItemClicked(it)

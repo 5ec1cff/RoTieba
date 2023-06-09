@@ -37,7 +37,6 @@ import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
@@ -73,8 +72,7 @@ class ThreadFragment : Fragment() {
     ): View {
         val binding = FragmentThreadBinding.inflate(inflater, container, false)
         if (viewModel.threadConfig.value == null) {
-            viewModel.threadConfig.value = ThreadConfig(args.tid.toLong())
-            Logger.d("update thread config")
+            viewModel.threadConfig.value = ThreadConfig(args.tid)
         }
         val postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->

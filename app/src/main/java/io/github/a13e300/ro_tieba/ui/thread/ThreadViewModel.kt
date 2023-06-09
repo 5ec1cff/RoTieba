@@ -9,7 +9,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
@@ -94,7 +93,6 @@ class ThreadViewModel : ViewModel() {
                         }
                     }
                 }
-                Logger.d("load thread : $page")
                 return LoadResult.Page(
                     data = posts,
                     prevKey = if (page == 1) null else (page - 1),
