@@ -28,8 +28,11 @@ import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.misc.IconSpan
+import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.ui.photo.Photo
+import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -38,6 +41,7 @@ class ForumFragment : Fragment() {
 
     private val viewModel: ForumViewModel by viewModels()
     private val args: ForumFragmentArgs by navArgs()
+    private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -124,6 +128,66 @@ class ForumFragment : Fragment() {
             )
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid))
+            }
+            val images = thread.content.filterIsInstance<Content.ImageContent>()
+            val image1 = images.firstOrNull()
+            val image2 = images.getOrNull(1)
+            val image3 = images.getOrNull(2)
+            if (image1 != null) {
+                holder.binding.previewImage1.visibility = View.VISIBLE
+                holder.binding.previewImage1.displayImage(image1.previewSrc)
+                holder.binding.previewImage1.setOnClickListener {
+                    photoViewModel.currentIndex.value = 0
+                    photoViewModel.photos = images.map {
+                        Photo(
+                            it.src,
+                            "t${thread.tid}_p${thread.postId}_f1_c${image1.order}"
+                        )
+                    }
+                    findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+            } else {
+                holder.binding.previewImage1.visibility = View.INVISIBLE
+                holder.binding.previewImage1.setOnClickListener(null)
+            }
+            if (image2 != null) {
+                holder.binding.previewImage2.visibility = View.VISIBLE
+                holder.binding.previewImage2.displayImage(image2.previewSrc)
+                holder.binding.previewImage2.setOnClickListener {
+                    photoViewModel.currentIndex.value = 1
+                    photoViewModel.photos = images.map {
+                        Photo(
+                            it.src,
+                            "t${thread.tid}_p${thread.postId}_f1_c${image2.order}"
+                        )
+                    }
+                    findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+            } else {
+                holder.binding.previewImage2.visibility = View.INVISIBLE
+                holder.binding.previewImage2.setOnClickListener(null)
+            }
+            if (image3 != null) {
+                holder.binding.previewImage3.visibility = View.VISIBLE
+                holder.binding.previewImage3.displayImage(image3.previewSrc)
+                holder.binding.previewImage3.setOnClickListener {
+                    photoViewModel.currentIndex.value = 2
+                    photoViewModel.photos = images.map {
+                        Photo(
+                            it.src,
+                            "t${thread.tid}_p${thread.postId}_f1_c${image3.order}"
+                        )
+                    }
+                    findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+            } else {
+                holder.binding.previewImage3.visibility = View.INVISIBLE
+                holder.binding.previewImage3.setOnClickListener(null)
+            }
+            if (images.isEmpty()) {
+                holder.binding.previewImage1.visibility = View.GONE
+                holder.binding.previewImage2.visibility = View.GONE
+                holder.binding.previewImage3.visibility = View.GONE
             }
         }
 

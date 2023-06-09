@@ -37,6 +37,7 @@ class ForumViewModel : ViewModel() {
                 val posts = response.threadListList.map { p ->
                     TiebaThread(
                         p.id,
+                        p.postId,
                         p.title,
                         users[p.authorId] ?: User(),
                         p.firstPostContentList.toPostContent(),

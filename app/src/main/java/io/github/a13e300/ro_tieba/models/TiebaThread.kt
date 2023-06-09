@@ -4,6 +4,7 @@ import java.util.Date
 
 data class TiebaThread(
     val tid: Long,
+    val postId: Long,
     val title: String,
     val author: User,
     val content: List<Content>,

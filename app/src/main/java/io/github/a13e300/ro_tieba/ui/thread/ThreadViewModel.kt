@@ -58,7 +58,8 @@ class ThreadViewModel : ViewModel() {
                     author = response.thread.author.toUser(),
                     content = listOf(),
                     replyNum = response.thread.replyNum,
-                    time = Date(response.thread.createTime.toLong() * 1000)
+                    time = Date(response.thread.createTime.toLong() * 1000),
+                    postId = response.thread.postId
                 )
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })
