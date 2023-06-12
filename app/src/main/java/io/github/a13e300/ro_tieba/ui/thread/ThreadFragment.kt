@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.style.URLSpan
 import android.util.TypedValue
 import android.view.ContextMenu
 import android.view.LayoutInflater
@@ -17,6 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.MenuProvider
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -34,43 +34,53 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
+import com.github.panpf.sketch.request.DownloadRequest
+import com.github.panpf.sketch.request.DownloadResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
+import io.github.a13e300.ro_tieba.StorageUtils
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
+import io.github.a13e300.ro_tieba.guessExtension
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
+import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.utils.appendUser
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
-import io.github.a13e300.ro_tieba.view.PbContentTextView
 import io.github.a13e300.ro_tieba.view.SelectedLink
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.BufferedInputStream
 
 class ThreadFragment : Fragment() {
 
     private val viewModel: ThreadViewModel by viewModels()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
     private val args: ThreadFragmentArgs by navArgs()
+    lateinit var binding: FragmentThreadBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentThreadBinding.inflate(inflater, container, false)
+        binding = FragmentThreadBinding.inflate(inflater, container, false)
         if (viewModel.threadConfig.value == null) {
             viewModel.threadConfig.value = ThreadConfig(args.tid)
         }
@@ -138,6 +148,9 @@ class ThreadFragment : Fragment() {
         if (selected is SelectedLink) {
             menu.setGroupVisible(R.id.group_link, true)
         }
+        if (selected is Photo) {
+            menu.setGroupVisible(R.id.group_photo, true)
+        }
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -186,6 +199,53 @@ class ThreadFragment : Fragment() {
                                 it
                             )
                         )
+                    }
+                    return true
+                }
+
+                R.id.save_photo -> {
+                    (selected as? Photo)?.let { photo ->
+                        if (StorageUtils.verifyStoragePermissions(requireActivity())) {
+                            lifecycleScope.launch {
+                                val result = DownloadRequest(
+                                    requireContext(),
+                                    photo.url
+                                )
+                                    .execute()
+                                if (result is DownloadResult.Success) {
+                                    kotlin.runCatching {
+                                        withContext(Dispatchers.IO) {
+                                            BufferedInputStream(result.data.data.newInputStream()).use { inputStream ->
+                                                val ext = inputStream.guessExtension()
+                                                StorageUtils.saveImage(
+                                                    "${photo.key}_${System.currentTimeMillis()}.$ext",
+                                                    requireContext(),
+                                                    inputStream
+                                                )
+                                            }
+                                        }
+                                    }.onSuccess {
+                                        Snackbar.make(
+                                            binding.root,
+                                            getString(R.string.saved_to_gallery),
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                    }.onFailure {
+                                        Snackbar.make(
+                                            binding.root,
+                                            "error:${it.message}",
+                                            Snackbar.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                } else if (result is DownloadResult.Error) {
+                                    Snackbar.make(
+                                        binding.root,
+                                        "error:${result.throwable.message}",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
                     }
                     return true
                 }
@@ -245,13 +305,15 @@ class ThreadFragment : Fragment() {
             holder.binding.avatar.displayImage("$AVATAR_THUMBNAIL/${post.user.portrait}")
             fun addTextView() {
                 if (lastString == null) return
-                contentView.addView(PbContentTextView(context).apply {
+                contentView.addView(AppCompatTextView(context).apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
                     text = lastString
                     movementMethod = MyLinkMovementMethod
+                    isClickable = false
+                    isLongClickable = false
                     setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize.toFloat())
                 })
                 lastString = null
@@ -267,7 +329,7 @@ class ThreadFragment : Fragment() {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         lastString!!.append(
                             content.text.ifEmpty { "[link]" },
-                            URLSpan(content.link),
+                            MyURLSpan(content.link),
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
                     }
@@ -292,6 +354,17 @@ class ThreadFragment : Fragment() {
                                             viewModel.photos.keys.indexOf(post.floor to content.order)
                                         photoViewModel.currentIndex.value = idx
                                         findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                                    }
+                                    setOnLongClickListener {
+                                        var parent = it.parent
+                                        while (parent !is ItemView) parent = parent.parent
+                                        (parent as? ItemView)?.setSelectedData(
+                                            Photo(
+                                                content.src,
+                                                "t_${post.tid}_p${post.postId}_f${post.floor}_c${content.order}"
+                                            )
+                                        )
+                                        false
                                     }
                                 }
                         contentView.addView(imageView)

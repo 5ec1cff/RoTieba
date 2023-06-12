@@ -16,8 +16,15 @@ class EmojiSpan(private val mDrawable: Drawable) : ReplacementSpan() {
         text: CharSequence?,
         start: Int,
         end: Int,
-        metrics: Paint.FontMetricsInt?
+        fontMetrics: Paint.FontMetricsInt?
     ): Int {
+        fontMetrics?.apply {
+            val pm = paint.fontMetrics
+            top = pm.top.toInt()
+            ascent = pm.ascent.toInt()
+            descent = pm.descent.toInt()
+            bottom = pm.bottom.toInt()
+        }
         return (paint.fontMetrics.descent - paint.fontMetrics.ascent).roundToInt()
     }
 

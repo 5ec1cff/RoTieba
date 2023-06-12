@@ -22,9 +22,9 @@ class RoundSpan(
         text: CharSequence,
         start: Int,
         end: Int,
-        fontMertics: Paint.FontMetricsInt?
+        fontMetrics: Paint.FontMetricsInt?
     ): Int {
-        fontMertics?.apply {
+        fontMetrics?.apply {
             val pm = paint.fontMetrics
             top = pm.top.toInt()
             ascent = pm.ascent.toInt()

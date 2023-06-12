@@ -2,19 +2,19 @@
 <io.github.a13e300.ro_tieba.view.ItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/Widget.RoTieba.FilledCardPrimary"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:clickable="true"
     android:focusable="true"
-    android:layout_marginVertical="8dp"
-    android:layout_marginHorizontal="16dp">
+    android:background="?colorSurface"
+    android:foreground="?selectableItemBackground"
+    android:padding="16dp"
+    android:layout_marginBottom="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:layout_width="48dp"
@@ -45,7 +45,7 @@
             app:layout_constraintTop_toBottomOf="@id/account_name"
             app:layout_constraintBottom_toBottomOf="@id/avatar" />
 
-        <io.github.a13e300.ro_tieba.view.PbContentView
+        <LinearLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -56,6 +56,7 @@
             app:layout_constraintTop_toBottomOf="@id/avatar" />
 
         <com.google.android.material.card.MaterialCardView
+            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/comments_box"

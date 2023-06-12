@@ -5,10 +5,10 @@ import android.util.AttributeSet
 import android.view.ContextMenu
 import android.view.MotionEvent
 import android.view.View
-import com.google.android.material.card.MaterialCardView
+import android.widget.FrameLayout
 import java.lang.ref.WeakReference
 
-class ItemView : MaterialCardView {
+class ItemView : FrameLayout {
     data class ContextMenuInfo(
         val data: Any?,
         val targetView: View,
