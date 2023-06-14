@@ -6,4 +6,9 @@
         android:title="@string/download_photo_title"
         android:icon="@drawable/ic_download"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/share_photo"
+        android:title="@string/share_photo_title"
+        android:icon="@drawable/ic_share"
+        app:showAsAction="ifRoom" />
 </menu>

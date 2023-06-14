@@ -148,8 +148,7 @@ class ForumFragment : BaseFragment() {
                     photoViewModel.currentIndex.value = 0
                     photoViewModel.photos = images.map {
                         Photo(
-                            it.src,
-                            "t${thread.tid}_p${thread.postId}_f1_c${image1.order}"
+                            it.src, it.order, thread
                         )
                     }
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
@@ -165,8 +164,7 @@ class ForumFragment : BaseFragment() {
                     photoViewModel.currentIndex.value = 1
                     photoViewModel.photos = images.map {
                         Photo(
-                            it.src,
-                            "t${thread.tid}_p${thread.postId}_f1_c${image2.order}"
+                            it.src, it.order, thread
                         )
                     }
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
@@ -182,8 +180,7 @@ class ForumFragment : BaseFragment() {
                     photoViewModel.currentIndex.value = 2
                     photoViewModel.photos = images.map {
                         Photo(
-                            it.src,
-                            "t${thread.tid}_p${thread.postId}_f1_c${image3.order}"
+                            it.src, it.order, thread
                         )
                     }
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())

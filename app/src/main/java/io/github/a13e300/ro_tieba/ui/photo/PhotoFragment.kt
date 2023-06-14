@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.photo
 
 import android.os.Bundle
+import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -17,20 +18,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.github.panpf.sketch.displayImage
-import com.github.panpf.sketch.request.DownloadRequest
-import com.github.panpf.sketch.request.DownloadResult
 import com.github.panpf.sketch.zoom.SketchZoomImageView
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.BaseFragment
+import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.StatusBarConfig
-import io.github.a13e300.ro_tieba.StorageUtils
 import io.github.a13e300.ro_tieba.databinding.FragmentPhotoBinding
-import io.github.a13e300.ro_tieba.guessExtension
-import kotlinx.coroutines.Dispatchers
+import io.github.a13e300.ro_tieba.forceShowIcon
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.BufferedInputStream
 
 private const val KEY_FULLSCREEN = "fullscreen"
 
@@ -78,55 +74,7 @@ class PhotoFragment : BaseFragment() {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.download_photo -> {
-                        if (StorageUtils.verifyStoragePermissions(requireActivity())) {
-                            lifecycleScope.launch {
-                                val photo = viewModel.photos[viewModel.currentIndex.value!!]
-                                val result = DownloadRequest(
-                                    requireContext(),
-                                    photo.url
-                                )
-                                    .execute()
-                                if (result is DownloadResult.Success) {
-                                    kotlin.runCatching {
-                                        withContext(Dispatchers.IO) {
-                                            BufferedInputStream(result.data.data.newInputStream()).use { inputStream ->
-                                                val ext = inputStream.guessExtension()
-                                                StorageUtils.saveImage(
-                                                    "${photo.key}_${System.currentTimeMillis()}.$ext",
-                                                    requireContext(),
-                                                    inputStream
-                                                )
-                                            }
-                                        }
-                                    }.onSuccess {
-                                        Snackbar.make(
-                                            binding.root,
-                                            getString(R.string.saved_to_gallery),
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                    }.onFailure {
-                                        Snackbar.make(
-                                            binding.root,
-                                            "error:${it.message}",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                } else if (result is DownloadResult.Error) {
-                                    Snackbar.make(
-                                        binding.root,
-                                        "error:${result.throwable.message}",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }
-                        true
-                    }
-
-                    else -> false
-                }
+                return onContextItemSelected(menuItem)
             }
 
         })
@@ -154,6 +102,67 @@ class PhotoFragment : BaseFragment() {
         outState.putBoolean(KEY_FULLSCREEN, isFullscreen)
     }
 
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        MenuInflater(requireContext()).inflate(R.menu.post_item_menu, menu)
+        menu.forceShowIcon()
+        menu.setGroupVisible(R.id.group_post, false)
+        menu.setGroupVisible(R.id.group_link, false)
+        menu.setGroupVisible(R.id.group_photo, true)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.download_photo, R.id.save_photo -> {
+                val photo = viewModel.photos[viewModel.currentIndex.value!!]
+                lifecycleScope.launch {
+                    PhotoUtils.downloadPhoto(
+                        activity = requireActivity(),
+                        photo = photo,
+                        onSuccess = {
+                            Snackbar.make(
+                                binding.root,
+                                getString(R.string.saved_to_gallery),
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        },
+                        onFailure = {
+                            Snackbar.make(
+                                binding.root,
+                                "error:${it.message}",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+                true
+            }
+
+            R.id.share_photo -> {
+                lifecycleScope.launch {
+                    PhotoUtils.sharePhoto(
+                        context = requireContext(),
+                        photo = viewModel.photos[viewModel.currentIndex.value!!],
+                        onFailure = {
+                            Snackbar.make(
+                                binding.root,
+                                "failed to share:${it.message}",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                }
+                true
+            }
+
+            else -> false
+        }
+    }
+
     class PhotoViewHolder(val imageView: SketchZoomImageView) : RecyclerView.ViewHolder(imageView)
 
     inner class PhotoAdapter(private val items: List<Photo>) :
@@ -169,6 +178,7 @@ class PhotoFragment : BaseFragment() {
                     isFullscreen = !isFullscreen
                     updateFullscreen()
                 }
+                registerForContextMenu(this)
             })
         }
 

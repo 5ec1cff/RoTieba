@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModel
 
 data class Photo(
     val url: String,
-    val key: String
+    val order: Int,
+    val source: Any? = null
 )
 
 class PhotoViewModel : ViewModel() {

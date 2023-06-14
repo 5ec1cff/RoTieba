@@ -29,5 +29,9 @@
             android:id="@+id/save_photo"
             android:title="@string/download_photo_title"
             android:icon="@drawable/ic_download" />
+        <item
+            android:id="@+id/share_photo"
+            android:title="@string/share_photo_title"
+            android:icon="@drawable/ic_share" />
     </group>
 </menu>

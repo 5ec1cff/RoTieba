@@ -33,23 +33,20 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
-import com.github.panpf.sketch.request.DownloadRequest
-import com.github.panpf.sketch.request.DownloadResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
+import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
-import io.github.a13e300.ro_tieba.StorageUtils
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
-import io.github.a13e300.ro_tieba.guessExtension
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
@@ -63,11 +60,8 @@ import io.github.a13e300.ro_tieba.utils.appendUser
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.SelectedLink
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.BufferedInputStream
 
 class ThreadFragment : BaseFragment() {
 
@@ -205,46 +199,44 @@ class ThreadFragment : BaseFragment() {
 
                 R.id.save_photo -> {
                     (selected as? Photo)?.let { photo ->
-                        if (StorageUtils.verifyStoragePermissions(requireActivity())) {
-                            lifecycleScope.launch {
-                                val result = DownloadRequest(
-                                    requireContext(),
-                                    photo.url
-                                )
-                                    .execute()
-                                if (result is DownloadResult.Success) {
-                                    kotlin.runCatching {
-                                        withContext(Dispatchers.IO) {
-                                            BufferedInputStream(result.data.data.newInputStream()).use { inputStream ->
-                                                val ext = inputStream.guessExtension()
-                                                StorageUtils.saveImage(
-                                                    "${photo.key}_${System.currentTimeMillis()}.$ext",
-                                                    requireContext(),
-                                                    inputStream
-                                                )
-                                            }
-                                        }
-                                    }.onSuccess {
-                                        Snackbar.make(
-                                            binding.root,
-                                            getString(R.string.saved_to_gallery),
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                    }.onFailure {
-                                        Snackbar.make(
-                                            binding.root,
-                                            "error:${it.message}",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                } else if (result is DownloadResult.Error) {
+                        lifecycleScope.launch {
+                            PhotoUtils.downloadPhoto(
+                                activity = requireActivity(),
+                                photo = photo,
+                                onSuccess = {
                                     Snackbar.make(
                                         binding.root,
-                                        "error:${result.throwable.message}",
+                                        getString(R.string.saved_to_gallery),
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onFailure = {
+                                    Snackbar.make(
+                                        binding.root,
+                                        "error:${it.message}",
                                         Snackbar.LENGTH_SHORT
                                     ).show()
                                 }
-                            }
+                            )
+                        }
+                    }
+                    return true
+                }
+
+                R.id.share_photo -> {
+                    lifecycleScope.launch {
+                        (selected as? Photo)?.let { photo ->
+                            PhotoUtils.sharePhoto(
+                                context = requireContext(),
+                                photo = photo,
+                                onFailure = {
+                                    Snackbar.make(
+                                        binding.root,
+                                        "failed to share:${it.message}",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
                         }
                     }
                     return true
@@ -360,8 +352,7 @@ class ThreadFragment : BaseFragment() {
                                         while (parent !is ItemView) parent = parent.parent
                                         (parent as? ItemView)?.setSelectedData(
                                             Photo(
-                                                content.src,
-                                                "t_${post.tid}_p${post.postId}_f${post.floor}_c${content.order}"
+                                                content.src, content.order, post
                                             )
                                         )
                                         false
