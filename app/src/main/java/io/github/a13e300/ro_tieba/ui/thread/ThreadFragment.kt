@@ -20,7 +20,6 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.MenuProvider
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +38,7 @@ import com.github.panpf.sketch.request.DownloadResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 
-class ThreadFragment : Fragment() {
+class ThreadFragment : BaseFragment() {
 
     private val viewModel: ThreadViewModel by viewModels()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })

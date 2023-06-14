@@ -8,9 +8,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
-import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.fragment.app.Fragment
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -21,7 +21,9 @@ import com.github.panpf.sketch.request.DownloadRequest
 import com.github.panpf.sketch.request.DownloadResult
 import com.github.panpf.sketch.zoom.SketchZoomImageView
 import com.google.android.material.snackbar.Snackbar
+import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.R
+import io.github.a13e300.ro_tieba.StatusBarConfig
 import io.github.a13e300.ro_tieba.StorageUtils
 import io.github.a13e300.ro_tieba.databinding.FragmentPhotoBinding
 import io.github.a13e300.ro_tieba.guessExtension
@@ -30,28 +32,32 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 
-class PhotoFragment : Fragment() {
+private const val KEY_FULLSCREEN = "fullscreen"
+
+class PhotoFragment : BaseFragment() {
+    private var isFullscreen = false
 
     private val viewModel: PhotoViewModel by viewModels({ findNavController().previousBackStackEntry!! })
-    private lateinit var windowInsetsControllerCompat: WindowInsetsControllerCompat
+    private lateinit var binding: FragmentPhotoBinding
     private var oldIsAppearanceLightStatusBars = false
 
     override fun onStart() {
         super.onStart()
-        oldIsAppearanceLightStatusBars = windowInsetsControllerCompat.isAppearanceLightStatusBars
-        windowInsetsControllerCompat.isAppearanceLightStatusBars = false
+        oldIsAppearanceLightStatusBars = insetsController.isAppearanceLightStatusBars
+        insetsController.isAppearanceLightStatusBars = false
     }
 
     override fun onStop() {
         super.onStop()
-        windowInsetsControllerCompat.isAppearanceLightStatusBars = oldIsAppearanceLightStatusBars
+        insetsController.isAppearanceLightStatusBars = oldIsAppearanceLightStatusBars
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentPhotoBinding.inflate(inflater, container, false)
+        binding = FragmentPhotoBinding.inflate(inflater, container, false)
+        savedInstanceState?.getBoolean(KEY_FULLSCREEN)?.let { isFullscreen = it }
         viewModel.currentIndex.observe(viewLifecycleOwner) {
             binding.toolbar.title = "${it + 1} / ${viewModel.photos.size}"
         }
@@ -124,9 +130,28 @@ class PhotoFragment : Fragment() {
             }
 
         })
-        windowInsetsControllerCompat =
-            WindowCompat.getInsetsController(requireActivity().window, binding.root)
         return binding.root
+    }
+
+    override fun onInitStatusBar(): StatusBarConfig {
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        return StatusBarConfig(false, !isFullscreen)
+    }
+
+    private fun updateFullscreen() {
+        if (isFullscreen) {
+            binding.appBar.isVisible = false
+            insetsController.hide(WindowInsetsCompat.Type.statusBars())
+        } else {
+            binding.appBar.isVisible = true
+            insetsController.show(WindowInsetsCompat.Type.statusBars())
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_FULLSCREEN, isFullscreen)
     }
 
     class PhotoViewHolder(val imageView: SketchZoomImageView) : RecyclerView.ViewHolder(imageView)
@@ -139,6 +164,11 @@ class PhotoFragment : Fragment() {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+
+                setOnClickListener {
+                    isFullscreen = !isFullscreen
+                    updateFullscreen()
+                }
             })
         }
 

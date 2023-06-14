@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +21,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
@@ -31,7 +31,7 @@ import io.github.a13e300.ro_tieba.utils.appendLevelSpan
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment() {
     fun findMainNavController() =
         requireActivity().findNavController(R.id.nav_host_fragment_activity_main)
 

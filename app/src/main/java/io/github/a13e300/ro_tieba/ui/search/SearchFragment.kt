@@ -14,12 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.search.SearchView
+import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
 import io.github.a13e300.ro_tieba.view.MySearchView
 
-class SearchFragment : Fragment() {
+class SearchFragment : BaseFragment() {
 
     private val viewModel: SearchViewModel by viewModels()
 

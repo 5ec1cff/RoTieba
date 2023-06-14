@@ -4,10 +4,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import rikka.insets.WindowInsetsHelper
 import rikka.layoutinflater.view.LayoutInflaterFactory
 
 abstract class BaseActivity : AppCompatActivity() {
+    lateinit var insetsController: WindowInsetsControllerCompat
     override fun onCreate(savedInstanceState: Bundle?) {
         /*
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -19,13 +21,7 @@ abstract class BaseActivity : AppCompatActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         */
-        val ta = obtainStyledAttributes(intArrayOf(androidx.appcompat.R.attr.isLightTheme))
-        val isLight = ta.getBoolean(0, false)
-        ta.recycle()
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            // isAppearanceLightNavigationBars = isLight
-            isAppearanceLightStatusBars = isLight
-        }
+        insetsController = WindowCompat.getInsetsController(window, window.decorView)
         LayoutInflaterCompat.setFactory2(
             layoutInflater, LayoutInflaterFactory(delegate)
                 .addOnViewCreatedListener(WindowInsetsHelper.LISTENER)
