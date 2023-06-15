@@ -30,4 +30,24 @@
             style="@style/PhotoAppBarStyle" />
     </com.google.android.material.appbar.AppBarLayout>
 
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@color/photo_view_background"
+        android:fitsSystemWindows="false"
+        app:fitsSystemWindowsInsets="bottom"
+        android:id="@+id/photo_bottom_bar"
+        android:layout_gravity="bottom">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/image_text"
+            android:textColor="@color/white"
+            android:textSize="@dimen/content_text_size"
+            android:maxLines="5"
+            android:ellipsize="end"
+            android:paddingVertical="16dp" />
+    </com.google.android.material.bottomappbar.BottomAppBar>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.photo
 
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.Menu
@@ -24,8 +25,11 @@ import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.StatusBarConfig
+import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentPhotoBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
+import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.models.TiebaThread
 import kotlinx.coroutines.launch
 
 private const val KEY_FULLSCREEN = "fullscreen"
@@ -62,6 +66,19 @@ class PhotoFragment : BaseFragment() {
             registerOnPageChangeCallback(object : OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     viewModel.currentIndex.value = position
+                    val photo = viewModel.photos[position]
+                    val content = when (val s = photo.source) {
+                        is Post -> s.content
+                        is TiebaThread -> s.content
+                        else -> null
+                    }
+                    if (content != null) {
+                        // FIXME: sometimes the textview only shows 1 line
+                        binding.imageText.text =
+                            SpannableStringBuilder().appendSimpleContent(content, requireContext())
+                    } else {
+                        binding.imageText.text = null
+                    }
                 }
             })
             viewModel.currentIndex.value?.let {
@@ -91,9 +108,11 @@ class PhotoFragment : BaseFragment() {
     private fun updateFullscreen() {
         if (isFullscreen) {
             binding.appBar.isVisible = false
+            binding.photoBottomBar.isVisible = false
             insetsController.hide(WindowInsetsCompat.Type.statusBars())
         } else {
             binding.appBar.isVisible = true
+            binding.photoBottomBar.isVisible = true
             insetsController.show(WindowInsetsCompat.Type.statusBars())
         }
     }
