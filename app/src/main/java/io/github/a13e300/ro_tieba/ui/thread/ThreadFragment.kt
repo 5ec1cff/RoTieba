@@ -97,6 +97,7 @@ class ThreadFragment : BaseFragment() {
         viewModel.threadInfo.observe(viewLifecycleOwner) {
             binding.toolbar.title = it.title
         }
+        setupToolbar(binding.toolbar)
         binding.toolbar.setOnClickListener {
             binding.list.scrollToPosition(0)
         }

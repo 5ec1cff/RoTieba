@@ -56,6 +56,7 @@ class ForumFragment : BaseFragment() {
             binding.forumDesc.text = it.desc
             binding.forumAvatar.displayImage(it.avatarUrl)
         }
+        setupToolbar(binding.toolbar)
         binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
             binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
                 viewModel.forumInfo.value?.name else null

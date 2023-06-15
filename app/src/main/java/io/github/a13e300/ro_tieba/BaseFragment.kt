@@ -1,8 +1,10 @@
 package io.github.a13e300.ro_tieba
 
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 
 data class StatusBarConfig(
     val light: Boolean,
@@ -20,6 +22,14 @@ abstract class BaseFragment : Fragment() {
         else
             insetsController.hide(WindowInsetsCompat.Type.statusBars())
         insetsController.isAppearanceLightStatusBars = config.light
+    }
+
+    protected fun setupToolbar(toolbar: Toolbar) {
+        toolbar.setNavigationIcon(R.drawable.ic_back)
+        toolbar.setNavigationContentDescription(R.string.back_title)
+        toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
     }
 
     protected open fun onInitStatusBar(): StatusBarConfig {

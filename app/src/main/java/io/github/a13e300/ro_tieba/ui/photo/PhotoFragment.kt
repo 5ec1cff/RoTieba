@@ -78,6 +78,7 @@ class PhotoFragment : BaseFragment() {
             }
 
         })
+        setupToolbar(binding.toolbar)
         return binding.root
     }
 

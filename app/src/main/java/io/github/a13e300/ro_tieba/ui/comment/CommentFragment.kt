@@ -32,6 +32,7 @@ class CommentFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentCommentBinding.inflate(inflater, container, false)
+        setupToolbar(binding.toolbar)
         viewModel.pid = args.pid
         viewModel.tid = args.tid
         viewModel.commentCount.observe(viewLifecycleOwner) {

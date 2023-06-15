@@ -26,4 +26,5 @@
     <string name="search_tab_bar_title">吧</string>
     <string name="no_result_tips">没有结果</string>
     <string name="share_photo_title">分享图片</string>
+    <string name="back_title">返回</string>
 </resources>
