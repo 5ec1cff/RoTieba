@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shareInterpolator="true">
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="0.1"
+        android:duration="@android:integer/config_shortAnimTime" />
+    <translate
+        android:fromYDelta="0%p"
+        android:toYDelta="-10%p"
+        android:duration="@android:integer/config_shortAnimTime" />
+</set>

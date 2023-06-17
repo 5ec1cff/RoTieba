@@ -10,9 +10,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.isVisible
+import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -30,26 +31,23 @@ import io.github.a13e300.ro_tieba.databinding.FragmentPhotoBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
+import io.github.a13e300.ro_tieba.utils.hideAnim
+import io.github.a13e300.ro_tieba.utils.showAnim
 import kotlinx.coroutines.launch
 
 private const val KEY_FULLSCREEN = "fullscreen"
+
+const val TRANSITION_NAME_PREFIX = "photo_fragment_transition_"
 
 class PhotoFragment : BaseFragment() {
     private var isFullscreen = false
 
     private val viewModel: PhotoViewModel by viewModels({ findNavController().previousBackStackEntry!! })
     private lateinit var binding: FragmentPhotoBinding
-    private var oldIsAppearanceLightStatusBars = false
 
-    override fun onStart() {
-        super.onStart()
-        oldIsAppearanceLightStatusBars = insetsController.isAppearanceLightStatusBars
-        insetsController.isAppearanceLightStatusBars = false
-    }
-
-    override fun onStop() {
-        super.onStop()
-        insetsController.isAppearanceLightStatusBars = oldIsAppearanceLightStatusBars
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // sharedElementEnterTransition = MyChangeImageTransform()
     }
 
     override fun onCreateView(
@@ -58,6 +56,8 @@ class PhotoFragment : BaseFragment() {
     ): View {
         binding = FragmentPhotoBinding.inflate(inflater, container, false)
         savedInstanceState?.getBoolean(KEY_FULLSCREEN)?.let { isFullscreen = it }
+        binding.appBar.isGone = isFullscreen
+        binding.photoBottomBar.isGone = isFullscreen
         viewModel.currentIndex.observe(viewLifecycleOwner) {
             binding.toolbar.title = "${it + 1} / ${viewModel.photos.size}"
         }
@@ -99,6 +99,14 @@ class PhotoFragment : BaseFragment() {
         return binding.root
     }
 
+    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        postponeEnterTransition()
+        (view.parent as? ViewGroup)?.doOnPreDraw {
+            startPostponedEnterTransition()
+        }
+    }
+     */
+
     override fun onInitStatusBar(): StatusBarConfig {
         insetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -107,12 +115,12 @@ class PhotoFragment : BaseFragment() {
 
     private fun updateFullscreen() {
         if (isFullscreen) {
-            binding.appBar.isVisible = false
-            binding.photoBottomBar.isVisible = false
+            binding.appBar.hideAnim(false)
+            binding.photoBottomBar.hideAnim(true)
             insetsController.hide(WindowInsetsCompat.Type.statusBars())
         } else {
-            binding.appBar.isVisible = true
-            binding.photoBottomBar.isVisible = true
+            binding.appBar.showAnim(false)
+            binding.photoBottomBar.showAnim(true)
             insetsController.show(WindowInsetsCompat.Type.statusBars())
         }
     }
@@ -205,7 +213,10 @@ class PhotoFragment : BaseFragment() {
         override fun getItemCount(): Int = items.size
 
         override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
-            holder.imageView.displayImage(items[position].url)
+            holder.imageView.apply {
+                displayImage(items[position].url)
+                ViewCompat.setTransitionName(this, "${TRANSITION_NAME_PREFIX}_$position")
+            }
         }
     }
 

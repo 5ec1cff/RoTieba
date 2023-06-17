@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -38,6 +39,7 @@ import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
@@ -56,6 +58,7 @@ import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.ui.photo.TRANSITION_NAME_PREFIX
 import io.github.a13e300.ro_tieba.utils.appendUser
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
@@ -332,6 +335,7 @@ class ThreadFragment : BaseFragment() {
                         val imageView =
                             ImageContentBinding.inflate(layoutInflater, contentView, false)
                                 .root.apply {
+                                    Logger.d("scaleType=${scaleType}")
                                     displayImage(content.previewSrc) {
                                         placeholder(
                                             PlaceHolderDrawable(
@@ -341,12 +345,18 @@ class ThreadFragment : BaseFragment() {
                                         )
                                         resize(content.width, content.height)
                                     }
+                                    val idx =
+                                        viewModel.photos.keys.indexOf(post.floor to content.order)
+                                    val name = "${TRANSITION_NAME_PREFIX}_$idx"
+                                    ViewCompat.setTransitionName(this, name)
                                     setOnClickListener {
                                         photoViewModel.photos = viewModel.photos.values.toList()
-                                        val idx =
-                                            viewModel.photos.keys.indexOf(post.floor to content.order)
                                         photoViewModel.currentIndex.value = idx
-                                        findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                                        findNavController().navigate(
+                                            MobileNavigationDirections.viewPhotos(),
+                                            // navigatorExtras = FragmentNavigatorExtras(it to name)
+                                        )
+
                                     }
                                     setOnLongClickListener {
                                         var parent = it.parent
