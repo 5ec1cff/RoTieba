@@ -30,14 +30,15 @@
             style="@style/PhotoAppBarStyle" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.bottomappbar.BottomAppBar
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:backgroundTint="@color/photo_view_background"
+        android:layout_height="match_parent"
+        android:background="@color/photo_view_background"
         android:fitsSystemWindows="false"
         app:fitsSystemWindowsInsets="bottom"
         android:id="@+id/photo_bottom_bar"
-        android:layout_gravity="bottom">
+        app:layout_behavior="io.github.a13e300.ro_tieba.misc.PhotoDescScrollBehavior"
+        app:behavior_minHeight="100dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -45,9 +46,15 @@
             android:id="@+id/image_text"
             android:textColor="@color/white"
             android:textSize="@dimen/content_text_size"
-            android:maxLines="5"
-            android:ellipsize="end"
-            android:paddingVertical="16dp" />
-    </com.google.android.material.bottomappbar.BottomAppBar>
+            android:padding="16dp" />
+    </androidx.core.widget.NestedScrollView>
+
+    <io.github.a13e300.ro_tieba.view.ShadowView
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_gravity="bottom"
+        android:fitsSystemWindows="false"
+        app:fitsSystemWindowsInsets="bottom"
+        android:id="@+id/bottom_shadow" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

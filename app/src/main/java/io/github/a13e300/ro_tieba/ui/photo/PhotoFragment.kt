@@ -72,12 +72,15 @@ class PhotoFragment : BaseFragment() {
                         is TiebaThread -> s.content
                         else -> null
                     }
-                    if (content != null) {
-                        // FIXME: sometimes the textview only shows 1 line
-                        binding.imageText.text =
-                            SpannableStringBuilder().appendSimpleContent(content, requireContext())
-                    } else {
-                        binding.imageText.text = null
+                    binding.imageText.post {
+                        // sometimes the textview only shows 1 line
+                        // log shows `requestLayout() improperly called` in this case
+                        // update text in view.post seems to solve the bug
+                        binding.imageText.text = if (content == null) null
+                        else SpannableStringBuilder().appendSimpleContent(
+                            content,
+                            requireContext()
+                        )
                     }
                 }
             })
@@ -117,10 +120,12 @@ class PhotoFragment : BaseFragment() {
         if (isFullscreen) {
             binding.appBar.hideAnim(false)
             binding.photoBottomBar.hideAnim(true)
+            binding.bottomShadow.isGone = true
             insetsController.hide(WindowInsetsCompat.Type.statusBars())
         } else {
             binding.appBar.showAnim(false)
             binding.photoBottomBar.showAnim(true)
+            binding.bottomShadow.isGone = false
             insetsController.show(WindowInsetsCompat.Type.statusBars())
         }
     }
