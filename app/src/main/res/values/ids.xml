@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="tag_recycler_view_item" type="id" />
-    <item name="tag_last_click_time" type="id" />
+    <item name="tag_movement_method_longclick" type="id" />
+    <item name="tag_movement_method_last_click" type="id" />
 </resources>
