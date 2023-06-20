@@ -61,6 +61,9 @@ class ForumFragment : BaseFragment() {
             binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
                 viewModel.forumInfo.value?.name else null
         }
+        binding.toolbar.setOnClickListener {
+            binding.threadList.scrollToPosition(0)
+        }
         val threadAdapter = ThreadAdapter(ThreadComparator)
         threadAdapter.addLoadStateListener { state ->
             (state.refresh as? LoadState.Error)?.error?.let {
