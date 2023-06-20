@@ -9,5 +9,6 @@ data class TiebaThread(
     val author: User,
     val content: List<Content>,
     val time: Date,
-    val replyNum: Int
+    val replyNum: Int,
+    val forum: Forum? = null
 )

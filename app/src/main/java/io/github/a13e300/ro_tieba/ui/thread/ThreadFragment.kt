@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba.ui.thread
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
@@ -30,9 +31,11 @@ import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
 import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -45,6 +48,7 @@ import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
+import io.github.a13e300.ro_tieba.databinding.FragmentThreadHeaderBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
@@ -93,12 +97,22 @@ class ThreadFragment : BaseFragment() {
                     .show()
             }
         }
+        val headerAdapter = HeaderAdapter()
         binding.list.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = postAdapter.withLoadStateFooter(FooterAdapter())
+            adapter = ConcatAdapter(
+                headerAdapter,
+                postAdapter
+            ) // postAdapter.withLoadStateFooter(FooterAdapter())
+            addItemDecoration(
+                MyItemDecoration(
+                    resources.getDimension(R.dimen.thread_list_margin).toInt()
+                )
+            )
         }
         viewModel.threadInfo.observe(viewLifecycleOwner) {
-            binding.toolbar.title = it.title
+            binding.toolbar.title = it.forum?.name
+            headerAdapter.notifyDataSetChanged()
         }
         setupToolbar(binding.toolbar)
         binding.toolbar.setOnClickListener {
@@ -248,6 +262,35 @@ class ThreadFragment : BaseFragment() {
             }
         }
         return super.onContextItemSelected(item)
+    }
+
+    class MyItemDecoration(private val mMargin: Int) : ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            val pos = parent.getChildAdapterPosition(view)
+            if (pos >= 2) {
+                outRect.set(0, mMargin, 0, 0)
+            }
+        }
+    }
+
+    class HeaderHolder(val binding: FragmentThreadHeaderBinding) :
+        RecyclerView.ViewHolder(binding.root)
+
+    inner class HeaderAdapter : RecyclerView.Adapter<HeaderHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HeaderHolder =
+            HeaderHolder(FragmentThreadHeaderBinding.inflate(layoutInflater, parent, false))
+
+        override fun getItemCount(): Int = 1
+
+        override fun onBindViewHolder(holder: HeaderHolder, position: Int) {
+            holder.binding.threadTitle.text = viewModel.threadInfo.value?.title
+        }
+
     }
 
     class FooterHolder(val binding: ThreadListFooterBinding) : RecyclerView.ViewHolder(binding.root)

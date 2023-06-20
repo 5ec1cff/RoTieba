@@ -12,6 +12,7 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
@@ -54,7 +55,8 @@ class ThreadViewModel : ViewModel() {
                     content = listOf(),
                     replyNum = response.thread.replyNum,
                     time = Date(response.thread.createTime.toLong() * 1000),
-                    postId = response.thread.postId
+                    postId = response.thread.postId,
+                    forum = Forum(response.forum.name, response.forum.id)
                 )
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })

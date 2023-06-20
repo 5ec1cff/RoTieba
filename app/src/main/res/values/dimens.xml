@@ -6,4 +6,5 @@
     <dimen name="content_text_size">16sp</dimen>
     <dimen name="level_span_width">20sp</dimen>
     <dimen name="round_span_default_padding">1sp</dimen>
+    <dimen name="thread_list_margin">8dp</dimen>
 </resources>
