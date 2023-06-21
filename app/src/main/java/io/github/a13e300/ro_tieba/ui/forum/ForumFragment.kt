@@ -28,6 +28,7 @@ import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.misc.IconSpan
+import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.toSimpleString
@@ -106,7 +107,23 @@ class ForumFragment : BaseFragment() {
 
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val thread = getItem(position) ?: return
-            holder.binding.threadTitle.text = thread.title.ifEmpty { "无标题" }
+            holder.binding.threadTitle.text = SpannableStringBuilder().apply {
+                if (thread.isGood) {
+                    val context = requireContext()
+                    append(
+                        "[精]",
+                        RoundSpan(
+                            context,
+                            context.getColor(R.color.good_span_background),
+                            context.getColor(R.color.good_span_text),
+                            showText = "精"
+                        ),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    append(" ")
+                }
+                append(thread.title)
+            }
             holder.binding.threadContent.text = SpannableStringBuilder()
                 .appendSimpleContent(thread.content, requireContext())
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }

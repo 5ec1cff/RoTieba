@@ -8,7 +8,8 @@ data class User(
     val uid: Long = 0,
     val portrait: String = "",
     val location: String = "",
-    val level: Int = 0
+    val level: Int = 0,
+    val bawuType: String? = null
 )
 
 fun UserOuterClass.User.toUser() = this.let { user ->
@@ -18,6 +19,7 @@ fun UserOuterClass.User.toUser() = this.let { user ->
         uid = user.id,
         portrait = user.portrait,
         location = user.ipAddress,
-        level = user.levelId
+        level = user.levelId,
+        bawuType = user.bawuType
     )
 }

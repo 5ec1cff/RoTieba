@@ -27,4 +27,6 @@
     <string name="no_result_tips">没有结果</string>
     <string name="share_photo_title">分享图片</string>
     <string name="back_title">返回</string>
+    <string name="bawu_type_manager_name">吧主</string>
+    <string name="bawu_type_assist_name">小吧主</string>
 </resources>

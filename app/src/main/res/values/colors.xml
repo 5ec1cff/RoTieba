@@ -68,5 +68,9 @@
     <color name="level_color_low">#0DA67A</color>
     <color name="level_color_mid">#2E98DF</color>
     <color name="level_color_high">#FDC00A</color>
-    <color name="level_span_text">#000000</color>
+    <color name="level_span_text">#FFFFFF</color>
+    <color name="bawu_span_background">#87E3FA</color>
+    <color name="bawu_span_text">#0DACF6</color>
+    <color name="good_span_background">#ED6565</color>
+    <color name="good_span_text">#FFFFFF</color>
 </resources>

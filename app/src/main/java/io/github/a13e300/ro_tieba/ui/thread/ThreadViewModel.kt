@@ -56,6 +56,7 @@ class ThreadViewModel : ViewModel() {
                     replyNum = response.thread.replyNum,
                     time = Date(response.thread.createTime.toLong() * 1000),
                     postId = response.thread.postId,
+                    isGood = response.thread.isGood == 1,
                     forum = Forum(response.forum.name, response.forum.id)
                 )
                 val users = response.userListList.associateBy({ it.id },

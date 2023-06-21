@@ -15,7 +15,8 @@ class RoundSpan(
     private val textColor: Int,
     private val showText: String? = null,
     private val width: Float? = null,
-    private val padding: Float = context.resources.getDimension(R.dimen.round_span_default_padding)
+    private val padding: Float = context.resources.getDimension(R.dimen.round_span_default_padding),
+    private val radius: Float = context.resources.getDimension(R.dimen.round_span_round_corner)
 ) : ReplacementSpan() {
     override fun getSize(
         paint: Paint,
@@ -35,10 +36,10 @@ class RoundSpan(
     }
 
     private fun measureText(paint: Paint, text: CharSequence, start: Int, end: Int): Float {
-        val textSize = width
-            ?: showText?.let { paint.measureText(showText) }
+        if (width != null) return width
+        val textSize = showText?.let { paint.measureText(showText) }
             ?: paint.measureText(text, start, end)
-        return textSize + padding.times(2)
+        return textSize.times(0.7f) + padding.times(2)
     }
 
     override fun draw(
@@ -62,7 +63,7 @@ class RoundSpan(
         val rectTop = center - fontSize / 2
         val rectBottom = center + fontSize / 2
         val rect = RectF(x, rectTop, x + width, rectBottom)
-        canvas.drawRoundRect(rect, 25f, 25f, paint)
+        canvas.drawRoundRect(rect, radius, radius, paint)
         paint.color = Color.BLACK
         paint.textSize = paint.textSize * 0.7f
         paint.textAlign = Paint.Align.CENTER

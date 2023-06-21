@@ -36,6 +36,24 @@ fun SpannableStringBuilder.appendUser(
 ) = apply {
     append(user.nick.ifEmpty { user.name })
     if (isAuthor) {
+        if (user.bawuType?.isNotEmpty() == true) {
+            append(" ")
+            val bawuTypeName = when (val t = user.bawuType) {
+                "manager" -> context.getString(R.string.bawu_type_manager_name)
+                "assist" -> context.getString(R.string.bawu_type_assist_name)
+                else -> t
+            }
+            append(
+                "[$bawuTypeName]",
+                RoundSpan(
+                    context,
+                    context.getColor(R.color.bawu_span_background),
+                    context.getColor(R.color.bawu_span_text),
+                    showText = bawuTypeName
+                ),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
         append(" ")
         append(
             "[楼主]",

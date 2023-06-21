@@ -44,8 +44,9 @@ class ForumViewModel : ViewModel() {
                         p.title,
                         users[p.authorId] ?: User(),
                         p.firstPostContentList.toPostContent(),
-                        Date(p.createTime.toLong() * 1000),
-                        p.replyNum
+                        Date(p.lastTimeInt.toLong() * 1000),
+                        p.replyNum,
+                        p.isGood == 1
                     )
                 }
                 return LoadResult.Page(

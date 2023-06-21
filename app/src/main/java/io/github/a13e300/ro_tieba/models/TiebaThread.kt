@@ -10,5 +10,6 @@ data class TiebaThread(
     val content: List<Content>,
     val time: Date,
     val replyNum: Int,
+    val isGood: Boolean,
     val forum: Forum? = null
 )
