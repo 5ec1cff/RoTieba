@@ -40,13 +40,14 @@ class ForumViewModel : ViewModel() {
                 val posts = response.threadListList.map { p ->
                     TiebaThread(
                         p.id,
-                        p.postId,
+                        p.firstPostId,
                         p.title,
                         users[p.authorId] ?: User(),
                         p.firstPostContentList.toPostContent(),
                         Date(p.lastTimeInt.toLong() * 1000),
                         p.replyNum,
-                        p.isGood == 1
+                        p.isGood == 1,
+                        createTime = Date(p.createTime.toLong() * 1000)
                     )
                 }
                 return LoadResult.Page(

@@ -60,9 +60,11 @@ import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.TRANSITION_NAME_PREFIX
+import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendUser
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
@@ -435,6 +437,10 @@ class ThreadFragment : BaseFragment() {
                 }
             }
             addTextView()
+            holder.binding.floorNum.setOnClickListener {
+                val (ks, vs) = post.toDetail()
+                DetailDialogFragment.newInstance(ks, vs).show(childFragmentManager, "detail")
+            }
             holder.binding.floorNum.text = SpannableStringBuilder().apply {
                 append("${post.floor}楼·")
                 append(

@@ -40,6 +40,7 @@
             tools:text="floor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:foreground="?selectableItemBackground"
             app:layout_constraintStart_toStartOf="@id/account_name"
             app:layout_constraintTop_toBottomOf="@id/account_name"
             app:layout_constraintBottom_toBottomOf="@id/avatar" />

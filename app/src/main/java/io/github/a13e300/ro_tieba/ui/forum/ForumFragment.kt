@@ -32,9 +32,11 @@ import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
+import io.github.a13e300.ro_tieba.ui.toDetail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -127,6 +129,10 @@ class ForumFragment : BaseFragment() {
             holder.binding.threadContent.text = SpannableStringBuilder()
                 .appendSimpleContent(thread.content, requireContext())
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
+            holder.binding.threadInfo.setOnClickListener {
+                val (ks, vs) = thread.toDetail()
+                DetailDialogFragment.newInstance(ks, vs).show(childFragmentManager, "detail")
+            }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(
                     "最后回复 ",
