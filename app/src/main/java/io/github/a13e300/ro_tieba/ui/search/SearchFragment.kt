@@ -70,7 +70,9 @@ class SearchFragment : BaseFragment() {
 
         }
         binding.searchView.onBackPressedListener = MySearchView.OnBackPressedListener {
-            findNavController().navigateUp()
+            if (viewModel.searched)
+                binding.searchView.hide()
+            else findNavController().navigateUp()
         }
         val myAdapter = SearchSuggestionAdapter()
         binding.searchView.editText.doAfterTextChanged { e ->

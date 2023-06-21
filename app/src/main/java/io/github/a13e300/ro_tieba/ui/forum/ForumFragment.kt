@@ -129,7 +129,7 @@ class ForumFragment : BaseFragment() {
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(
-                    "发帖时间 ",
+                    "最后回复 ",
                     IconSpan(
                         AppCompatResources.getDrawable(
                             requireContext(),

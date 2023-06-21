@@ -31,9 +31,10 @@ sealed class SearchResult<T> {
     data class Error<T>(val error: Throwable) : SearchResult<T>()
 }
 
-fun SearchForum.ForumInfo.toForum(): Forum = Forum(forumName, forumId.toLong(), avatar, intro)
+fun SearchForum.ForumInfo.toForum(): Forum = Forum(forumName, forumId.toLong(), avatar, slogan)
 
 class SearchViewModel : ViewModel() {
+    var searched = false
     var needShowSearch = true
     var searchedForums: SearchResult<List<Forum>> = SearchResult.Result(emptyList())
     val barLoadState = MutableLiveData<LoadState>()
@@ -41,6 +42,7 @@ class SearchViewModel : ViewModel() {
     private var searchForumJob: Job? = null
 
     fun fetchBars(keyword: String) {
+        searched = true
         searchForumJob?.cancel()
         barLoadState.value = LoadState.FETCHING
         searchForumJob = viewModelScope.launch {

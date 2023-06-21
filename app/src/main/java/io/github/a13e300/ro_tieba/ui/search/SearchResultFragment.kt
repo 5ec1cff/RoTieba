@@ -47,7 +47,12 @@ class SearchResultFragment : Fragment() {
     }
 
     private fun updateData() {
-        viewModel.searchedForums.also { frs ->
+        if (!viewModel.searched) {
+            binding.resultList.visibility = View.GONE
+            binding.resultTips.visibility = View.GONE
+            return
+        }
+        viewModel.searchedForums.let { frs ->
             when (frs) {
                 is SearchResult.Result -> {
                     if (frs.data.isEmpty()) {
