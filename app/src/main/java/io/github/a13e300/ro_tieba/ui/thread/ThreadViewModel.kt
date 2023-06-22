@@ -24,11 +24,13 @@ import java.util.TreeMap
 
 
 data class ThreadConfig(
-    val tid: Long
+    val tid: Long,
+    val pid: Long
 )
 
 class ThreadViewModel : ViewModel() {
     var currentUid: String? = null
+    val needLoadPrevious = MutableLiveData<Boolean>()
     val threadConfig = MutableLiveData<ThreadConfig>()
     val threadInfo = MutableLiveData<TiebaThread>()
     val photos = TreeMap<Pair<Int, Int>, Photo> { p0, p1 ->
@@ -39,13 +41,30 @@ class ThreadViewModel : ViewModel() {
         else 0
     }
 
+    sealed class Key
+    data class PageKey(val pn: Int) : Key()
+    data class PidKey(
+        val pid: Long,
+        val prevPid: Long?
+    ) : Key()
+
     inner class PostPagingSource(
         private val client: TiebaClient
-    ) : PagingSource<Int, Post>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Post> {
+    ) : PagingSource<Key, Post>() {
+        override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Post> {
             try {
-                val page = params.key ?: 1
-                val response = client.getPosts(threadConfig.value!!.tid, page)
+                val pid = threadConfig.value!!.pid
+                val key = params.key ?: if (pid != 0L) {
+                    PidKey(pid, null)
+                } else PageKey(1)
+                val response = when (key) {
+                    is PageKey -> client.getPosts(threadConfig.value!!.tid, key.pn)
+                    is PidKey -> client.getPosts(
+                        threadConfig.value!!.tid,
+                        if (key.pid == pid) 0 else 1,
+                        key.pid
+                    )
+                }
                 threadInfo.value = TiebaThread(
                     tid = response.thread.id,
                     title = response.thread.title,
@@ -90,21 +109,40 @@ class ThreadViewModel : ViewModel() {
                         }
                     }
                 }
+                if (params.key == null) // initial load
+                    needLoadPrevious.value =
+                        key is PidKey && response.postListList.first().floor != 1
+                val prevKey: Key?
+                val nextKey: Key?
+                when (key) {
+                    is PageKey -> {
+                        prevKey =
+                            if (response.page.hasPrev != 0) PageKey(response.page.currentPage - 1) else null
+                        nextKey =
+                            if (response.page.hasMore != 0) PageKey(response.page.currentPage + 1) else null
+                    }
+
+                    is PidKey -> {
+                        prevKey = null
+                        if (response.page.hasMore == 0) nextKey = null
+                        else {
+                            val lastPid = response.postListList.last().id
+                            nextKey = PidKey(lastPid, key.pid)
+                        }
+                    }
+                }
                 return LoadResult.Page(
                     data = posts,
-                    prevKey = if (page == 1) null else (page - 1),
-                    nextKey = if (response.page.hasMore != 0) page + 1 else null
+                    prevKey = prevKey,
+                    nextKey = nextKey
                 )
             } catch (t: Throwable) {
                 return LoadResult.Error(t)
             }
         }
 
-        override fun getRefreshKey(state: PagingState<Int, Post>): Int? {
-            return state.anchorPosition?.let { anchorPosition ->
-                val anchorPage = state.closestPageToPosition(anchorPosition)
-                anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-            }
+        override fun getRefreshKey(state: PagingState<Key, Post>): Key? {
+            return null
         }
     }
 

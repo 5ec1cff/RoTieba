@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba.api
 
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
 import io.github.a13e300.ro_tieba.db.Account
 import io.github.a13e300.ro_tieba.fromJson
@@ -61,7 +62,12 @@ class TiebaClient(val account: Account = Account()) {
         .build()
         .create(TiebaProtobufAPI::class.java)
 
-    suspend fun getPosts(tid: Long, page: Int = 1): PbPageResIdl.DataRes {
+    suspend fun getPosts(
+        tid: Long,
+        page: Int = 1,
+        pid: Long = 0,
+        rn: Int = 30
+    ): PbPageResIdl.DataRes {
         val req = PbPageReqIdl.newBuilder()
             .setData(
                 PbPageReqIdl.DataReq.newBuilder()
@@ -71,8 +77,13 @@ class TiebaClient(val account: Account = Account()) {
                             .setClientVersion(MAIN_VERSION)
                     )
                     .setTid(tid)
-                    .setPn(page)
-                    .setRn(30) // post count
+                    .apply {
+                        if (pid != 0L)
+                            setPid(pid)
+                        if (page != 0)
+                            pn = page
+                    }
+                    .setRn(rn) // post count
                     .setSort(0)
                     .setOnlyThreadAuthor(0)
                     .setWithComments(1)
@@ -88,6 +99,8 @@ class TiebaClient(val account: Account = Account()) {
             result.error.errorno,
             result.error.errmsg
         )
+        val floors = result.data.postListList.map { it.floor }.joinToString(" ")
+        Logger.d("request tid=$tid pid=$pid page=$page postCount=${result.data.postListCount} $floors")
         return result.data
     }
 

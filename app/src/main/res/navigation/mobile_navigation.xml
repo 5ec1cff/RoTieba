@@ -39,8 +39,12 @@
         <argument
             android:name="tid"
             app:argType="long" />
+        <argument
+            android:name="pid"
+            app:argType="long"
+            android:defaultValue="0L" />
         <deepLink
-            app:uri="tieba.baidu.com/p/{tid}"
+            app:uri="tieba.baidu.com/p/{tid}?pid={pid}"
             app:action="android.intent.action.VIEW" />
     </fragment>
 

@@ -77,7 +77,9 @@ class ThreadFragment : BaseFragment() {
     private val viewModel: ThreadViewModel by viewModels()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
     private val args: ThreadFragmentArgs by navArgs()
-    lateinit var binding: FragmentThreadBinding
+    private lateinit var binding: FragmentThreadBinding
+    private lateinit var postAdapter: PostAdapter
+    private lateinit var headerAdapter: HeaderAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,9 +87,9 @@ class ThreadFragment : BaseFragment() {
     ): View {
         binding = FragmentThreadBinding.inflate(inflater, container, false)
         if (viewModel.threadConfig.value == null) {
-            viewModel.threadConfig.value = ThreadConfig(args.tid)
+            viewModel.threadConfig.value = ThreadConfig(args.tid, args.pid)
         }
-        val postAdapter = PostAdapter(PostComparator)
+        postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->
             (state.refresh as? LoadState.Error)?.error?.let {
                 MaterialAlertDialogBuilder(requireContext())
@@ -99,13 +101,16 @@ class ThreadFragment : BaseFragment() {
                     .show()
             }
         }
-        val headerAdapter = HeaderAdapter()
+        headerAdapter = HeaderAdapter()
+        viewModel.needLoadPrevious.observe(viewLifecycleOwner) {
+            headerAdapter.notifyDataSetChanged()
+        }
         binding.list.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = ConcatAdapter(
                 headerAdapter,
                 postAdapter
-            ) // postAdapter.withLoadStateFooter(FooterAdapter())
+            )
             addItemDecoration(
                 MyItemDecoration(
                     resources.getDimension(R.dimen.thread_list_margin).toInt()
@@ -291,6 +296,11 @@ class ThreadFragment : BaseFragment() {
 
         override fun onBindViewHolder(holder: HeaderHolder, position: Int) {
             holder.binding.threadTitle.text = viewModel.threadInfo.value?.title
+            viewModel.needLoadPrevious.value?.let { holder.binding.loadPrevious.isGone = !it }
+            holder.binding.loadPrevious.setOnClickListener {
+                viewModel.threadConfig.value = viewModel.threadConfig.value!!.copy(pid = 0L)
+                postAdapter.refresh()
+            }
         }
 
     }

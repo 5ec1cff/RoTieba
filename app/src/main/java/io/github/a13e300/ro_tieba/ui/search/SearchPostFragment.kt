@@ -63,7 +63,9 @@ class SearchPostFragment : Fragment() {
             holder.binding.threadInfo.text = "${item.forum}吧 ${item.post.time.toSimpleString()}"
             holder.binding.threadAvatar.displayImage(item.post.user.avatarUrl)
             holder.binding.root.setOnClickListener {
-                findNavController().navigate(MobileNavigationDirections.goToThread(item.post.tid))
+                findNavController().navigate(
+                    MobileNavigationDirections.goToThread(item.post.tid).setPid(item.post.postId)
+                )
             }
         }
 

@@ -31,4 +31,5 @@
     <string name="bawu_type_assist_name">小吧主</string>
     <string name="detail_title">详细信息</string>
     <string name="search_tab_post_title">贴</string>
+    <string name="load_previous_title">加载全部内容</string>
 </resources>
