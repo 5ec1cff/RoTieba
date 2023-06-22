@@ -19,7 +19,6 @@ import io.github.a13e300.ro_tieba.databinding.FragmentCommentBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentItemBinding
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.toSimpleString
-import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
 import kotlinx.coroutines.launch
 
 class CommentFragment : BaseFragment() {
@@ -65,7 +64,7 @@ class CommentFragment : BaseFragment() {
                 comment.user.nick.ifEmpty { comment.user.name }.ifEmpty { "[${comment.user.uid}]" }
             holder.binding.commentContent.text =
                 SpannableStringBuilder().appendSimpleContent(comment.content, requireContext())
-            holder.binding.avatar.displayImage("$AVATAR_THUMBNAIL/${comment.user.portrait}")
+            holder.binding.avatar.displayImage(comment.user.avatarUrl)
             holder.binding.description.text =
                 comment.time.toSimpleString()
         }

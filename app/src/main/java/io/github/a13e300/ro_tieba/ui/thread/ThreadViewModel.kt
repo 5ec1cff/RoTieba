@@ -22,8 +22,6 @@ import io.github.a13e300.ro_tieba.ui.photo.Photo
 import java.util.Date
 import java.util.TreeMap
 
-const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
-const val AVATAR_ORIG = "http://tb.himg.baidu.com/sys/portraith/item/"
 
 data class ThreadConfig(
     val tid: Long

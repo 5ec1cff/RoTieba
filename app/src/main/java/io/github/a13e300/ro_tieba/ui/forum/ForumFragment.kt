@@ -35,7 +35,6 @@ import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
-import io.github.a13e300.ro_tieba.ui.thread.AVATAR_THUMBNAIL
 import io.github.a13e300.ro_tieba.ui.toDetail
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -158,9 +157,7 @@ class ForumFragment : BaseFragment() {
                 )
                 append(thread.replyNum.toString())
             }
-            holder.binding.threadAvatar.displayImage(
-                "$AVATAR_THUMBNAIL/${thread.author.portrait}"
-            )
+            holder.binding.threadAvatar.displayImage(thread.author.avatarUrl)
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid))
             }

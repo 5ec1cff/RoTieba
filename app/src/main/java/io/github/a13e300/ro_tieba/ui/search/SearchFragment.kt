@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.search.SearchView
+import com.google.android.material.tabs.TabLayoutMediator
 import io.github.a13e300.ro_tieba.BaseFragment
+import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
@@ -50,22 +52,23 @@ class SearchFragment : BaseFragment() {
             )
                 return@setOnEditorActionListener false
             val t = textView.text
-            binding.searchBar.text = t
-            viewModel.fetchBars(t.toString())
-            binding.searchView.hide()
+            performSearch(t.toString(), -1)
             true
         }
-        binding.searchView.addTransitionListener { searchView, previousState, newState ->
+        binding.searchView.addTransitionListener { _, _, newState ->
             if (newState == SearchView.TransitionState.HIDDEN) viewModel.needShowSearch = false
             else if (newState == SearchView.TransitionState.SHOWN) viewModel.needShowSearch = true
         }
         binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int {
-                return 1
+                return 2
             }
 
             override fun createFragment(position: Int): Fragment {
-                return SearchResultFragment()
+                if (position == 0)
+                    return SearchResultFragment()
+                else
+                    return SearchPostFragment()
             }
 
         }
@@ -75,14 +78,22 @@ class SearchFragment : BaseFragment() {
             else findNavController().navigateUp()
         }
         val myAdapter = SearchSuggestionAdapter()
+        TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> getString(R.string.search_tab_bar_title)
+                else -> getString(R.string.search_tab_post_title)
+            }
+        }.attach()
         binding.searchView.editText.doAfterTextChanged { e ->
             if (e.isNullOrEmpty()) {
                 viewModel.suggestions = emptyList()
             } else {
                 val l = mutableListOf<Operation>()
                 val s = e.toString()
-                l.add(Operation.GoToBar(s))
+                l.add(Operation.GoToForum(s))
                 s.toLongOrNull()?.also { l.add(Operation.GoToThread(it)) }
+                l.add(Operation.SearchForum(s))
+                l.add(Operation.SearchPosts(s))
                 viewModel.suggestions = l
             }
             myAdapter.notifyDataSetChanged()
@@ -94,6 +105,15 @@ class SearchFragment : BaseFragment() {
         return binding.root
     }
 
+    private fun performSearch(t: String, tab: Int) {
+        binding.searchBar.text = t
+        viewModel.fetchForums(t)
+        viewModel.currentKeyword.value = t
+        binding.searchView.hide()
+        if (tab >= 0)
+            binding.searchViewPager.currentItem = tab
+    }
+
     class SearchSuggestionViewHolder(val binding: SearchSuggestionItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
@@ -101,7 +121,7 @@ class SearchFragment : BaseFragment() {
         override fun onBindViewHolder(holder: SearchSuggestionViewHolder, position: Int) {
             val op = viewModel.suggestions[position]
             when (op) {
-                is Operation.GoToBar -> {
+                is Operation.GoToForum -> {
                     holder.binding.title.text = "进吧：${op.name}"
                     holder.binding.root.setOnClickListener {
                         findNavController().navigate(ThreadFragmentDirections.goToForum(op.name))
@@ -112,6 +132,20 @@ class SearchFragment : BaseFragment() {
                     holder.binding.title.text = "进帖：${op.tid}"
                     holder.binding.root.setOnClickListener {
                         findNavController().navigate(ThreadFragmentDirections.goToThread(op.tid))
+                    }
+                }
+
+                is Operation.SearchForum -> {
+                    holder.binding.title.text = "搜吧：${op.name}"
+                    holder.binding.root.setOnClickListener {
+                        performSearch(op.name, 0)
+                    }
+                }
+
+                is Operation.SearchPosts -> {
+                    holder.binding.title.text = "搜帖：${op.keyword}"
+                    holder.binding.root.setOnClickListener {
+                        performSearch(op.keyword, 1)
                     }
                 }
             }

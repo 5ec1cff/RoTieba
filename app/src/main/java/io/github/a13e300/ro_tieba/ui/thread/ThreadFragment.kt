@@ -343,7 +343,7 @@ class ThreadFragment : BaseFragment() {
             val fontSize = context.resources.getDimensionPixelSize(R.dimen.content_text_size)
             contentView.removeAllViews()
             var lastString: SpannableStringBuilder? = null
-            holder.binding.avatar.displayImage("$AVATAR_THUMBNAIL/${post.user.portrait}")
+            holder.binding.avatar.displayImage(post.user.avatarUrl)
             fun addTextView() {
                 if (lastString == null) return
                 contentView.addView(AppCompatTextView(context).apply {

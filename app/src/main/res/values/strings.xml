@@ -30,4 +30,5 @@
     <string name="bawu_type_manager_name">吧主</string>
     <string name="bawu_type_assist_name">小吧主</string>
     <string name="detail_title">详细信息</string>
+    <string name="search_tab_post_title">贴</string>
 </resources>

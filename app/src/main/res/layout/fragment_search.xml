@@ -34,12 +34,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/search_tab_bar_title" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/search_tab_post_title" />
         </com.google.android.material.tabs.TabLayout>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/search_view_pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"></androidx.viewpager2.widget.ViewPager2>
+            android:layout_height="match_parent" />
     </LinearLayout>
     <io.github.a13e300.ro_tieba.view.MySearchView
         android:layout_width="match_parent"
