@@ -22,6 +22,7 @@ import io.github.a13e300.ro_tieba.databinding.DialogDetailBinding
 import io.github.a13e300.ro_tieba.databinding.DialogDetailItemContentBinding
 import io.github.a13e300.ro_tieba.databinding.DialogDetailItemTitleBinding
 import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.TiebaThread
 
 fun Post.toDetail() = Pair(
@@ -37,12 +38,26 @@ fun Post.toDetail() = Pair(
 )
 
 fun TiebaThread.toDetail() = Pair(
-    arrayListOf("pid", "tid", "作者名字", "作者昵称", "发布时间", "回复时间"),
+    arrayListOf("pid", "tid", "作者名字", "作者昵称", "发布时间", "回复时间", "查看次数"),
     arrayListOf(postId.toString(), tid.toString(), author.name, author.nick,
         createTime?.let {
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it)
         } ?: "",
-        time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) }
+        time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) },
+        viewNum.toString()
+    )
+)
+
+fun SearchedPost.toDetail() = Pair(
+    arrayListOf("pid", "tid", "贴吧", "作者名字", "作者昵称", "发布时间"),
+    arrayListOf(post.postId.toString(),
+        post.tid.toString(),
+        forum,
+        post.user.name,
+        post.user.nick,
+        post.time.let {
+            DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it)
+        }
     )
 )
 

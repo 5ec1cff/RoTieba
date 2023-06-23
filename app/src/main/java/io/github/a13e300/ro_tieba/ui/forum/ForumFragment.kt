@@ -156,6 +156,18 @@ class ForumFragment : BaseFragment() {
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
                 append(thread.replyNum.toString())
+                append(" ")
+                append(
+                    "观看数 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_see
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.viewNum.toString())
             }
             holder.binding.threadAvatar.displayImage(thread.author.avatarUrl)
             holder.binding.root.setOnClickListener {

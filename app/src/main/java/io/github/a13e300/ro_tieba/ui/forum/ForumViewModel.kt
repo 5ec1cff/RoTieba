@@ -47,7 +47,8 @@ class ForumViewModel : ViewModel() {
                         Date(p.lastTimeInt.toLong() * 1000),
                         p.replyNum,
                         p.isGood == 1,
-                        createTime = Date(p.createTime.toLong() * 1000)
+                        createTime = Date(p.createTime.toLong() * 1000),
+                        viewNum = p.viewNum
                     )
                 }
                 return LoadResult.Page(

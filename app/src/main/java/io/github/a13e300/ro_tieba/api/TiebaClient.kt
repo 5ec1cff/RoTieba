@@ -1,7 +1,6 @@
 package io.github.a13e300.ro_tieba.api
 
 import io.github.a13e300.ro_tieba.App
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
 import io.github.a13e300.ro_tieba.db.Account
 import io.github.a13e300.ro_tieba.fromJson
@@ -99,8 +98,6 @@ class TiebaClient(val account: Account = Account()) {
             result.error.errorno,
             result.error.errmsg
         )
-        val floors = result.data.postListList.map { it.floor }.joinToString(" ")
-        Logger.d("request tid=$tid pid=$pid page=$page postCount=${result.data.postListCount} $floors")
         return result.data
     }
 

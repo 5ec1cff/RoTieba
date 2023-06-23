@@ -18,6 +18,8 @@ import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostItemBinding
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
+import io.github.a13e300.ro_tieba.ui.toDetail
 import kotlinx.coroutines.launch
 
 
@@ -66,6 +68,14 @@ class SearchPostFragment : Fragment() {
                 findNavController().navigate(
                     MobileNavigationDirections.goToThread(item.post.tid).setPid(item.post.postId)
                 )
+            }
+            holder.binding.threadInfo.setOnClickListener {
+                findNavController().navigate(MobileNavigationDirections.goToForum(item.forum))
+            }
+            holder.binding.threadInfo.setOnLongClickListener {
+                val (ks, vs) = item.toDetail()
+                DetailDialogFragment.newInstance(ks, vs).show(childFragmentManager, "detail")
+                true
             }
         }
 

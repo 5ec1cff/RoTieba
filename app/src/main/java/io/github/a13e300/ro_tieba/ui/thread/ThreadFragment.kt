@@ -295,11 +295,25 @@ class ThreadFragment : BaseFragment() {
         override fun getItemCount(): Int = 1
 
         override fun onBindViewHolder(holder: HeaderHolder, position: Int) {
-            holder.binding.threadTitle.text = viewModel.threadInfo.value?.title
+            val thread = viewModel.threadInfo.value ?: return
+            holder.binding.threadTitle.text = thread.title
             viewModel.needLoadPrevious.value?.let { holder.binding.loadPrevious.isGone = !it }
             holder.binding.loadPrevious.setOnClickListener {
                 viewModel.threadConfig.value = viewModel.threadConfig.value!!.copy(pid = 0L)
                 postAdapter.refresh()
+            }
+            holder.binding.threadInfo.text = SpannableStringBuilder().apply {
+                append(
+                    "回复数 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_comment
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.replyNum.toString())
             }
         }
 

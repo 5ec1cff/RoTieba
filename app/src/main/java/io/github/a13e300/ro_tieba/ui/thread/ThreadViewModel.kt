@@ -71,10 +71,11 @@ class ThreadViewModel : ViewModel() {
                     author = response.thread.author.toUser(),
                     content = listOf(),
                     replyNum = response.thread.replyNum,
-                    time = Date(response.thread.createTime.toLong() * 1000),
+                    time = Date(response.thread.createTime.toLong() * 1000), // TODO: remove this useless date
                     postId = response.thread.postId,
                     isGood = response.thread.isGood == 1,
-                    forum = Forum(response.forum.name, response.forum.id)
+                    forum = Forum(response.forum.name, response.forum.id),
+                    createTime = Date(response.thread.createTime.toLong() * 1000)
                 )
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })
