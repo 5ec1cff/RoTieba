@@ -8,6 +8,7 @@
     android:orientation="horizontal"
     android:clickable="true"
     android:focusable="true"
+    android:background="?selectableItemBackground"
     android:layout_marginVertical="8dp"
     android:layout_marginHorizontal="16dp">
 

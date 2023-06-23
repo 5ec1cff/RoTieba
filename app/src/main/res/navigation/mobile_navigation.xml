@@ -76,7 +76,7 @@
         app:popEnterAnim="@anim/fade_pop_enter_anim"
         app:popExitAnim="@anim/fade_pop_exit_anim" />
 
-    <fragment
+    <dialog
         android:id="@+id/navigation_comment"
         android:name="io.github.a13e300.ro_tieba.ui.comment.CommentFragment">
         <argument
@@ -85,7 +85,7 @@
         <argument
             android:name="pid"
             app:argType="long" />
-    </fragment>
+    </dialog>
 
     <action
         android:id="@+id/show_comments"

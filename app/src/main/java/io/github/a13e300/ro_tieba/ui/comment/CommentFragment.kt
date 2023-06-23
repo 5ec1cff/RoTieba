@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
-import io.github.a13e300.ro_tieba.BaseFragment
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentItemBinding
@@ -21,7 +21,7 @@ import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.toSimpleString
 import kotlinx.coroutines.launch
 
-class CommentFragment : BaseFragment() {
+class CommentFragment : BottomSheetDialogFragment() {
 
     private val viewModel: CommentViewModel by viewModels()
     private val args: CommentFragmentArgs by navArgs()
@@ -31,12 +31,9 @@ class CommentFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentCommentBinding.inflate(inflater, container, false)
-        setupToolbar(binding.toolbar)
+        // setupToolbar(binding.toolbar)
         viewModel.pid = args.pid
         viewModel.tid = args.tid
-        viewModel.commentCount.observe(viewLifecycleOwner) {
-            binding.toolbar.title = "${it}条评论"
-        }
         val commentAdapter = CommentAdapter(CommentComparator)
         binding.list.apply {
             layoutManager = LinearLayoutManager(requireContext())
