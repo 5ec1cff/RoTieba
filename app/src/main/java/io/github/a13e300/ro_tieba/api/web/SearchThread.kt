@@ -53,3 +53,11 @@ data class SearchThread(
         val portrait: String,
     )
 }
+
+enum class SearchFilter(val value: String) {
+    ALL("2"), THREAD("1")
+}
+
+enum class SearchOrder(val value: String) {
+    OLD("0"), NEW("1"), RELEVANT("2")
+}

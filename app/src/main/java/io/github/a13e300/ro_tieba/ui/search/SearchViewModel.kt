@@ -11,7 +11,9 @@ import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
+import io.github.a13e300.ro_tieba.api.web.SearchFilter
 import io.github.a13e300.ro_tieba.api.web.SearchForum
+import io.github.a13e300.ro_tieba.api.web.SearchOrder
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
@@ -47,6 +49,8 @@ fun SearchForum.ForumInfo.toForum(): Forum = Forum(forumName, forumId.toLong(), 
 class SearchViewModel : ViewModel() {
     val currentKeyword = MutableLiveData<String>()
     var searchPostKeyWord: String? = null
+    var searchPostFilter: SearchFilter = SearchFilter.ALL
+    val searchPostOrder = MutableLiveData(SearchOrder.NEW)
     var searched = false
     var needShowSearch = true
     var searchedForums: SearchResult<List<Forum>> = SearchResult.Result(emptyList())
@@ -85,7 +89,12 @@ class SearchViewModel : ViewModel() {
             val keyword = currentKeyword.value ?: return LoadResult.Page(emptyList(), null, null)
             try {
                 val page = params.key ?: 1
-                val response = client.webAPI.searchThread(keyword, page, "1", "2")
+                val response = client.webAPI.searchThread(
+                    keyword,
+                    page,
+                    searchPostOrder.value!!.value,
+                    searchPostFilter.value
+                )
                 val posts = response.postList.map { p ->
                     SearchedPost(
                         post = Post(

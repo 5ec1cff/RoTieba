@@ -17,4 +17,11 @@
     <style name="Widget.RoTieba.FilledCardSecondary" parent="Widget.Material3.CardView.Filled">
         <item name="cardBackgroundColor">?attr/colorSecondaryContainer</item>
     </style>
+
+    <style name="Widget.RoTieba.SmallOutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
 </resources>
