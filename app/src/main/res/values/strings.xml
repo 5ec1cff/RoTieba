@@ -37,4 +37,5 @@
     <string name="search_post_order_old">从旧到新</string>
     <string name="search_post_order_new">从新到旧</string>
     <string name="search_post_order_relevant">相关性</string>
+    <string name="empty">没有内容</string>
 </resources>

@@ -45,12 +45,12 @@ data class SearchThread(
 
     data class UserInfoBean(
         @SerializedName("user_name")
-        val userName: String,
+        val userName: String?,
         @SerializedName("show_nickname")
         val showNickname: String,
         @SerializedName("user_id")
-        val userId: String,
-        val portrait: String,
+        val userId: String?,
+        val portrait: String?,
     )
 }
 

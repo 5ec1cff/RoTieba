@@ -99,10 +99,10 @@ class SearchViewModel : ViewModel() {
                     SearchedPost(
                         post = Post(
                             user = User(
-                                name = p.user.userName,
+                                name = p.user.userName ?: "null",
                                 nick = p.user.showNickname,
                                 avatar = p.user.portrait,
-                                uid = p.user.userId.toLong()
+                                uid = p.user.userId?.toLong() ?: 0
                             ),
                             content = emptyList(),
                             floor = 0, // unknown
@@ -124,11 +124,13 @@ class SearchViewModel : ViewModel() {
                     nextKey = if (response.hasMore) page + 1 else null
                 )
             } catch (t: Throwable) {
+                if (t !is CancellationException)
+                    Logger.e("failed to search $keyword ${params.key}", t)
                 return LoadResult.Error(t)
             }
         }
 
-        override fun getRefreshKey(state: PagingState<Int, SearchedPost>): Int? {
+        override fun getRefreshKey(state: PagingState<Int, SearchedPost>): Int {
             return 1
         }
     }
