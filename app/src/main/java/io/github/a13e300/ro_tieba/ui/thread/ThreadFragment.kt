@@ -4,10 +4,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.ContextMenu
 import android.view.LayoutInflater
@@ -48,6 +50,7 @@ import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
+import io.github.a13e300.ro_tieba.databinding.FragmentThreadCommentPreviewBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadHeaderBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
@@ -57,7 +60,9 @@ import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
+import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.IPost
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
@@ -65,7 +70,7 @@ import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.TRANSITION_NAME_PREFIX
 import io.github.a13e300.ro_tieba.ui.toDetail
-import io.github.a13e300.ro_tieba.utils.appendUser
+import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.SelectedLink
@@ -174,8 +179,8 @@ class ThreadFragment : BaseFragment() {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val info = item.menuInfo as? ItemView.ContextMenuInfo
-        val post = info?.data as? Post
         val selected = info?.selectedData
+        val post = if (selected is IPost) selected else info?.data as? IPost
         if (post != null) {
             when (item.itemId) {
                 R.id.copy_post_content -> {
@@ -193,10 +198,15 @@ class ThreadFragment : BaseFragment() {
 
                 R.id.copy_post_link -> {
                     val cm = requireContext().getSystemService(ClipboardManager::class.java)
+                    val text = when (post) {
+                        is Post -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
+                        is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&ppid=${post.ppid}"
+                        else -> null
+                    }
                     cm.setPrimaryClip(
                         ClipData.newPlainText(
                             "",
-                            "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
+                            text
                         )
                     )
                     return true
@@ -358,7 +368,8 @@ class ThreadFragment : BaseFragment() {
                 }
             }
             val context = requireContext()
-            holder.binding.accountName.text = SpannableStringBuilder().appendUser(
+            holder.binding.accountName.text = post.user.showName
+            holder.binding.accountInfo.text = SpannableStringBuilder().appendUserInfo(
                 post.user, post.user.uid == viewModel.threadInfo.value?.author?.uid,
                 context,
                 showLevel = true
@@ -494,19 +505,36 @@ class ThreadFragment : BaseFragment() {
             val hasComment = post.commentCount != 0
             holder.binding.commentsBox.isGone = !hasComment
             if (hasComment) {
-                val sb = SpannableStringBuilder()
-                post.comments.forEach {
-                    sb.appendUser(
-                        it.user,
-                        it.user.uid == viewModel.threadInfo.value?.author?.uid,
+                holder.binding.commentsContent.removeAllViews()
+                post.comments.forEach { comment ->
+                    val preview = FragmentThreadCommentPreviewBinding.inflate(layoutInflater)
+                    val sb = SpannableStringBuilder()
+                    sb.append(
+                        comment.user.showName,
+                        StyleSpan(Typeface.BOLD),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    sb.appendUserInfo(
+                        comment.user,
+                        comment.user.uid == viewModel.threadInfo.value?.author?.uid,
                         requireContext()
                     )
                     sb.append(": ")
-                    sb.appendSimpleContent(it.content, requireContext())
-                    sb.append("\n")
+                    sb.appendSimpleContent(comment.content, requireContext())
+                    preview.text.text = sb
+                    preview.root.setOnLongClickListener {
+                        var parent = it.parent
+                        while (parent !is ItemView) parent = parent.parent
+                        (parent as? ItemView)?.setSelectedData(comment)
+                        false
+                    }
+                    holder.binding.commentsContent.addView(preview.root)
                 }
-                sb.append("共${post.commentCount}条回复")
-                holder.binding.commentsContent.text = sb
+                if (post.commentCount > 4) {
+                    val preview = FragmentThreadCommentPreviewBinding.inflate(layoutInflater)
+                    preview.text.text = "查看全部${post.commentCount}条回复"
+                    holder.binding.commentsContent.addView(preview.root)
+                }
             }
         }
 

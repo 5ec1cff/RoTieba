@@ -35,6 +35,16 @@
             app:layout_constraintBottom_toTopOf="@id/floor_num" />
 
         <TextView
+            android:id="@+id/account_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Account Info"
+            android:textAppearance="?attr/textAppearanceListItem"
+            app:layout_constraintStart_toEndOf="@id/account_name"
+            app:layout_constraintTop_toTopOf="@id/avatar"
+            app:layout_constraintBottom_toTopOf="@id/floor_num" />
+
+        <TextView
             android:id="@+id/floor_num"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             tools:text="floor"
@@ -65,11 +75,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:visibility="gone">
 
-            <TextView
+            <LinearLayout
                 android:layout_margin="8dp"
                 android:id="@+id/comments_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
         </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </io.github.a13e300.ro_tieba.view.ItemView>

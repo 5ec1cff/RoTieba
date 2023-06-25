@@ -28,13 +28,12 @@ fun SpannableStringBuilder.appendLevelSpan(
     )
 }
 
-fun SpannableStringBuilder.appendUser(
+fun SpannableStringBuilder.appendUserInfo(
     user: User,
     isAuthor: Boolean,
     context: Context,
     showLevel: Boolean = false
 ) = apply {
-    append(user.nick.ifEmpty { user.name })
     if (isAuthor) {
         if (user.bawuType?.isNotEmpty() == true) {
             append(" ")

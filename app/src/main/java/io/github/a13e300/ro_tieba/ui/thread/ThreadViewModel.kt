@@ -86,7 +86,7 @@ class ThreadViewModel : ViewModel() {
                             content = sp.contentList.toPostContent(),
                             floor = sp.floor,
                             postId = p.id,
-                            tid = p.tid,
+                            tid = response.thread.id,
                             time = Date(sp.time.toLong() * 1000),
                             ppid = p.id
                         )
