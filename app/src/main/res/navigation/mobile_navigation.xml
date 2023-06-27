@@ -46,6 +46,12 @@
         <deepLink
             app:uri="tieba.baidu.com/p/{tid}?pid={pid}"
             app:action="android.intent.action.VIEW" />
+        <deepLink
+            app:uri="com.baidu.tieba://unidispatch/pb?tid={tid}"
+            app:action="android.intent.action.VIEW" />
+        <deepLink
+            app:uri="tbpb://tieba.baidu.com//tid={tid}"
+            app:action="android.intent.action.VIEW" />
     </fragment>
 
     <action
@@ -62,6 +68,15 @@
         <argument
             android:name="fname"
             app:argType="string" />
+        <deepLink
+            app:uri="tieba.baidu.com/f?kw={fname}"
+            app:action="android.intent.action.VIEW" />
+        <deepLink
+            app:uri="com.baidu.tieba://unidispatch/frs?kw={fname}"
+            app:action="android.intent.action.VIEW" />
+        <deepLink
+            app:uri="tbfrs://tieba.baidu.com//kw={fname}"
+            app:action="android.intent.action.VIEW" />
     </fragment>
 
     <fragment
