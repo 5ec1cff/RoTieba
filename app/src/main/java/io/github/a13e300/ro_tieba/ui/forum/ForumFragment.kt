@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -125,6 +126,7 @@ class ForumFragment : BaseFragment() {
                 }
                 append(thread.title)
             }
+            holder.binding.threadTitle.isGone = holder.binding.threadTitle.text.isEmpty()
             holder.binding.threadContent.text = SpannableStringBuilder()
                 .appendSimpleContent(thread.content, requireContext())
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
