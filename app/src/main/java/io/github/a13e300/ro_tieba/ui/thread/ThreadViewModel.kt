@@ -75,7 +75,9 @@ class ThreadViewModel : ViewModel() {
                     postId = response.thread.postId,
                     isGood = response.thread.isGood == 1,
                     forum = Forum(response.forum.name, response.forum.id),
-                    createTime = Date(response.thread.createTime.toLong() * 1000)
+                    createTime = Date(response.thread.createTime.toLong() * 1000),
+                    agreeNum = response.thread.agree.agreeNum,
+                    disagreeNum = response.thread.agree.disagreeNum
                 )
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })
@@ -99,7 +101,9 @@ class ThreadViewModel : ViewModel() {
                         response.thread.id,
                         Date(p.time.toLong() * 1000),
                         comments,
-                        p.subPostNumber
+                        p.subPostNumber,
+                        agreeNum = p.agree.agreeNum,
+                        disagreeNum = p.agree.disagreeNum
                     )
                 }
                 posts.forEach { p ->

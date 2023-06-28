@@ -26,25 +26,40 @@ import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.TiebaThread
 
 fun Post.toDetail() = Pair(
-    arrayListOf("pid", "tid", "作者名字", "作者昵称", "IP位置", "楼层", "发布时间"),
-    arrayListOf(postId.toString(),
+    arrayListOf("pid", "tid", "作者名字", "作者昵称", "IP位置", "楼层", "发布时间", "赞数", "踩数"),
+    arrayListOf(
+        postId.toString(),
         tid.toString(),
         user.name,
         user.nick,
         user.location,
         floor.toString(),
-        time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) }
+        time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) },
+        agreeNum.toString(),
+        disagreeNum.toString()
     )
 )
 
 fun TiebaThread.toDetail() = Pair(
-    arrayListOf("pid", "tid", "作者名字", "作者昵称", "发布时间", "回复时间", "查看次数"),
+    arrayListOf(
+        "pid",
+        "tid",
+        "作者名字",
+        "作者昵称",
+        "发布时间",
+        "回复时间",
+        "查看次数",
+        "赞数",
+        "踩数"
+    ),
     arrayListOf(postId.toString(), tid.toString(), author.name, author.nick,
         createTime?.let {
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it)
         } ?: "",
         time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) },
-        viewNum.toString()
+        viewNum.toString(),
+        agreeNum.toString(),
+        disagreeNum.toString()
     )
 )
 

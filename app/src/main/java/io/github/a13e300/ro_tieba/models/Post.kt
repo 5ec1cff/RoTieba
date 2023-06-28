@@ -10,7 +10,9 @@ data class Post(
     val tid: Long,
     override val time: Date,
     val comments: List<Comment>,
-    val commentCount: Int
+    val commentCount: Int,
+    val agreeNum: Long = 0,
+    val disagreeNum: Long = 0
 ) : IPost {
     override val id: Long
         get() = postId

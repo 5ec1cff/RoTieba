@@ -48,7 +48,9 @@ class ForumViewModel : ViewModel() {
                         p.replyNum,
                         p.isGood == 1,
                         createTime = Date(p.createTime.toLong() * 1000),
-                        viewNum = p.viewNum
+                        viewNum = p.viewNum,
+                        agreeNum = p.agree.agreeNum,
+                        disagreeNum = p.agree.disagreeNum
                     )
                 }
                 return LoadResult.Page(

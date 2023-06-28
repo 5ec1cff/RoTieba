@@ -13,5 +13,7 @@ data class TiebaThread(
     val isGood: Boolean,
     val forum: Forum? = null,
     val createTime: Date? = null,
-    val viewNum: Int = 0
+    val viewNum: Int = 0,
+    val agreeNum: Long = 0,
+    val disagreeNum: Long = 0
 )

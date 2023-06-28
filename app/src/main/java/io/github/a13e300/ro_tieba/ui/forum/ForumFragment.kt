@@ -170,6 +170,30 @@ class ForumFragment : BaseFragment() {
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
                 append(thread.viewNum.toString())
+                append(" ")
+                append(
+                    "点赞 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_agree
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.agreeNum.toString())
+                append(" ")
+                append(
+                    "点踩 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_disagree
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.disagreeNum.toString())
             }
             holder.binding.threadAvatar.displayImage(thread.author.avatarUrl)
             holder.binding.root.setOnClickListener {

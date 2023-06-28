@@ -346,6 +346,30 @@ class ThreadFragment : BaseFragment() {
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
                 append(thread.replyNum.toString())
+                append(" ")
+                append(
+                    "点赞 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_agree
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.agreeNum.toString())
+                append(" ")
+                append(
+                    "点踩 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_disagree
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(thread.disagreeNum.toString())
             }
         }
 
@@ -523,6 +547,30 @@ class ThreadFragment : BaseFragment() {
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
                 append(post.user.location)
+                append("·")
+                append(
+                    "点赞 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_agree
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(post.agreeNum.toString())
+                append("·")
+                append(
+                    "点踩 ",
+                    IconSpan(
+                        AppCompatResources.getDrawable(
+                            requireContext(),
+                            R.drawable.ic_disagree
+                        )!!
+                    ),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append(post.disagreeNum.toString())
             }
             val hasComment = post.commentCount != 0
             holder.binding.commentsBox.isGone = !hasComment
