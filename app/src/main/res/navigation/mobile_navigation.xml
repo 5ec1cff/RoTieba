@@ -47,7 +47,7 @@
             app:uri="tieba.baidu.com/p/{tid}?pid={pid}"
             app:action="android.intent.action.VIEW" />
         <deepLink
-            app:uri="com.baidu.tieba://unidispatch/pb?tid={tid}"
+            app:uri="com.baidu.tieba://unidispatch/pb?tid={tid}&amp;hightlight_anchor_pid={pid}"
             app:action="android.intent.action.VIEW" />
         <deepLink
             app:uri="tbpb://tieba.baidu.com//tid={tid}"

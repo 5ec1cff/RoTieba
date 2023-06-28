@@ -212,6 +212,28 @@ class ThreadFragment : BaseFragment() {
                     return true
                 }
 
+                R.id.open_at_other_client -> {
+                    val tid = when (post) {
+                        is Post -> post.tid
+                        is Comment -> post.tid
+                        else -> return false
+                    }
+                    val pid = when (post) {
+                        is Post -> post.postId
+                        is Comment -> post.postId
+                        else -> return false
+                    }
+                    val uri = Uri.Builder()
+                        .scheme("com.baidu.tieba")
+                        .authority("unidispatch")
+                        .appendPath("pb")
+                        .appendQueryParameter("tid", tid.toString())
+                        .appendQueryParameter("hightlight_anchor_pid", pid.toString())
+                        .build()
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    return true
+                }
+
                 R.id.open_link -> {
                     (selected as? SelectedLink)?.url?.also {
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))

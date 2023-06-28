@@ -9,6 +9,10 @@
             android:id="@+id/copy_post_link"
             android:title="@string/link_title"
             android:icon="@drawable/ic_link" />
+        <item
+            android:id="@+id/open_at_other_client"
+            android:title="@string/open_at_other_client_title"
+            android:icon="@drawable/ic_link" />
     </group>
     <group
         android:id="@+id/group_link"

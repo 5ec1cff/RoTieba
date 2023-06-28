@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.navigation.findNavController
 import io.github.a13e300.ro_tieba.databinding.ActivityMainBinding
 
+const val EXTRA_DONT_USE_NAV = "dont_use_nav"
+
 class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
