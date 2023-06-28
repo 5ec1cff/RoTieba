@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
@@ -59,5 +60,9 @@ class App : Application(), SketchFactory {
             }
             httpStack(OkHttpStack(OkHttpClient.Builder().ignoreAllSSLErrorsIfDebug().build()))
         }.build()
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
     }
 }

@@ -28,7 +28,14 @@ abstract class BaseFragment : Fragment() {
         toolbar.setNavigationIcon(R.drawable.ic_back)
         toolbar.setNavigationContentDescription(R.string.back_title)
         toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+            navigateUp()
+        }
+    }
+
+    fun navigateUp() {
+        // we don't like navigate up to home
+        if (!findNavController().popBackStack()) {
+            activity?.finish()
         }
     }
 

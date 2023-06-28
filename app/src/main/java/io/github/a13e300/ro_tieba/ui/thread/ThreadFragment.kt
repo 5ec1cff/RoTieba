@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
@@ -43,8 +44,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
+import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
@@ -101,7 +102,7 @@ class ThreadFragment : BaseFragment() {
                     .setTitle(R.string.error_dialog_title)
                     .setMessage(it.message)
                     .setOnDismissListener {
-                        findNavController().navigateUp()
+                        navigateUp()
                     }
                     .show()
             }
@@ -149,7 +150,7 @@ class ThreadFragment : BaseFragment() {
                 if (viewModel.currentUid == null)
                     viewModel.currentUid = currentUid
                 else if (currentUid != viewModel.currentUid) {
-                    findNavController().navigateUp()
+                    navigateUp()
                     return@repeatOnLifecycle
                 }
                 viewModel.flow.collect { data ->
@@ -230,13 +231,19 @@ class ThreadFragment : BaseFragment() {
                         .appendQueryParameter("tid", tid.toString())
                         .appendQueryParameter("hightlight_anchor_pid", pid.toString())
                         .build()
-                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    startActivity(
+                        Intent(Intent.ACTION_VIEW, uri),
+                        bundleOf(EXTRA_DONT_USE_NAV to true)
+                    )
                     return true
                 }
 
                 R.id.open_link -> {
                     (selected as? SelectedLink)?.url?.also {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+                        startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(it)),
+                            bundleOf(EXTRA_DONT_USE_NAV to true)
+                        )
                     }
                     return true
                 }
@@ -461,7 +468,6 @@ class ThreadFragment : BaseFragment() {
                         val imageView =
                             ImageContentBinding.inflate(layoutInflater, contentView, false)
                                 .root.apply {
-                                    Logger.d("scaleType=${scaleType}")
                                     displayImage(content.previewSrc) {
                                         placeholder(
                                             PlaceHolderDrawable(

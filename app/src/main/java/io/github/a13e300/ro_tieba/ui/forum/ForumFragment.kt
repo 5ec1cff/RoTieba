@@ -74,7 +74,7 @@ class ForumFragment : BaseFragment() {
                     .setTitle(R.string.error_dialog_title)
                     .setMessage(it.message)
                     .setOnDismissListener {
-                        findNavController().navigateUp()
+                        navigateUp()
                     }
                     .show()
             }
@@ -89,7 +89,7 @@ class ForumFragment : BaseFragment() {
                 if (viewModel.currentUid == null)
                     viewModel.currentUid = currentUid
                 else if (currentUid != viewModel.currentUid) {
-                    findNavController().navigateUp()
+                    navigateUp()
                     return@repeatOnLifecycle
                 }
                 viewModel.flow.collect {
