@@ -72,6 +72,13 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
     return map {
         // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/api/get_posts/_classdef.py
         when (it.type) {
+            0, // plain text
+            4, // at
+            9, // phone number
+            18, // hash tag
+            27, // keyword?
+            -> Content.TextContent(it.text)
+
             1 -> Content.LinkContent(it.text, it.link.convertTiebaUrl())
 
             2, 11 -> Content.EmojiContent(it.text)
@@ -88,7 +95,17 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
                 )
             }
 
-            else -> Content.TextContent(it.text)
+            5 -> Content.VideoContent(
+                src = it.link,
+                previewSrc = it.src,
+                width = it.width,
+                height = it.height,
+                duration = it.duringTime,
+                size = it.originSize,
+                text = it.text
+            )
+
+            else -> Content.UnknownContent(it.type, it.text, it.toString())
         }
     }
 }

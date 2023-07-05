@@ -15,4 +15,21 @@ sealed class Content {
     ) : Content()
 
     data class LinkContent(val text: String, val link: String) : Content()
+
+    data class VideoContent(
+        val src: String,
+        val previewSrc: String,
+        val width: Int,
+        val height: Int,
+        val duration: Int,
+        val size: Int,
+        val text: String
+    ) : Content()
+
+    data class UnknownContent(
+        val type: Int,
+        val text: String,
+        val source: String
+    ) : Content()
+
 }
