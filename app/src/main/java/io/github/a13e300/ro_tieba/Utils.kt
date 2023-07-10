@@ -96,7 +96,7 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
             }
 
             5 -> Content.VideoContent(
-                src = it.link,
+                src = Uri.parse(it.link).buildUpon().scheme("https").build().toString(),
                 previewSrc = it.src,
                 width = it.width,
                 height = it.height,

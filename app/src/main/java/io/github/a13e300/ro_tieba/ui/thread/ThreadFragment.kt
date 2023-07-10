@@ -18,8 +18,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
@@ -56,6 +58,7 @@ import io.github.a13e300.ro_tieba.databinding.FragmentThreadHeaderBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
+import io.github.a13e300.ro_tieba.databinding.VideoViewBinding
 import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
@@ -176,12 +179,15 @@ class ThreadFragment : BaseFragment() {
         if (selected is Photo) {
             menu.setGroupVisible(R.id.group_photo, true)
         }
+        ((menuInfo as? ItemView.ContextMenuInfo)?.data as? IPost)?.content?.find { it is Content.VideoContent }
+            ?.let { menu.setGroupVisible(R.id.group_video, true) }
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val info = item.menuInfo as? ItemView.ContextMenuInfo
         val selected = info?.selectedData
         val post = if (selected is IPost) selected else info?.data as? IPost
+        val video = post?.content?.find { it is Content.VideoContent } as? Content.VideoContent
         if (post != null) {
             when (item.itemId) {
                 R.id.copy_post_content -> {
@@ -192,6 +198,8 @@ class ThreadFragment : BaseFragment() {
                             is Content.ImageContent -> "[${it.src}]"
                             is Content.LinkContent -> "[${it.text}](${it.link})"
                             is Content.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
+                            is Content.VideoContent -> "[video](${it.src})"
+                            is Content.UnknownContent -> it.source
                         }
                     }))
                     return true
@@ -302,6 +310,56 @@ class ThreadFragment : BaseFragment() {
                                 }
                             )
                         }
+                    }
+                    return true
+                }
+
+                R.id.save_video -> {
+                    video?.src?.let {
+                        lifecycleScope.launch {
+                            PhotoUtils.downloadVideo(
+                                activity = requireActivity(),
+                                url = it,
+                                post = post as Post,
+                                onSuccess = {
+                                    Snackbar.make(
+                                        binding.root,
+                                        getString(R.string.saved_to_gallery),
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onFailure = {
+                                    Snackbar.make(
+                                        binding.root,
+                                        "error:${it.message}",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
+                        }
+                    }
+                    return true
+                }
+
+                R.id.open_video -> {
+                    video?.text?.let {
+                        startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(it)),
+                            bundleOf(EXTRA_DONT_USE_NAV to true)
+                        )
+                    }
+                    return true
+                }
+
+                R.id.copy_video_link -> {
+                    video?.src?.also {
+                        val cm = requireContext().getSystemService(ClipboardManager::class.java)
+                        cm.setPrimaryClip(
+                            ClipData.newPlainText(
+                                "",
+                                it
+                            )
+                        )
                     }
                     return true
                 }
@@ -518,6 +576,38 @@ class ThreadFragment : BaseFragment() {
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                         }
+                    }
+
+                    is Content.VideoContent -> {
+                        addTextView()
+                        val videoView = VideoViewBinding.inflate(layoutInflater, contentView, false)
+                        videoView.video.setVideoURI(Uri.parse(content.src))
+                        videoView.video.setMediaController(MediaController(requireContext()))
+                        (videoView.video.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio =
+                            "W,${content.height}:${content.width}"
+                        // videoView.video.start()
+                        videoView.previewImage.displayImage(content.previewSrc)
+                        videoView.previewImage.setOnClickListener {
+                            it.isGone = true
+                            videoView.video.start()
+                        }
+                        contentView.addView(videoView.root)
+                    }
+
+                    is Content.UnknownContent -> {
+                        if (lastString == null) lastString = SpannableStringBuilder()
+                        if (content.text.isNotEmpty())
+                            lastString!!.append(
+                                content.text,
+                                StyleSpan(Typeface.ITALIC),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        else
+                            lastString!!.append(
+                                " [unknown type ${content.type}] ",
+                                StyleSpan(Typeface.ITALIC),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
                     }
 
                     else -> {}

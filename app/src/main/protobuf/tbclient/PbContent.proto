@@ -12,6 +12,12 @@ message PbContent {
   string c = 11;
   string voice_md5 = 12;
   int64 uid = 15;
+  uint32 during_time = 13;
+  uint32 is_sub = 14;
+  string dynamic = 16;
+  string _static = 17;
+  uint32 width = 18;
+  uint32 height = 19;
   string origin_src = 25;
   uint32 origin_size = 27;
   message TiebaPlusInfo {

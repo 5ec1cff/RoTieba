@@ -38,4 +38,20 @@
             android:title="@string/share_photo_title"
             android:icon="@drawable/ic_share" />
     </group>
+    <group
+        android:id="@+id/group_video"
+        android:visible="false">
+        <item
+            android:id="@+id/save_video"
+            android:title="@string/download_video_title"
+            android:icon="@drawable/ic_download" />
+        <item
+            android:id="@+id/open_video"
+            android:title="@string/open_video_title"
+            android:icon="@drawable/ic_link" />
+        <item
+            android:id="@+id/copy_video_link"
+            android:title="@string/copy_video_link_title"
+            android:icon="@drawable/ic_copy" />
+    </group>
 </menu>

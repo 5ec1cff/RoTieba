@@ -39,4 +39,7 @@
     <string name="search_post_order_relevant">相关性</string>
     <string name="empty">没有内容</string>
     <string name="open_at_other_client_title">在其他客户端打开</string>
+    <string name="download_video_title">下载视频</string>
+    <string name="open_video_title">在浏览器打开视频</string>
+    <string name="copy_video_link_title">复制视频地址</string>
 </resources>
