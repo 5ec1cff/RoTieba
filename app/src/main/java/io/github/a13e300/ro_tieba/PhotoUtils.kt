@@ -20,6 +20,8 @@ import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -30,23 +32,24 @@ import java.net.URLConnection
 object PhotoUtils {
     private const val MY_PATH = "RoTieba"
 
-    private fun saveImage(fileName: String, context: Context, input: InputStream) {
+    private fun save(fileName: String, context: Context, input: InputStream, isVideo: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            saveImageQ(context, fileName, input)
+            saveQ(context, fileName, input, isVideo)
         } else {
-            saveImagePreQ(context, fileName, input)
+            savePreQ(context, fileName, input, isVideo)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun saveImageQ(context: Context, filename: String, input: InputStream) {
+    private fun saveQ(context: Context, filename: String, input: InputStream, isVideo: Boolean) {
         var fos: OutputStream?
         val imageUri: Uri
+        val root = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(
                 MediaStore.MediaColumns.RELATIVE_PATH,
-                "${Environment.DIRECTORY_PICTURES}/${MY_PATH}"
+                "$root/${MY_PATH}"
             )
             put(MediaStore.Video.Media.IS_PENDING, 1)
         }
@@ -55,7 +58,10 @@ object PhotoUtils {
 
         contentResolver.also { resolver ->
             imageUri =
-                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)!!
+                resolver.insert(
+                    if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    contentValues
+                )!!
             fos = imageUri.let { resolver.openOutputStream(it) }
             fos?.use { input.copyTo(it) }
 
@@ -65,9 +71,9 @@ object PhotoUtils {
         }
     }
 
-    private fun saveImagePreQ(context: Context, fileName: String, input: InputStream) {
+    private fun savePreQ(context: Context, fileName: String, input: InputStream, isVideo: Boolean) {
         val imagesDir =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            Environment.getExternalStoragePublicDirectory(if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES)
         val dir = File(imagesDir, MY_PATH)
         if (!dir.exists()) dir.mkdir()
         val image = File(dir, fileName)
@@ -118,10 +124,11 @@ object PhotoUtils {
                                 is TiebaThread -> "rotieba_t${source.tid}_p${source.postId}_f1_c${photo.order}"
                                 else -> "rotieba"
                             }
-                            saveImage(
+                            save(
                                 "${key}_${System.currentTimeMillis()}.$ext",
                                 activity,
-                                inputStream
+                                inputStream,
+                                false
                             )
                         }
                     }
@@ -132,6 +139,37 @@ object PhotoUtils {
                 }
             } else if (result is DownloadResult.Error) {
                 onFailure?.invoke(result.throwable)
+            }
+        }
+    }
+
+    suspend fun downloadVideo(
+        activity: Activity,
+        url: String,
+        post: Post,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Throwable) -> Unit)? = null
+    ) {
+        // TODO: progress bar
+        if (verifyStoragePermissions(activity)) {
+            kotlin.runCatching {
+                withContext(Dispatchers.IO) {
+                    val result = OkHttpClient().newCall(Request.Builder().url(url).build())
+                        .execute()
+                    result.body?.byteStream()?.use { inputStream ->
+                        save(
+                            "rotieba_t${post.tid}_p${post.postId}_f${post.floor}_v_${System.currentTimeMillis()}.mp4",
+                            activity,
+                            inputStream,
+                            true
+                        )
+                    }
+                }
+            }.onSuccess {
+                onSuccess?.invoke()
+            }.onFailure {
+                onFailure?.invoke(it)
+                Logger.e("failed to download $url", it)
             }
         }
     }
