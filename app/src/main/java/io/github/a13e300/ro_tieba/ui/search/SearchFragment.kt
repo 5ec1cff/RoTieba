@@ -6,10 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.view.isGone
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -25,6 +27,7 @@ import io.github.a13e300.ro_tieba.view.MySearchView
 class SearchFragment : BaseFragment() {
 
     private val viewModel: SearchViewModel by viewModels()
+    private val args by navArgs<SearchFragmentArgs>()
 
     private lateinit var binding: FragmentSearchBinding
 
@@ -40,7 +43,18 @@ class SearchFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (!viewModel.initialized) {
+            args.forum?.let {
+                viewModel.forum = it
+            }
+            viewModel.searchAtForum = args.forum != null
+        }
         binding = FragmentSearchBinding.inflate(inflater, container, false)
+        val hint = if (viewModel.searchAtForum)
+            getString(R.string.searchbar_search_at_forum_hint, viewModel.forum)
+        else getString(R.string.searchbar_hint)
+        binding.searchView.hint = hint
+        binding.searchBar.hint = hint
         binding.searchView.editText.setOnEditorActionListener { textView, i, keyEvent ->
             if (i != EditorInfo.IME_ACTION_SEARCH &&
                 !(keyEvent?.action == KeyEvent.ACTION_DOWN
@@ -61,14 +75,17 @@ class SearchFragment : BaseFragment() {
         }
         binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int {
-                return 2
+                return if (viewModel.searchAtForum) 1 else 2
             }
 
             override fun createFragment(position: Int): Fragment {
-                if (position == 0)
-                    return SearchResultFragment()
+                return if (position == 0)
+                    if (viewModel.searchAtForum)
+                        SearchPostFragment()
+                    else
+                        SearchResultFragment()
                 else
-                    return SearchPostFragment()
+                    SearchPostFragment()
             }
 
         }
@@ -77,37 +94,43 @@ class SearchFragment : BaseFragment() {
                 binding.searchView.hide()
             else navigateUp()
         }
-        val myAdapter = SearchSuggestionAdapter()
-        TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
-            tab.text = when (position) {
-                0 -> getString(R.string.search_tab_bar_title)
-                else -> getString(R.string.search_tab_post_title)
+        if (viewModel.searchAtForum) {
+            binding.searchTabLayout.isGone = true
+        } else {
+            val myAdapter = SearchSuggestionAdapter()
+            TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
+                tab.text = when (position) {
+                    0 -> getString(R.string.search_tab_bar_title)
+                    else -> getString(R.string.search_tab_post_title)
+                }
+            }.attach()
+            binding.searchView.editText.doAfterTextChanged { e ->
+                if (e.isNullOrEmpty()) {
+                    viewModel.suggestions = emptyList()
+                } else {
+                    val l = mutableListOf<Operation>()
+                    val s = e.toString()
+                    l.add(Operation.GoToForum(s))
+                    s.toLongOrNull()?.also { l.add(Operation.GoToThread(it)) }
+                    l.add(Operation.SearchForum(s))
+                    l.add(Operation.SearchPosts(s))
+                    viewModel.suggestions = l
+                }
+                myAdapter.notifyDataSetChanged()
             }
-        }.attach()
-        binding.searchView.editText.doAfterTextChanged { e ->
-            if (e.isNullOrEmpty()) {
-                viewModel.suggestions = emptyList()
-            } else {
-                val l = mutableListOf<Operation>()
-                val s = e.toString()
-                l.add(Operation.GoToForum(s))
-                s.toLongOrNull()?.also { l.add(Operation.GoToThread(it)) }
-                l.add(Operation.SearchForum(s))
-                l.add(Operation.SearchPosts(s))
-                viewModel.suggestions = l
+            binding.searchSuggestions.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = myAdapter
             }
-            myAdapter.notifyDataSetChanged()
-        }
-        binding.searchSuggestions.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = myAdapter
         }
         return binding.root
     }
 
     private fun performSearch(t: String, tab: Int) {
         binding.searchBar.text = t
-        viewModel.fetchForums(t)
+        if (!viewModel.searchAtForum) {
+            viewModel.fetchForums(t)
+        }
         viewModel.currentKeyword.value = t
         binding.searchView.hide()
         if (tab >= 0)

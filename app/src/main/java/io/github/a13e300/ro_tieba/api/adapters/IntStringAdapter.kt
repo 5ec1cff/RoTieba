@@ -6,19 +6,17 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import java.lang.reflect.Type
 
-class IntBooleanAdapter : JsonDeserializer<Any?> {
+class IntStringAdapter : JsonDeserializer<Any?> {
     override fun deserialize(
         json: JsonElement,
         typeOfT: Type?,
         context: JsonDeserializationContext
     ): Any? {
         if (json is JsonPrimitive) {
-            if (json.isBoolean)
-                return json.asBoolean
-            else if (json.isNumber)
-                return json.asInt != 0
+            if (json.isNumber)
+                return json.asInt
             else if (json.isString)
-                return json.asString == "1"
+                return json.asString.toInt()
             return context.deserialize(json, typeOfT)
         }
         return null

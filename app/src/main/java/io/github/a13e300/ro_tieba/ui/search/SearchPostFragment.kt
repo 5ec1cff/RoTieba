@@ -29,6 +29,7 @@ import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
+import io.github.a13e300.ro_tieba.utils.replaceEm
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.reduce
@@ -169,23 +170,30 @@ class SearchPostFragment : Fragment() {
         ) {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = getItem(position) ?: return
-            holder.binding.threadContent.text = item.content
+            holder.binding.threadContent.text =
+                if (viewModel.searchAtForum) item.content.replaceEm(requireContext()) else item.content
             holder.binding.threadUserName.text = item.post.user.showName
-            holder.binding.threadTitle.text = item.title
-            holder.binding.threadInfo.text = "${item.forum}吧 ${item.post.time.toSimpleString()}"
-            holder.binding.threadAvatar.displayImage(item.post.user.avatarUrl)
+            holder.binding.threadTitle.text =
+                if (viewModel.searchAtForum) item.title.replaceEm(requireContext()) else item.title
+            if (!viewModel.searchAtForum)
+                holder.binding.threadForum.text = "${item.forum}吧"
+            holder.binding.threadForum.isGone = viewModel.searchAtForum
+            holder.binding.threadInfo.text = item.post.time.toSimpleString()
+            val avatar = item.post.user.avatarUrl
+            if (avatar.isNotEmpty())
+                holder.binding.threadAvatar.displayImage(avatar)
+            holder.binding.threadAvatar.isGone = avatar.isEmpty()
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(
                     MobileNavigationDirections.goToThread(item.post.tid).setPid(item.post.postId)
                 )
             }
-            holder.binding.threadInfo.setOnClickListener {
+            holder.binding.threadForum.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToForum(item.forum))
             }
-            holder.binding.threadInfo.setOnLongClickListener {
+            holder.binding.threadInfo.setOnClickListener {
                 val (ks, vs) = item.toDetail()
                 DetailDialogFragment.newInstance(ks, vs).show(childFragmentManager, "detail")
-                true
             }
         }
 

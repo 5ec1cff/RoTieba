@@ -1,5 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.forum
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -7,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -23,6 +26,7 @@ import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
+import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
@@ -52,6 +56,32 @@ class ForumFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentForumBinding.inflate(inflater, container, false)
+        binding.toolbar.setOnMenuItemClickListener {
+            return@setOnMenuItemClickListener when (it.itemId) {
+                R.id.search -> {
+                    findNavController().navigate(
+                        MobileNavigationDirections.homeSearch().setForum(viewModel.forumName)
+                    )
+                    true
+                }
+
+                R.id.open_at_other_client -> {
+                    val uri = Uri.Builder()
+                        .scheme("com.baidu.tieba")
+                        .authority("unidispatch")
+                        .appendPath("frs")
+                        .appendQueryParameter("kw", viewModel.forumName)
+                        .build()
+                    startActivity(
+                        Intent(Intent.ACTION_VIEW, uri),
+                        bundleOf(EXTRA_DONT_USE_NAV to true)
+                    )
+                    true
+                }
+
+                else -> false
+            }
+        }
         viewModel.forumName = args.fname
         viewModel.forumInfo.observe(viewLifecycleOwner) {
             // binding.toolbar.title = it.name

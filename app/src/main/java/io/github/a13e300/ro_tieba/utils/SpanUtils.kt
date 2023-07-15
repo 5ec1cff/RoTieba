@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba.utils
 import android.content.Context
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.User
@@ -69,5 +70,23 @@ fun SpannableStringBuilder.appendUserInfo(
         append(" ")
         appendLevelSpan(context, user.level)
     }
+}
+
+fun String.replaceEm(context: Context): CharSequence {
+    val sb = SpannableStringBuilder()
+    val r = Regex("<em>(.*?)</em>")
+    var start = 0
+    while (true) {
+        val m = r.find(this, start) ?: break
+        sb.append(substring(start, m.range.first))
+        sb.append(
+            m.groupValues[1],
+            ForegroundColorSpan(context.getColor(R.color.em_span_color)),
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        start = m.range.last + 1
+    }
+    sb.append(substring(start))
+    return sb
 }
 

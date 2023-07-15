@@ -15,7 +15,12 @@
 
     <fragment
         android:id="@+id/navigation_search"
-        android:name="io.github.a13e300.ro_tieba.ui.search.SearchFragment" />
+        android:name="io.github.a13e300.ro_tieba.ui.search.SearchFragment">
+        <argument
+            app:nullable="true"
+            android:name="forum"
+            android:defaultValue="@null" />
+    </fragment>
 
     <action
         android:id="@+id/home_search"

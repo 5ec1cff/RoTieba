@@ -47,6 +47,9 @@ sealed class SearchResult<T> {
 fun SearchForum.ForumInfo.toForum(): Forum = Forum(forumName, forumId.toLong(), avatar, slogan)
 
 class SearchViewModel : ViewModel() {
+    var initialized = false
+    lateinit var forum: String
+    var searchAtForum = false
     val currentKeyword = MutableLiveData<String>()
     var searchPostKeyWord: String? = null
     var searchPostFilter: SearchFilter = SearchFilter.ALL
@@ -85,24 +88,53 @@ class SearchViewModel : ViewModel() {
     inner class PostPagingSource(
         private val client: TiebaClient
     ) : PagingSource<Int, SearchedPost>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SearchedPost> {
-            val keyword = currentKeyword.value ?: return LoadResult.Page(emptyList(), null, null)
-            try {
-                val page = params.key ?: 1
-                val response = client.webAPI.searchThread(
-                    keyword,
-                    page,
-                    searchPostOrder.value!!.value,
-                    searchPostFilter.value
+        private suspend fun searchThread(keyword: String, page: Int) = client.webAPI.searchThread(
+            keyword,
+            page,
+            searchPostOrder.value!!.value,
+            searchPostFilter.value
+        ).let {
+            it.hasMore to it.postList.map { p ->
+                SearchedPost(
+                    post = Post(
+                        user = User(
+                            name = p.user.userName ?: "null",
+                            nick = p.user.showNickname,
+                            avatar = p.user.portrait,
+                            uid = p.user.userId?.toLong() ?: 0
+                        ),
+                        content = emptyList(),
+                        floor = 0, // unknown
+                            postId = p.pid.toLong(),
+                        tid = p.tid.toLong(),
+                        time = Date(p.time.toLong() * 1000),
+                        comments = emptyList(),
+                        commentCount = 0,
+                    ),
+                    title = p.title,
+                    forum = p.forumName,
+                    content = p.content
                 )
-                val posts = response.postList.map { p ->
+            }
+        }
+
+        private suspend fun searchForumPost(keyword: String, page: Int) =
+            client.jsonAPI.searchForumPost(
+                forum,
+                keyword,
+                if (searchPostFilter == SearchFilter.ALL) "0" else "1",
+                page,
+                30,
+                searchPostOrder.value!!.value
+            ).let {
+                it.page.hasMore to it.postList.map { p ->
                     SearchedPost(
                         post = Post(
                             user = User(
-                                name = p.user.userName ?: "null",
-                                nick = p.user.showNickname,
-                                avatar = p.user.portrait,
-                                uid = p.user.userId?.toLong() ?: 0
+                                name = p.author.name ?: "null",
+                                nick = p.author.showName,
+                                avatar = "",
+                                uid = 0
                             ),
                             content = emptyList(),
                             floor = 0, // unknown
@@ -117,12 +149,30 @@ class SearchViewModel : ViewModel() {
                         content = p.content
                     )
                 }
-                searchPostKeyWord = keyword
-                return LoadResult.Page(
-                    data = posts,
-                    prevKey = if (page == 1) null else (page - 1),
-                    nextKey = if (response.hasMore) page + 1 else null
-                )
+            }
+
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SearchedPost> {
+            val keyword = currentKeyword.value ?: return LoadResult.Page(emptyList(), null, null)
+            try {
+                val page = params.key ?: 1
+                if (searchAtForum) {
+                    val (hasMore, posts) = searchForumPost(keyword, page)
+                    searchPostKeyWord = keyword
+                    return LoadResult.Page(
+                        data = posts,
+                        prevKey = if (page == 1) null else (page - 1),
+                        nextKey = if (hasMore) page + 1 else null
+                    )
+
+                } else {
+                    val (hasMore, posts) = searchThread(keyword, page)
+                    searchPostKeyWord = keyword
+                    return LoadResult.Page(
+                        data = posts,
+                        prevKey = if (page == 1) null else (page - 1),
+                        nextKey = if (hasMore) page + 1 else null
+                    )
+                }
             } catch (t: Throwable) {
                 if (t !is CancellationException)
                     Logger.e("failed to search $keyword ${params.key}", t)

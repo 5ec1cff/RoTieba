@@ -69,7 +69,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.appbar.MaterialToolbar
-                app:menu="@menu/home_menu"
+                app:menu="@menu/forum_menu"
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"

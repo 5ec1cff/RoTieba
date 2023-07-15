@@ -14,6 +14,7 @@
     <string name="delete_title">删除</string>
     <string name="search_title">搜索</string>
     <string name="searchbar_hint">搜索</string>
+    <string name="searchbar_search_at_forum_hint">在%s吧搜索</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="refresh_title">刷新</string>
     <string name="copy_title">复制内容</string>

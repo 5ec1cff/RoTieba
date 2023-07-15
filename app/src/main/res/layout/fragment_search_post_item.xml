@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             tools:text="user"
             android:maxLines="1"
+            app:layout_goneMarginStart="0dp"
             android:layout_marginStart="8dp"
             android:textAppearance="?attr/textAppearanceListItem"
             app:layout_constraintStart_toEndOf="@id/thread_avatar"
@@ -37,14 +38,28 @@
             app:layout_constraintBottom_toTopOf="@id/thread_info" />
 
         <TextView
-            android:id="@+id/thread_info"
+            android:id="@+id/thread_forum"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            tools:text="time"
+            tools:text="forum"
             android:maxLines="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:foreground="?selectableItemBackground"
             app:layout_constraintStart_toStartOf="@id/thread_user_name"
+            app:layout_constraintTop_toBottomOf="@id/thread_user_name"
+            app:layout_constraintBottom_toBottomOf="@id/thread_avatar" />
+
+        <TextView
+            android:id="@+id/thread_info"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            tools:text="info"
+            android:maxLines="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="?selectableItemBackground"
+            android:layout_marginStart="8dp"
+            app:layout_goneMarginStart="0dp"
+            app:layout_constraintStart_toEndOf="@id/thread_forum"
             app:layout_constraintTop_toBottomOf="@id/thread_user_name"
             app:layout_constraintBottom_toBottomOf="@id/thread_avatar" />
 
@@ -56,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/thread_avatar"
+            app:layout_constraintTop_toBottomOf="@id/thread_info"
             app:layout_constraintBottom_toTopOf="@id/thread_content" />
 
         <TextView

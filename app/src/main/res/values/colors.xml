@@ -73,4 +73,5 @@
     <color name="bawu_span_text">#0DACF6</color>
     <color name="good_span_background">#ED6565</color>
     <color name="good_span_text">#FFFFFF</color>
+    <color name="em_span_color">#109AE1</color>
 </resources>
