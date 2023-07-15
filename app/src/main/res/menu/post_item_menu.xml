@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:id="@+id/group_post">
+    <group
+        android:id="@+id/group_photo"
+        android:visible="false">
         <item
-            android:id="@+id/copy_post_content"
-            android:title="@string/copy_title"
-            android:icon="@drawable/ic_copy" />
+            android:id="@+id/save_photo"
+            android:title="@string/download_photo_title"
+            android:icon="@drawable/ic_download" />
         <item
-            android:id="@+id/copy_post_link"
-            android:title="@string/link_title"
-            android:icon="@drawable/ic_link" />
-        <item
-            android:id="@+id/open_at_other_client"
-            android:title="@string/open_at_other_client_title"
-            android:icon="@drawable/ic_link" />
+            android:id="@+id/share_photo"
+            android:title="@string/share_photo_title"
+            android:icon="@drawable/ic_share" />
     </group>
     <group
         android:id="@+id/group_link"
@@ -25,18 +23,6 @@
             android:id="@+id/copy_link"
             android:title="@string/copy_link_title"
             android:icon="@drawable/ic_copy" />
-    </group>
-    <group
-        android:id="@+id/group_photo"
-        android:visible="false">
-        <item
-            android:id="@+id/save_photo"
-            android:title="@string/download_photo_title"
-            android:icon="@drawable/ic_download" />
-        <item
-            android:id="@+id/share_photo"
-            android:title="@string/share_photo_title"
-            android:icon="@drawable/ic_share" />
     </group>
     <group
         android:id="@+id/group_video"
@@ -53,5 +39,19 @@
             android:id="@+id/copy_video_link"
             android:title="@string/copy_video_link_title"
             android:icon="@drawable/ic_copy" />
+    </group>
+    <group android:id="@+id/group_post">
+        <item
+            android:id="@+id/copy_post_content"
+            android:title="@string/copy_title"
+            android:icon="@drawable/ic_copy" />
+        <item
+            android:id="@+id/copy_post_link"
+            android:title="@string/link_title"
+            android:icon="@drawable/ic_link" />
+        <item
+            android:id="@+id/open_at_other_client"
+            android:title="@string/open_at_other_client_title"
+            android:icon="@drawable/ic_link" />
     </group>
 </menu>
