@@ -26,13 +26,27 @@ import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.TiebaThread
 
 fun Post.toDetail() = Pair(
-    arrayListOf("pid", "tid", "作者名字", "作者昵称", "IP位置", "楼层", "发布时间", "赞数", "踩数"),
+    arrayListOf(
+        "pid",
+        "tid",
+        "作者名字",
+        "作者昵称",
+        "IP位置",
+        "portrait",
+        "uid",
+        "楼层",
+        "发布时间",
+        "赞数",
+        "踩数"
+    ),
     arrayListOf(
         postId.toString(),
         tid.toString(),
         user.name,
         user.nick,
         user.location,
+        user.portrait,
+        user.uid.toString(),
         floor.toString(),
         time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) },
         agreeNum.toString(),
@@ -46,13 +60,20 @@ fun TiebaThread.toDetail() = Pair(
         "tid",
         "作者名字",
         "作者昵称",
+        "portrait",
+        "uid",
         "发布时间",
         "回复时间",
         "查看次数",
         "赞数",
         "踩数"
     ),
-    arrayListOf(postId.toString(), tid.toString(), author.name, author.nick,
+    arrayListOf(postId.toString(),
+        tid.toString(),
+        author.name,
+        author.nick,
+        author.portrait,
+        author.uid.toString(),
         createTime?.let {
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it)
         } ?: "",
