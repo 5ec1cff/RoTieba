@@ -465,16 +465,22 @@ class ThreadFragment : BaseFragment() {
 
         override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
             val post = getItem(position) ?: return
+            fun showComments() {
+                findNavController().navigate(
+                    MobileNavigationDirections.showComments(
+                        post.tid,
+                        post.postId
+                    )
+                )
+            }
             holder.binding.root.apply {
                 setData(post)
-                setOnClickListener {
-                    findNavController().navigate(
-                        MobileNavigationDirections.showComments(
-                            post.tid,
-                            post.postId
-                        )
-                    )
-                }
+                if (post.commentCount > 0)
+                    setOnClickListener {
+                        showComments()
+                    }
+                else
+                    setOnClickListener(null)
             }
             val context = requireContext()
             holder.binding.accountName.text = post.user.showName
@@ -670,9 +676,9 @@ class ThreadFragment : BaseFragment() {
                 append(post.disagreeNum.toString())
             }
             val hasComment = post.commentCount != 0
-            holder.binding.commentsBox.isGone = !hasComment
+            holder.binding.commentsBox.isVisible = hasComment
+            holder.binding.commentsContent.removeAllViews()
             if (hasComment) {
-                holder.binding.commentsContent.removeAllViews()
                 post.comments.forEach { comment ->
                     val preview = FragmentThreadCommentPreviewBinding.inflate(layoutInflater)
                     val sb = SpannableStringBuilder()
@@ -689,6 +695,7 @@ class ThreadFragment : BaseFragment() {
                     sb.append(": ")
                     sb.appendSimpleContent(comment.content, requireContext())
                     preview.text.text = sb
+                    preview.root.setOnClickListener { showComments() }
                     preview.root.setOnLongClickListener {
                         var parent = it.parent
                         while (parent !is ItemView) parent = parent.parent
@@ -700,6 +707,7 @@ class ThreadFragment : BaseFragment() {
                 if (post.commentCount > 4) {
                     val preview = FragmentThreadCommentPreviewBinding.inflate(layoutInflater)
                     preview.text.text = "查看全部${post.commentCount}条回复"
+                    preview.root.setOnClickListener { showComments() }
                     holder.binding.commentsContent.addView(preview.root)
                 }
             }
