@@ -68,6 +68,8 @@ import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.IPost
 import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.openPostAtOtherClient
+import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
@@ -232,17 +234,13 @@ class ThreadFragment : BaseFragment() {
                         is Comment -> post.postId
                         else -> return false
                     }
-                    val uri = Uri.Builder()
-                        .scheme("com.baidu.tieba")
-                        .authority("unidispatch")
-                        .appendPath("pb")
-                        .appendQueryParameter("tid", tid.toString())
-                        .appendQueryParameter("hightlight_anchor_pid", pid.toString())
-                        .build()
-                    startActivity(
-                        Intent(Intent.ACTION_VIEW, uri),
-                        bundleOf(EXTRA_DONT_USE_NAV to true)
-                    )
+                    if (!openPostAtOtherClient(tid, pid, requireContext())) {
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.no_other_apps_tips),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
                     return true
                 }
 
@@ -490,6 +488,9 @@ class ThreadFragment : BaseFragment() {
             contentView.removeAllViews()
             var lastString: SpannableStringBuilder? = null
             holder.binding.avatar.displayImage(post.user.avatarUrl)
+            holder.binding.avatar.setOnClickListener {
+                openUserAtOtherClient(post.user, requireContext())
+            }
             fun addTextView() {
                 if (lastString == null) return
                 contentView.addView(AppCompatTextView(context).apply {

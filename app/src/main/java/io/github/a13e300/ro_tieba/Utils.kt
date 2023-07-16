@@ -2,13 +2,16 @@ package io.github.a13e300.ro_tieba
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.view.ContextMenu
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.os.bundleOf
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.User
 import okhttp3.OkHttpClient
 import tbclient.PbContentOuterClass
 import java.io.InputStream
@@ -172,3 +175,50 @@ fun InputStream.guessExtension(): String {
         else -> "jpg"
     }
 }
+
+fun openAtOtherClient(uri: Uri, context: Context): Boolean {
+    if (context.packageManager.queryIntentActivities(Intent(Intent.ACTION_VIEW, uri), 0)
+            .map { it.activityInfo.packageName }.none { it != BuildConfig.APPLICATION_ID }
+    ) return false
+    context.startActivity(
+        Intent(Intent.ACTION_VIEW, uri),
+        bundleOf(EXTRA_DONT_USE_NAV to true)
+    )
+    return true
+}
+
+fun openUserAtOtherClient(user: User, context: Context) =
+// com.baidu.tieba://unidispatch/usercenter?portrait={}
+    // or com.baidu.tieba://usercenter//uid={}
+    openAtOtherClient(
+        Uri.Builder()
+            .scheme("com.baidu.tieba")
+            .authority("unidispatch")
+            .appendPath("usercenter")
+            .appendQueryParameter("portrait", user.portrait)
+            .build(),
+        context
+    )
+
+fun openForumAtOtherClient(forumName: String, context: Context) =
+    openAtOtherClient(
+        Uri.Builder()
+            .scheme("com.baidu.tieba")
+            .authority("unidispatch")
+            .appendPath("frs")
+            .appendQueryParameter("kw", forumName)
+            .build(),
+        context
+    )
+
+fun openPostAtOtherClient(tid: Long, pid: Long, context: Context) =
+    openAtOtherClient(
+        Uri.Builder()
+            .scheme("com.baidu.tieba")
+            .authority("unidispatch")
+            .appendPath("pb")
+            .appendQueryParameter("tid", tid.toString())
+            .appendQueryParameter("hightlight_anchor_pid", pid.toString())
+            .build(),
+        context
+    )

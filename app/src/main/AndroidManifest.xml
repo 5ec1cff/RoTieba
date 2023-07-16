@@ -7,6 +7,14 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <queries>
+        <intent>
+            <data
+                android:scheme="com.baidu.tieba"
+                android:host="unidispatch" />
+        </intent>
+    </queries>
+
     <application
         android:name=".App"
         android:allowBackup="true"

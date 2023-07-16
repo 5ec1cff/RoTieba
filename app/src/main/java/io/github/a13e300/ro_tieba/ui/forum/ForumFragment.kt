@@ -1,7 +1,5 @@
 package io.github.a13e300.ro_tieba.ui.forum
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -9,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -24,9 +21,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
-import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
@@ -36,6 +33,8 @@ import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.TiebaThread
+import io.github.a13e300.ro_tieba.openForumAtOtherClient
+import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
@@ -50,12 +49,13 @@ class ForumFragment : BaseFragment() {
     private val viewModel: ForumViewModel by viewModels()
     private val args: ForumFragmentArgs by navArgs()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
+    private lateinit var binding: FragmentForumBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentForumBinding.inflate(inflater, container, false)
+        binding = FragmentForumBinding.inflate(inflater, container, false)
         binding.toolbar.setOnMenuItemClickListener {
             return@setOnMenuItemClickListener when (it.itemId) {
                 R.id.search -> {
@@ -66,16 +66,13 @@ class ForumFragment : BaseFragment() {
                 }
 
                 R.id.open_at_other_client -> {
-                    val uri = Uri.Builder()
-                        .scheme("com.baidu.tieba")
-                        .authority("unidispatch")
-                        .appendPath("frs")
-                        .appendQueryParameter("kw", viewModel.forumName)
-                        .build()
-                    startActivity(
-                        Intent(Intent.ACTION_VIEW, uri),
-                        bundleOf(EXTRA_DONT_USE_NAV to true)
-                    )
+                    if (!openForumAtOtherClient(viewModel.forumName, requireContext())) {
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.no_other_apps_tips),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
                     true
                 }
 
@@ -163,6 +160,15 @@ class ForumFragment : BaseFragment() {
             holder.binding.threadInfo.setOnClickListener {
                 val (ks, vs) = thread.toDetail()
                 DetailDialogFragment.newInstance(ks, vs).show(childFragmentManager, "detail")
+            }
+            holder.binding.threadAvatar.setOnClickListener {
+                if (!openUserAtOtherClient(thread.author, requireContext())) {
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.no_other_apps_tips),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
             }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(
