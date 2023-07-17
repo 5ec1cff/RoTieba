@@ -60,7 +60,11 @@ class CommentFragment : BottomSheetDialogFragment() {
             holder.binding.accountName.text =
                 comment.user.nick.ifEmpty { comment.user.name }.ifEmpty { "[${comment.user.uid}]" }
             holder.binding.commentContent.text =
-                SpannableStringBuilder().appendSimpleContent(comment.content, requireContext())
+                SpannableStringBuilder().appendSimpleContent(
+                    comment.content,
+                    requireContext(),
+                    useUrlSpan = true
+                )
             holder.binding.avatar.displayImage(comment.user.avatarUrl)
             holder.binding.description.text =
                 comment.time.toSimpleString()

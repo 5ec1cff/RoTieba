@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/text"
-    android:clickable="true"
-    android:foreground="?selectableItemBackground" />
+    android:foreground="?selectableItemBackground">
+
+    <io.github.a13e300.ro_tieba.view.ContentTextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/text" />
+</LinearLayout>

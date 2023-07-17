@@ -20,7 +20,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
@@ -77,8 +76,8 @@ import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.TRANSITION_NAME_PREFIX
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
+import io.github.a13e300.ro_tieba.view.ContentTextView
 import io.github.a13e300.ro_tieba.view.ItemView
-import io.github.a13e300.ro_tieba.view.MyLinkMovementMethod
 import io.github.a13e300.ro_tieba.view.SelectedLink
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -499,15 +498,12 @@ class ThreadFragment : BaseFragment() {
             }
             fun addTextView() {
                 if (lastString == null) return
-                contentView.addView(AppCompatTextView(context).apply {
+                contentView.addView(ContentTextView(context).apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
                     text = lastString
-                    movementMethod = MyLinkMovementMethod
-                    isClickable = false
-                    isLongClickable = false
                     setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize.toFloat())
                 })
                 lastString = null
@@ -693,7 +689,7 @@ class ThreadFragment : BaseFragment() {
                         requireContext()
                     )
                     sb.append(": ")
-                    sb.appendSimpleContent(comment.content, requireContext())
+                    sb.appendSimpleContent(comment.content, requireContext(), useUrlSpan = true)
                     preview.text.text = sb
                     preview.root.setOnClickListener { showComments() }
                     preview.root.setOnLongClickListener {

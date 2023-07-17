@@ -10,6 +10,7 @@ import android.view.ContextMenu
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
+import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.User
 import okhttp3.OkHttpClient
@@ -115,12 +116,22 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
 
 fun SpannableStringBuilder.appendSimpleContent(
     contents: List<Content>,
-    context: Context
+    context: Context,
+    useUrlSpan: Boolean = false
 ): SpannableStringBuilder {
     contents.forEach { content ->
         when (content) {
             is Content.TextContent -> append(content.text)
-            is Content.LinkContent -> append(content.link)
+            is Content.LinkContent -> {
+                if (useUrlSpan) {
+                    append(
+                        content.text.ifEmpty { "[link]" },
+                        MyURLSpan(content.link),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                } else append(content.link)
+            }
+
             is Content.EmojiContent -> {
                 val emoji = Emotions.emotionMap.get(content.id)
                 if (emoji == null) {
