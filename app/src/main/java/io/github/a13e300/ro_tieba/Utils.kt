@@ -55,8 +55,12 @@ fun ContextMenu.forceShowIcon() {
 }
 
 fun String.convertTiebaUrl(): String {
-    if (!startsWith("https://tieba.baidu.com/mo/q/checkurl?url=")) return this
-    return Uri.parse(this).getQueryParameter("url") ?: this
+    val uri = Uri.parse(this)
+    if (uri.authority == "tieba.baidu.com" && uri.path == "/mo/q/checkurl")
+        return uri.getQueryParameter("url") ?: this
+    else if (uri.scheme == "tiebaclient" && uri.authority == "swan")
+        return uri.getQueryParameter("url") ?: this
+    return this
 }
 
 fun Date.toSimpleString(): String {
