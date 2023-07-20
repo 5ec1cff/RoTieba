@@ -2,13 +2,11 @@ package io.github.a13e300.ro_tieba.view
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.text.Spannable
 import android.text.Spanned
 import android.text.style.URLSpan
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatTextView
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 
@@ -23,7 +21,6 @@ class ContentTextView : AppCompatTextView {
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val text = layout.text
-        Logger.d("text = ${text.javaClass} ${text is Spannable}")
         val buffer = text as? Spanned ?: return super.onTouchEvent(event)
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
