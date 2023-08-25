@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "io.github.a13e300.ro_tieba"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "io.github.a13e300.ro_tieba"
         minSdk = 27
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
