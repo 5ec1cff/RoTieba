@@ -23,11 +23,14 @@ import tbclient.PbFloor.errorOrNull
 import tbclient.PbPage.PbPageReqIdlOuterClass.PbPageReqIdl
 import tbclient.PbPage.PbPageResIdlOuterClass.PbPageResIdl
 import tbclient.PbPage.errorOrNull
+import tbclient.Profile.ProfileReqIdlOuterClass.ProfileReqIdl
+import tbclient.Profile.ProfileResIdlOuterClass.ProfileResIdl
+import tbclient.Profile.errorOrNull
 import java.net.URLEncoder
 
 class TiebaClient(val account: Account = Account()) {
     companion object {
-        const val MAIN_VERSION = "12.40.1.0"
+        const val MAIN_VERSION = "12.43.7.0"
         const val POST_VERSION = "9.1.0.0"
 
         const val APP_SECURE_SCHEME = "https"
@@ -146,6 +149,32 @@ class TiebaClient(val account: Account = Account()) {
             MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
         val result = protobufAPI.getComments(part).let {
             PbFloorResIdl.parseFrom(it.byteStream())
+        }
+        if (result.errorOrNull?.errorno != 0) throw TiebaApiError(
+            result.error.errorno,
+            result.error.errmsg
+        )
+        return result.data
+    }
+
+    suspend fun getUserProfile(portrait: String): ProfileResIdl.DataRes {
+        val req = ProfileReqIdl.newBuilder()
+            .setData(
+                ProfileReqIdl.DataReq.newBuilder()
+                    .setCommon(
+                        CommonReqOuterClass.CommonReq.newBuilder()
+                            .setClientType(2)
+                            .setClientVersion(MAIN_VERSION)
+                    )
+                    .setNeedPostCount(1)
+                    .setFriendUidPortrait(portrait)
+                    .setPn(1)
+                    // .setPage(1)
+            ).build()
+        val part =
+            MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
+        val result = protobufAPI.getUserProfile(part).let {
+            ProfileResIdl.parseFrom(it.byteStream())
         }
         if (result.errorOrNull?.errorno != 0) throw TiebaApiError(
             result.error.errorno,

@@ -22,4 +22,9 @@ interface TiebaProtobufAPI {
     @Multipart
     @POST("/c/f/pb/floor?cmd=302002")
     suspend fun getComments(@Part part: MultipartBody.Part): ResponseBody
+
+    @Headers("x_bd_data_type: protobuf")
+    @Multipart
+    @POST("/c/u/user/profile?cmd=303012")
+    suspend fun getUserProfile(@Part part: MultipartBody.Part): ResponseBody
 }

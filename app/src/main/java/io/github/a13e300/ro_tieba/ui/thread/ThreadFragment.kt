@@ -79,8 +79,11 @@ import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.view.ContentTextView
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.SelectedLink
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
+import java.nio.charset.Charset
 
 class ThreadFragment : BaseFragment() {
 
