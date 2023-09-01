@@ -93,8 +93,8 @@ class ThreadFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentThreadBinding.inflate(inflater, container, false)
-        if (viewModel.threadConfig.value == null) {
-            viewModel.threadConfig.value = ThreadConfig(args.tid, args.pid)
+        if (savedInstanceState == null) {
+            viewModel.threadConfig = ThreadConfig(args.tid, args.pid)
         }
         postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->
@@ -126,15 +126,27 @@ class ThreadFragment : BaseFragment() {
         }
         binding.toolbar.addMenuProvider(object : MenuProvider {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                if (menuItem.itemId == R.id.refresh) {
-                    postAdapter.refresh()
-                    return true
+                return when (menuItem.itemId) {
+                    R.id.refresh -> {
+                        postAdapter.refresh()
+                        true
+                    }
+
+                    R.id.sort -> {
+                        val v = !menuItem.isChecked
+                        menuItem.setChecked(v)
+                        viewModel.threadConfig = viewModel.threadConfig.copy(reverse = v)
+                        postAdapter.refresh()
+                        true
+                    }
+
+                    else -> false
                 }
-                return false
             }
 
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.thread_menu, menu)
+                menu.findItem(R.id.sort).setChecked(viewModel.threadConfig.reverse)
             }
         })
         lifecycleScope.launch {

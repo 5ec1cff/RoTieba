@@ -29,12 +29,15 @@ import java.util.TreeMap
 
 data class ThreadConfig(
     val tid: Long,
-    val pid: Long
+    val pid: Long = 0L,
+    val reverse: Boolean = false,
+    val page: Int = 0
 )
 
 class ThreadViewModel : ViewModel() {
+    var totalPage = 0 // FIXME: request totalPage
     var currentUid: String? = null
-    val threadConfig = MutableLiveData<ThreadConfig>()
+    lateinit var threadConfig: ThreadConfig
     val threadInfo = MutableLiveData<TiebaThread>()
     val photos = TreeMap<Pair<Int, Int>, Photo> { p0, p1 ->
         if (p0.first < p1.first) -1
@@ -48,7 +51,6 @@ class ThreadViewModel : ViewModel() {
     data class PageKey(val pn: Int) : Key()
     data class PidKey(
         val pid: Long,
-        val prevPid: Long?,
         val reverse: Boolean
     ) : Key()
 
@@ -58,21 +60,27 @@ class ThreadViewModel : ViewModel() {
     }
 
     inner class PostPagingSource(
-        private val client: TiebaClient
+        private val client: TiebaClient,
+        private val threadConfig: ThreadConfig
     ) : PagingSource<Key, Post>() {
         override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Post> {
             try {
-                val pid = threadConfig.value!!.pid
+                val pid = threadConfig.pid
                 val key = params.key ?: if (pid != 0L) {
-                    PidKey(pid, null, false)
-                } else PageKey(1)
+                    PidKey(pid, false)
+                } else if (threadConfig.reverse) PageKey(totalPage) else PageKey(1)
+                // Logger.d("load thread $key $threadConfig")
                 val response = try {
                     when (key) {
-                        is PageKey -> client.getPosts(threadConfig.value!!.tid, key.pn)
+                        is PageKey -> client.getPosts(
+                            threadConfig.tid,
+                            key.pn,
+                            sort = if (threadConfig.reverse) 1 else 0
+                        )
                         is PidKey -> client.getPosts(
-                            threadConfig.value!!.tid,
-                            if (key.pid == pid && !key.reverse) 0 else 1,
-                            key.pid, sort = if (key.reverse) 1 else 0
+                            threadConfig.tid,
+                            if (params.key == null) 0 else 1,
+                            key.pid, sort = if (key.reverse xor threadConfig.reverse) 1 else 0
                         )
                     }
                 } catch (t: Throwable) {
@@ -93,6 +101,7 @@ class ThreadViewModel : ViewModel() {
                     agreeNum = response.thread.agree.agreeNum,
                     disagreeNum = response.thread.agree.disagreeNum
                 )
+                totalPage = response.page.totalPage
                 val users = response.userListList.associateBy({ it.id },
                     { it.toUser() })
                 val posts = response.postListList.map { p ->
@@ -132,21 +141,70 @@ class ThreadViewModel : ViewModel() {
                 val nextKey: Key?
                 when (key) {
                     is PageKey -> {
-                        prevKey =
-                            if (response.page.hasPrev != 0) PageKey(response.page.currentPage - 1) else null
-                        nextKey =
-                            if (response.page.hasMore != 0) PageKey(response.page.currentPage + 1) else null
+                        if (threadConfig.reverse) {
+                            val currentPage =
+                                // if (key.pn == 0) response.page.totalPage // use pn = 0 is incorrect
+                                response.page.currentPage
+                            prevKey =
+                                if (response.page.hasPrev != 0) PageKey(currentPage + 1) else null
+                            nextKey =
+                                if (response.page.hasMore != 0) PageKey(currentPage - 1) else null
+                        } else {
+                            val currentPage = response.page.currentPage
+                            prevKey =
+                                if (response.page.hasPrev != 0) PageKey(currentPage - 1) else null
+                            nextKey =
+                                if (response.page.hasMore != 0) PageKey(currentPage + 1) else null
+                        }
+                        // Logger.d("$key prev=$prevKey next=$nextKey currentPage=${response.page.currentPage} totalPage=${response.page.totalPage} ${response.postListList.first().floor}..${response.postListList.last().floor}")
                     }
 
                     is PidKey -> {
-                        val last = response.postListList.last()
-                        val lastPid = last.id
-                        prevKey =
-                            if ((key.reverse && last.floor == 1) || (!key.reverse && response.postListList.first().floor == 1)) null
-                            else PidKey(if (key.reverse) lastPid else key.pid, key.pid, true)
-                        nextKey = if (response.page.hasMore == 0) null
-                        else PidKey(lastPid, key.pid, false)
-
+                        if (threadConfig.reverse) {
+                            if (params.key == null) {
+                                prevKey = PidKey(key.pid, true)
+                                nextKey =
+                                    if (response.postListList.last().floor == 1) null else PidKey(
+                                        response.postListList.last().id,
+                                        false
+                                    )
+                            } else if (key.reverse) {
+                                prevKey = if (response.postListList.isEmpty()) null else PidKey(
+                                    response.postListList.last().id,
+                                    true
+                                )
+                                nextKey = null
+                            } else {
+                                nextKey =
+                                    if (response.postListList.last().floor == 1) null else PidKey(
+                                        response.postListList.last().id,
+                                        false
+                                    )
+                                prevKey = null
+                            }
+                        } else {
+                            if (params.key == null) {
+                                prevKey =
+                                    if (response.postListList.first().floor == 1) null else PidKey(
+                                        key.pid,
+                                        true
+                                    )
+                                nextKey = if (response.page.hasMore == 0) null else PidKey(
+                                    response.postListList.last().id,
+                                    false
+                                )
+                            } else if (key.reverse) {
+                                val first = response.postListList.last()
+                                prevKey = if (first.floor == 1) null else PidKey(first.id, true)
+                                nextKey = null
+                            } else {
+                                nextKey = if (response.postListList.isEmpty()) null else PidKey(
+                                    response.postListList.last().id,
+                                    false
+                                )
+                                prevKey = null
+                            }
+                        }
                     }
                 }
                 return LoadResult.Page(
@@ -155,6 +213,7 @@ class ThreadViewModel : ViewModel() {
                     nextKey = nextKey
                 )
             } catch (t: Throwable) {
+                Logger.e("error load thread $threadConfig", t)
                 return LoadResult.Error(t)
             }
         }
@@ -168,7 +227,7 @@ class ThreadViewModel : ViewModel() {
         PagingConfig(pageSize = 30)
     ) {
         photos.clear()
-        PostPagingSource(App.instance.client)
+        PostPagingSource(App.instance.client, threadConfig)
     }.flow.map {
         it.map<Post, PostModel> { item -> PostModel.Post(item) }
             .insertHeaderItem(item = PostModel.Header)
