@@ -23,7 +23,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
-import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -35,11 +34,11 @@ import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
 import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -73,17 +72,13 @@ import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
-import io.github.a13e300.ro_tieba.ui.photo.TRANSITION_NAME_PREFIX
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.view.ContentTextView
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.SelectedLink
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.io.File
-import java.nio.charset.Charset
 
 class ThreadFragment : BaseFragment() {
 
@@ -92,7 +87,6 @@ class ThreadFragment : BaseFragment() {
     private val args: ThreadFragmentArgs by navArgs()
     private lateinit var binding: FragmentThreadBinding
     private lateinit var postAdapter: PostAdapter
-    private lateinit var headerAdapter: HeaderAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -114,16 +108,9 @@ class ThreadFragment : BaseFragment() {
                     .show()
             }
         }
-        headerAdapter = HeaderAdapter()
-        viewModel.needLoadPrevious.observe(viewLifecycleOwner) {
-            headerAdapter.notifyDataSetChanged()
-        }
         binding.list.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = ConcatAdapter(
-                headerAdapter,
-                postAdapter
-            )
+            adapter = postAdapter
             addItemDecoration(
                 MyItemDecoration(
                     resources.getDimension(R.dimen.thread_list_margin).toInt()
@@ -132,7 +119,6 @@ class ThreadFragment : BaseFragment() {
         }
         viewModel.threadInfo.observe(viewLifecycleOwner) {
             binding.toolbar.title = it.forum?.name
-            headerAdapter.notifyDataSetChanged()
         }
         setupToolbar(binding.toolbar)
         binding.toolbar.setOnClickListener {
@@ -382,23 +368,55 @@ class ThreadFragment : BaseFragment() {
         }
     }
 
-    class HeaderHolder(val binding: FragmentThreadHeaderBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    class FooterHolder(val binding: ThreadListFooterBinding) : ViewHolder(binding.root)
 
-    inner class HeaderAdapter : RecyclerView.Adapter<HeaderHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HeaderHolder =
-            HeaderHolder(FragmentThreadHeaderBinding.inflate(layoutInflater, parent, false))
+    inner class FooterAdapter : LoadStateAdapter<FooterHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): FooterHolder {
+            return FooterHolder(ThreadListFooterBinding.inflate(layoutInflater, parent, false))
+        }
 
-        override fun getItemCount(): Int = 1
+        override fun onBindViewHolder(holder: FooterHolder, loadState: LoadState) {
+            val isErr = loadState is LoadState.Error
+            holder.binding.retryButton.isVisible = isErr
+            holder.binding.errorMessage.isVisible = isErr
+            if (loadState is LoadState.Error) {
+                holder.binding.errorMessage.text = loadState.error.message
+            }
+        }
+    }
 
-        override fun onBindViewHolder(holder: HeaderHolder, position: Int) {
+    class PostViewHolder(val binding: FragmentThreadPostItemBinding) :
+        ViewHolder(binding.root)
+
+    class HeaderViewHolder(val binding: FragmentThreadHeaderBinding) :
+        ViewHolder(binding.root)
+
+
+    inner class PostAdapter(diffCallback: DiffUtil.ItemCallback<ThreadViewModel.PostModel>) :
+        PagingDataAdapter<ThreadViewModel.PostModel, ViewHolder>(
+            diffCallback
+        ) {
+
+        override fun getItemViewType(position: Int): Int {
+            return when (peek(position)) {
+                is ThreadViewModel.PostModel.Post -> R.layout.fragment_thread_post_item
+                is ThreadViewModel.PostModel.Header -> R.layout.fragment_thread_header
+                else -> throw IllegalStateException("unknown item")
+            }
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val post = getItem(position) ?: return
+            if (holder is PostViewHolder) {
+                bindForPost(holder, (post as ThreadViewModel.PostModel.Post).post)
+            } else if (holder is HeaderViewHolder) {
+                bindForHeader(holder)
+            }
+        }
+
+        private fun bindForHeader(holder: HeaderViewHolder) {
             val thread = viewModel.threadInfo.value ?: return
             holder.binding.threadTitle.text = thread.title
-            viewModel.needLoadPrevious.value?.let { holder.binding.loadPrevious.isGone = !it }
-            holder.binding.loadPrevious.setOnClickListener {
-                viewModel.threadConfig.value = viewModel.threadConfig.value!!.copy(pid = 0L)
-                postAdapter.refresh()
-            }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(
                     "回复数 ",
@@ -438,35 +456,8 @@ class ThreadFragment : BaseFragment() {
             }
         }
 
-    }
+        private fun bindForPost(holder: PostViewHolder, post: Post) {
 
-    class FooterHolder(val binding: ThreadListFooterBinding) : RecyclerView.ViewHolder(binding.root)
-
-    inner class FooterAdapter : LoadStateAdapter<FooterHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): FooterHolder {
-            return FooterHolder(ThreadListFooterBinding.inflate(layoutInflater, parent, false))
-        }
-
-        override fun onBindViewHolder(holder: FooterHolder, loadState: LoadState) {
-            val isErr = loadState is LoadState.Error
-            holder.binding.retryButton.isVisible = isErr
-            holder.binding.errorMessage.isVisible = isErr
-            if (loadState is LoadState.Error) {
-                holder.binding.errorMessage.text = loadState.error.message
-            }
-        }
-    }
-
-    class PostViewHolder(val binding: FragmentThreadPostItemBinding) :
-        RecyclerView.ViewHolder(binding.root)
-
-    inner class PostAdapter(diffCallback: DiffUtil.ItemCallback<Post>) :
-        PagingDataAdapter<Post, PostViewHolder>(
-            diffCallback
-        ) {
-
-        override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-            val post = getItem(position) ?: return
             fun showComments() {
                 findNavController().navigate(
                     MobileNavigationDirections.showComments(
@@ -541,11 +532,9 @@ class ThreadFragment : BaseFragment() {
                                         )
                                         resize(content.width, content.height)
                                     }
-                                    val idx =
-                                        viewModel.photos.keys.indexOf(post.floor to content.order)
-                                    val name = "${TRANSITION_NAME_PREFIX}_$idx"
-                                    ViewCompat.setTransitionName(this, name)
                                     setOnClickListener {
+                                        val idx =
+                                            viewModel.photos.keys.indexOf(post.floor to content.order)
                                         photoViewModel.photos = viewModel.photos.values.toList()
                                         photoViewModel.currentIndex.value = idx
                                         findNavController().navigate(
@@ -712,22 +701,42 @@ class ThreadFragment : BaseFragment() {
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-            return PostViewHolder(
-                FragmentThreadPostItemBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                ).apply { registerForContextMenu(root) }
-            )
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            return when (viewType) {
+                R.layout.fragment_thread_post_item -> PostViewHolder(
+                    FragmentThreadPostItemBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false
+                    ).apply { registerForContextMenu(root) }
+                )
+
+                R.layout.fragment_thread_header -> HeaderViewHolder(
+                    FragmentThreadHeaderBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false
+                    )
+                )
+
+                else -> throw IllegalStateException("unknown type $viewType")
+            }
         }
     }
 }
 
-object PostComparator : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
-        return oldItem.postId == newItem.postId
+object PostComparator : DiffUtil.ItemCallback<ThreadViewModel.PostModel>() {
+    override fun areItemsTheSame(
+        oldItem: ThreadViewModel.PostModel,
+        newItem: ThreadViewModel.PostModel
+    ): Boolean {
+        if (oldItem is ThreadViewModel.PostModel.Post && newItem is ThreadViewModel.PostModel.Post)
+            return oldItem.post.postId == newItem.post.postId
+        else if (oldItem == ThreadViewModel.PostModel.Header && newItem == ThreadViewModel.PostModel.Header)
+            return true
+        return false
     }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+    override fun areContentsTheSame(
+        oldItem: ThreadViewModel.PostModel,
+        newItem: ThreadViewModel.PostModel
+    ): Boolean {
         return oldItem == newItem
     }
 }

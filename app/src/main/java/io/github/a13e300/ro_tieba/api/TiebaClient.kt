@@ -5,6 +5,7 @@ import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
 import io.github.a13e300.ro_tieba.db.Account
 import io.github.a13e300.ro_tieba.fromJson
 import io.github.a13e300.ro_tieba.ignoreAllSSLErrorsIfDebug
+import kotlinx.coroutines.runBlocking
 import okhttp3.FormBody
 import okhttp3.Interceptor
 import okhttp3.MultipartBody
@@ -68,7 +69,8 @@ class TiebaClient(val account: Account = Account()) {
         tid: Long,
         page: Int = 1,
         pid: Long = 0,
-        rn: Int = 30
+        rn: Int = 30,
+        sort: Int = 0
     ): PbPageResIdl.DataRes {
         val req = PbPageReqIdl.newBuilder()
             .setData(
@@ -86,7 +88,7 @@ class TiebaClient(val account: Account = Account()) {
                             pn = page
                     }
                     .setRn(rn) // post count
-                    .setSort(0)
+                    .setSort(sort)
                     .setOnlyThreadAuthor(0)
                     .setWithComments(1)
                     .setCommentRn(4) // sub floors
@@ -181,6 +183,16 @@ class TiebaClient(val account: Account = Account()) {
             result.error.errmsg
         )
         return result.data
+    }
+
+    // for debug
+
+    fun getThreadsSync(fname: String, pn: Int) = runBlocking {
+        getThreads(fname, pn)
+    }
+
+    fun getPostsSync(tid: Long, page: Int, pid: Long, rn: Int, sort: Int) = runBlocking {
+        getPosts(tid, page, pid, rn, sort)
     }
 
     inner class JsonAPIInterceptor : Interceptor {

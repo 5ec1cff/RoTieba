@@ -17,13 +17,4 @@
         android:layout_height="wrap_content"
         android:id="@+id/thread_info"
         android:layout_marginHorizontal="16dp" />
-
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?attr/materialButtonOutlinedStyle"
-        android:text="@string/load_previous_title"
-        android:id="@+id/load_previous"
-        android:visibility="gone"
-        android:layout_marginHorizontal="16dp" />
 </androidx.appcompat.widget.LinearLayoutCompat>

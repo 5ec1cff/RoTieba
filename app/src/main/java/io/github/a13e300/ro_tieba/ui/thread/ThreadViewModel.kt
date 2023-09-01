@@ -8,7 +8,10 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.insertHeaderItem
+import androidx.paging.map
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
@@ -19,6 +22,7 @@ import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.toPostContent
 import io.github.a13e300.ro_tieba.ui.photo.Photo
+import kotlinx.coroutines.flow.map
 import java.util.Date
 import java.util.TreeMap
 
@@ -30,7 +34,6 @@ data class ThreadConfig(
 
 class ThreadViewModel : ViewModel() {
     var currentUid: String? = null
-    val needLoadPrevious = MutableLiveData<Boolean>()
     val threadConfig = MutableLiveData<ThreadConfig>()
     val threadInfo = MutableLiveData<TiebaThread>()
     val photos = TreeMap<Pair<Int, Int>, Photo> { p0, p1 ->
@@ -45,8 +48,14 @@ class ThreadViewModel : ViewModel() {
     data class PageKey(val pn: Int) : Key()
     data class PidKey(
         val pid: Long,
-        val prevPid: Long?
+        val prevPid: Long?,
+        val reverse: Boolean
     ) : Key()
+
+    sealed class PostModel {
+        data class Post(val post: io.github.a13e300.ro_tieba.models.Post) : PostModel()
+        data object Header : PostModel()
+    }
 
     inner class PostPagingSource(
         private val client: TiebaClient
@@ -55,15 +64,20 @@ class ThreadViewModel : ViewModel() {
             try {
                 val pid = threadConfig.value!!.pid
                 val key = params.key ?: if (pid != 0L) {
-                    PidKey(pid, null)
+                    PidKey(pid, null, false)
                 } else PageKey(1)
-                val response = when (key) {
-                    is PageKey -> client.getPosts(threadConfig.value!!.tid, key.pn)
-                    is PidKey -> client.getPosts(
-                        threadConfig.value!!.tid,
-                        if (key.pid == pid) 0 else 1,
-                        key.pid
-                    )
+                val response = try {
+                    when (key) {
+                        is PageKey -> client.getPosts(threadConfig.value!!.tid, key.pn)
+                        is PidKey -> client.getPosts(
+                            threadConfig.value!!.tid,
+                            if (key.pid == pid && !key.reverse) 0 else 1,
+                            key.pid, sort = if (key.reverse) 1 else 0
+                        )
+                    }
+                } catch (t: Throwable) {
+                    Logger.e("load thread $key", t)
+                    throw t
                 }
                 threadInfo.value = TiebaThread(
                     tid = response.thread.id,
@@ -105,7 +119,7 @@ class ThreadViewModel : ViewModel() {
                         agreeNum = p.agree.agreeNum,
                         disagreeNum = p.agree.disagreeNum
                     )
-                }
+                }.let { if (key is PidKey && key.reverse) it.reversed() else it }
                 posts.forEach { p ->
                     p.content.forEach { c ->
                         if (c is Content.ImageContent) {
@@ -114,9 +128,6 @@ class ThreadViewModel : ViewModel() {
                         }
                     }
                 }
-                if (params.key == null) // initial load
-                    needLoadPrevious.value =
-                        key is PidKey && response.postListList.first().floor != 1
                 val prevKey: Key?
                 val nextKey: Key?
                 when (key) {
@@ -128,12 +139,14 @@ class ThreadViewModel : ViewModel() {
                     }
 
                     is PidKey -> {
-                        prevKey = null
-                        if (response.page.hasMore == 0) nextKey = null
-                        else {
-                            val lastPid = response.postListList.last().id
-                            nextKey = PidKey(lastPid, key.pid)
-                        }
+                        val last = response.postListList.last()
+                        val lastPid = last.id
+                        prevKey =
+                            if ((key.reverse && last.floor == 1) || (!key.reverse && response.postListList.first().floor == 1)) null
+                            else PidKey(if (key.reverse) lastPid else key.pid, key.pid, true)
+                        nextKey = if (response.page.hasMore == 0) null
+                        else PidKey(lastPid, key.pid, false)
+
                     }
                 }
                 return LoadResult.Page(
@@ -156,6 +169,8 @@ class ThreadViewModel : ViewModel() {
     ) {
         photos.clear()
         PostPagingSource(App.instance.client)
-    }.flow
-        .cachedIn(viewModelScope)
+    }.flow.map {
+        it.map<Post, PostModel> { item -> PostModel.Post(item) }
+            .insertHeaderItem(item = PostModel.Header)
+    }.cachedIn(viewModelScope)
 }
