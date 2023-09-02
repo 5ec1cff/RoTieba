@@ -93,6 +93,7 @@ class ThreadFragment : BaseFragment() {
     private val args: ThreadFragmentArgs by navArgs()
     private lateinit var binding: FragmentThreadBinding
     private lateinit var postAdapter: PostAdapter
+    private lateinit var postLayoutManager: LinearLayoutManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -114,8 +115,9 @@ class ThreadFragment : BaseFragment() {
                     .show()
             }
         }
+        postLayoutManager = LinearLayoutManager(context)
         binding.list.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = postLayoutManager
             adapter = postAdapter
             addItemDecoration(
                 MyItemDecoration(
@@ -190,9 +192,21 @@ class ThreadFragment : BaseFragment() {
 
     private fun handleJumpPage() {
         val totalPage = viewModel.totalPage
+        val page = postLayoutManager.findFirstVisibleItemPosition().let {
+            if (it == RecyclerView.NO_POSITION) 0
+            else {
+                val items = postAdapter.snapshot().items
+                (items[it].let { a ->
+                    if (a is ThreadViewModel.PostModel.Header) {
+                        items.getOrNull(it + 1)?.let { b -> (b as? ThreadViewModel.PostModel.Post) }
+                    } else (a as? ThreadViewModel.PostModel.Post)
+                })?.post?.page ?: 0
+            }
+        }
+        val title = if (page != 0) "第 $page / $totalPage 页" else "共 $totalPage 页"
         val b = DialogJumpPageBinding.inflate(layoutInflater)
         val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("共 $totalPage 页")
+            .setTitle(title)
             .setView(b.root)
             .create()
 

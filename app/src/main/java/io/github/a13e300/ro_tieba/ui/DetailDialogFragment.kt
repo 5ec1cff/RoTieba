@@ -35,6 +35,7 @@ fun Post.toDetail() = Pair(
         "portrait",
         "uid",
         "楼层",
+        "页码",
         "发布时间",
         "赞数",
         "踩数"
@@ -48,6 +49,7 @@ fun Post.toDetail() = Pair(
         user.portrait,
         user.uid.toString(),
         floor.toString(),
+        page.toString(),
         time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) },
         agreeNum.toString(),
         disagreeNum.toString()

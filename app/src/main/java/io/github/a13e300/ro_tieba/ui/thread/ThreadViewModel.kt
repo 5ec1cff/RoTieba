@@ -92,7 +92,7 @@ class ThreadViewModel : ViewModel() {
                 key.pn,
                 sort = if (threadConfig.reverse) 1 else 0, seeLz = threadConfig.seeLz
             )
-            val posts = loadCommon(response, false)
+            val posts = loadCommon(response, false, key.pn)
             val prevKey: Key?
             val nextKey: Key?
             if (threadConfig.reverse) {
@@ -127,7 +127,7 @@ class ThreadViewModel : ViewModel() {
                 key.pid, sort = if (key.reverse xor threadConfig.reverse) 1 else 0,
                 seeLz = threadConfig.seeLz
             )
-            val posts = loadCommon(response, key.reverse)
+            val posts = loadCommon(response, key.reverse, 0)
             val prevKey: Key?
             val nextKey: Key?
             if (threadConfig.reverse) {
@@ -184,7 +184,7 @@ class ThreadViewModel : ViewModel() {
 
         private fun loadCommon(
             response: PbPageResIdlOuterClass.PbPageResIdl.DataRes,
-            reverse: Boolean
+            reverse: Boolean, page: Int
         ): List<Post> {
             threadInfo.value = TiebaThread(
                 tid = response.thread.id,
@@ -225,7 +225,8 @@ class ThreadViewModel : ViewModel() {
                     comments,
                     p.subPostNumber,
                     agreeNum = p.agree.agreeNum,
-                    disagreeNum = p.agree.disagreeNum
+                    disagreeNum = p.agree.disagreeNum,
+                    page = page
                 )
             }.let { if (reverse) it.reversed() else it }
             posts.forEach { p ->

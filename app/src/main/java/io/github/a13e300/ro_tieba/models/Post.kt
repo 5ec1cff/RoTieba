@@ -12,7 +12,8 @@ data class Post(
     val comments: List<Comment>,
     val commentCount: Int,
     val agreeNum: Long = 0,
-    val disagreeNum: Long = 0
+    val disagreeNum: Long = 0,
+    val page: Int = 0
 ) : IPost {
     override val id: Long
         get() = postId
