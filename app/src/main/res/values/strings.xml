@@ -45,4 +45,5 @@
     <string name="copy_video_link_title">复制视频地址</string>
     <string name="no_other_apps_tips">没有可以处理贴吧链接的其他应用</string>
     <string name="sort_title">倒序</string>
+    <string name="see_lz_title">只看楼主</string>
 </resources>

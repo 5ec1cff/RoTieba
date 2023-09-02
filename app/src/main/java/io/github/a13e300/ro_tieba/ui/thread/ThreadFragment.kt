@@ -128,6 +128,7 @@ class ThreadFragment : BaseFragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.refresh -> {
+                        viewModel.threadConfig = viewModel.threadConfig.copy(pid = 0L)
                         postAdapter.refresh()
                         true
                     }
@@ -140,6 +141,15 @@ class ThreadFragment : BaseFragment() {
                         true
                     }
 
+                    R.id.see_lz -> {
+                        val v = !menuItem.isChecked
+                        menuItem.setChecked(v)
+                        // clear pid to prevent from bugs
+                        viewModel.threadConfig = viewModel.threadConfig.copy(seeLz = v, pid = 0L)
+                        postAdapter.refresh()
+                        true
+                    }
+
                     else -> false
                 }
             }
@@ -147,6 +157,7 @@ class ThreadFragment : BaseFragment() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.thread_menu, menu)
                 menu.findItem(R.id.sort).setChecked(viewModel.threadConfig.reverse)
+                menu.findItem(R.id.see_lz).setChecked(viewModel.threadConfig.seeLz)
             }
         })
         lifecycleScope.launch {

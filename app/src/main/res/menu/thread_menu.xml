@@ -13,4 +13,10 @@
         android:checkable="true"
         app:actionViewClass="android.widget.CheckBox"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/see_lz"
+        android:title="@string/see_lz_title"
+        android:checkable="true"
+        app:actionViewClass="android.widget.CheckBox"
+        app:showAsAction="never" />
 </menu>

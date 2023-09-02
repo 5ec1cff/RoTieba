@@ -70,7 +70,8 @@ class TiebaClient(val account: Account = Account()) {
         page: Int = 1,
         pid: Long = 0,
         rn: Int = 30,
-        sort: Int = 0
+        sort: Int = 0,
+        seeLz: Boolean = false
     ): PbPageResIdl.DataRes {
         val req = PbPageReqIdl.newBuilder()
             .setData(
@@ -89,7 +90,7 @@ class TiebaClient(val account: Account = Account()) {
                     }
                     .setRn(rn) // post count
                     .setSort(sort)
-                    .setOnlyThreadAuthor(0)
+                    .setOnlyThreadAuthor(if (seeLz) 1 else 0)
                     .setWithComments(1)
                     .setCommentRn(4) // sub floors
                     .setIsFold(0)
@@ -191,8 +192,9 @@ class TiebaClient(val account: Account = Account()) {
         getThreads(fname, pn)
     }
 
-    fun getPostsSync(tid: Long, page: Int, pid: Long, rn: Int, sort: Int) = runBlocking {
-        getPosts(tid, page, pid, rn, sort)
+    fun getPostsSync(tid: Long, page: Int, pid: Long, rn: Int, sort: Int, seeLz: Boolean) =
+        runBlocking {
+            getPosts(tid, page, pid, rn, sort, seeLz)
     }
 
     inner class JsonAPIInterceptor : Interceptor {

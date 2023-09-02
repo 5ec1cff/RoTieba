@@ -31,7 +31,8 @@ data class ThreadConfig(
     val tid: Long,
     val pid: Long = 0L,
     val reverse: Boolean = false,
-    val page: Int = 0
+    val page: Int = 0,
+    val seeLz: Boolean = false
 )
 
 class ThreadViewModel : ViewModel() {
@@ -75,12 +76,13 @@ class ThreadViewModel : ViewModel() {
                         is PageKey -> client.getPosts(
                             threadConfig.tid,
                             key.pn,
-                            sort = if (threadConfig.reverse) 1 else 0
+                            sort = if (threadConfig.reverse) 1 else 0, seeLz = threadConfig.seeLz
                         )
                         is PidKey -> client.getPosts(
                             threadConfig.tid,
                             if (params.key == null) 0 else 1,
-                            key.pid, sort = if (key.reverse xor threadConfig.reverse) 1 else 0
+                            key.pid, sort = if (key.reverse xor threadConfig.reverse) 1 else 0,
+                            seeLz = threadConfig.seeLz
                         )
                     }
                 } catch (t: Throwable) {
