@@ -70,7 +70,7 @@ class TiebaClient(val account: Account = Account()) {
         page: Int = 1,
         pid: Long = 0,
         rn: Int = 30,
-        sort: Int = 0,
+        sort: Int = 0, // 0 -> normal, 1 -> reverse, 2 -> hot
         seeLz: Boolean = false
     ): PbPageResIdl.DataRes {
         val req = PbPageReqIdl.newBuilder()
