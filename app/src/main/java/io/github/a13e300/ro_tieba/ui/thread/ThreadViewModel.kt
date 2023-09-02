@@ -69,7 +69,11 @@ class ThreadViewModel : ViewModel() {
             val pid = threadConfig.pid
             val key = params.key ?: if (pid != 0L) {
                 PidKey(pid, false)
-            } else if (threadConfig.reverse) PageKey(totalPage) else PageKey(1)
+            } else {
+                val p = threadConfig.page
+                if (threadConfig.reverse) PageKey(if (p == 0) totalPage else p)
+                else PageKey(if (p == 0) 1 else p)
+            }
             return try {
                 // Logger.d("load thread $key $threadConfig")
                 when (key) {

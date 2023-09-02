@@ -12,12 +12,15 @@ import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.ContextMenu
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -25,6 +28,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -46,10 +50,12 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.PhotoUtils
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.appendSimpleContent
+import io.github.a13e300.ro_tieba.databinding.DialogJumpPageBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadCommentPreviewBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadHeaderBinding
@@ -150,6 +156,11 @@ class ThreadFragment : BaseFragment() {
                         true
                     }
 
+                    R.id.jump_page -> {
+                        handleJumpPage()
+                        true
+                    }
+
                     else -> false
                 }
             }
@@ -175,6 +186,55 @@ class ThreadFragment : BaseFragment() {
             }
         }
         return binding.root
+    }
+
+    private fun handleJumpPage() {
+        val totalPage = viewModel.totalPage
+        val b = DialogJumpPageBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("共 $totalPage 页")
+            .setView(b.root)
+            .create()
+
+        fun toPage(t: String?) =
+            if (t.isNullOrEmpty()) 0
+            else t.toIntOrNull()?.let { if (it in 1..totalPage) it else 0 } ?: 0
+
+        fun jump(pn: Int) {
+            viewModel.threadConfig = viewModel.threadConfig.copy(pid = 0L, page = pn)
+            postAdapter.refresh()
+            dialog.dismiss()
+        }
+        b.inputText.doAfterTextChanged {
+            val canJump = toPage(it?.toString()) != 0
+            b.buttonOk.isEnabled = canJump
+            b.inputLayout.error = if (canJump) null else "请输入 1 到 $totalPage 的整数"
+        }
+        b.inputText.setOnEditorActionListener { textView, i, keyEvent ->
+            Logger.d("OnEditorActionListener $i $keyEvent")
+            if (i != EditorInfo.IME_ACTION_DONE &&
+                !(keyEvent?.action == KeyEvent.ACTION_DOWN
+                        && keyEvent.keyCode in intArrayOf(
+                    KeyEvent.KEYCODE_ENTER,
+                    KeyEvent.KEYCODE_NUMPAD_ENTER
+                )
+                        )
+            )
+                return@setOnEditorActionListener false
+            val pn = toPage(textView.text?.toString())
+            if (pn != 0) jump(pn)
+            true
+        }
+        b.buttonOk.setOnClickListener {
+            jump(b.inputText.text.toString().toInt())
+        }
+        dialog.window?.apply {
+            clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        }
+        dialog.show()
+        b.inputText.requestFocus()
+        // context.getSystemService(InputMethodManager::class.java).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
     }
 
     override fun onCreateContextMenu(

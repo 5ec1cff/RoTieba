@@ -19,4 +19,8 @@
         android:checkable="true"
         app:actionViewClass="android.widget.CheckBox"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/jump_page"
+        android:title="@string/jump_page_title"
+        app:showAsAction="never" />
 </menu>

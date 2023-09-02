@@ -46,4 +46,7 @@
     <string name="no_other_apps_tips">没有可以处理贴吧链接的其他应用</string>
     <string name="sort_title">倒序</string>
     <string name="see_lz_title">只看楼主</string>
+    <string name="jump_page_title">跳页</string>
+    <string name="jump_page_hint">页数</string>
+    <string name="ok">确定</string>
 </resources>
