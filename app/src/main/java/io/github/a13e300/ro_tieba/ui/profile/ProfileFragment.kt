@@ -65,7 +65,7 @@ class ProfileFragment : BaseFragment() {
             binding.userAvatar.displayImage(profile.avatarUrl)
             binding.userAvatar.setOnClickListener {
                 photoViewModel.currentIndex.value = 0
-                photoViewModel.photos = listOf(Photo(profile.avatarUrl, 0, profile))
+                photoViewModel.photos = listOf(Photo(profile.realAvatarUrl, 0, profile))
                 findNavController().navigate(MobileNavigationDirections.viewPhotos())
             }
             binding.userStat.text =

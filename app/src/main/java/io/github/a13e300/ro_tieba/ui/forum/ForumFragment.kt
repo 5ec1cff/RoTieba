@@ -84,6 +84,13 @@ class ForumFragment : BaseFragment() {
             binding.forumName.text = it.name
             binding.forumDesc.text = it.desc
             binding.forumAvatar.displayImage(it.avatarUrl)
+            binding.forumAvatar.setOnClickListener { _ ->
+                if (it.avatarUrl != null) {
+                    photoViewModel.currentIndex.value = 0
+                    photoViewModel.photos = listOf(Photo(it.avatarUrl, 0))
+                    findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+            }
         }
         setupToolbar(binding.toolbar)
         binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
@@ -164,14 +171,6 @@ class ForumFragment : BaseFragment() {
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile().setPortrait(thread.author.portrait)
                 )
-                /*
-                if (!openUserAtOtherClient(thread.author, requireContext())) {
-                    Snackbar.make(
-                        binding.root,
-                        getString(R.string.no_other_apps_tips),
-                        Snackbar.LENGTH_SHORT
-                    ).show()
-                }*/
             }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(
