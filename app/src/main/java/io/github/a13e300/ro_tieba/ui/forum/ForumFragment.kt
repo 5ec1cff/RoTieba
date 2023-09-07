@@ -34,7 +34,6 @@ import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.openForumAtOtherClient
-import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
@@ -162,13 +161,17 @@ class ForumFragment : BaseFragment() {
                 DetailDialogFragment.newInstance(ks, vs).show(childFragmentManager, "detail")
             }
             holder.binding.threadAvatar.setOnClickListener {
+                findNavController().navigate(
+                    MobileNavigationDirections.showProfile().setPortrait(thread.author.portrait)
+                )
+                /*
                 if (!openUserAtOtherClient(thread.author, requireContext())) {
                     Snackbar.make(
                         binding.root,
                         getString(R.string.no_other_apps_tips),
                         Snackbar.LENGTH_SHORT
                     ).show()
-                }
+                }*/
             }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(

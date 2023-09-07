@@ -160,7 +160,12 @@ class TiebaClient(val account: Account = Account()) {
         return result.data
     }
 
-    suspend fun getUserProfile(portrait: String): ProfileResIdl.DataRes {
+    suspend fun getUserProfile(
+        portrait: String? = null,
+        uid: Long = 0L,
+        pn: Int = 1,
+        page: Int = 1
+    ): ProfileResIdl.DataRes {
         val req = ProfileReqIdl.newBuilder()
             .setData(
                 ProfileReqIdl.DataReq.newBuilder()
@@ -170,9 +175,12 @@ class TiebaClient(val account: Account = Account()) {
                             .setClientVersion(MAIN_VERSION)
                     )
                     .setNeedPostCount(1)
-                    .setFriendUidPortrait(portrait)
-                    .setPn(1)
-                    // .setPage(1)
+                    .setPn(pn)
+                    .setPage(page)
+                    .apply {
+                        if (portrait != null) setFriendUidPortrait(portrait)
+                        if (uid != 0L) setUid(uid)
+                    }
             ).build()
         val part =
             MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
@@ -195,6 +203,10 @@ class TiebaClient(val account: Account = Account()) {
     fun getPostsSync(tid: Long, page: Int, pid: Long, rn: Int, sort: Int, seeLz: Boolean) =
         runBlocking {
             getPosts(tid, page, pid, rn, sort, seeLz)
+    }
+
+    fun getUserProfileSync(portrait: String?, uid: Long, pn: Int = 1, page: Int) = runBlocking {
+        getUserProfile(portrait, uid, pn, page)
     }
 
     inner class JsonAPIInterceptor : Interceptor {

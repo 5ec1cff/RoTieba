@@ -33,3 +33,35 @@ fun UserOuterClass.User.toUser() = this.let { user ->
         bawuType = user.bawuType
     )
 }
+
+data class UserProfile(
+    val name: String = "unknown",
+    val nick: String = "unknown",
+    val uid: Long = 0,
+    val portrait: String = "",
+    val desc: String = "",
+    val fanNum: Int = 0,
+    val followNum: Int = 0,
+    val threadNum: Int = 0
+) {
+    val showName: String
+        get() = nick.ifEmpty { name }
+
+    val avatarUrl: String
+        get() = "$AVATAR_THUMBNAIL/$portrait"
+
+    val realAvatarUrl: String
+        get() = "$AVATAR_ORIG/$portrait"
+}
+
+fun UserOuterClass.User.toUserProfile() =
+    UserProfile(
+        name = name,
+        nick = nameShow,
+        uid = id,
+        portrait = portrait,
+        desc = intro,
+        fanNum = fansNum,
+        followNum = concernNum,
+        threadNum = postNum
+    )

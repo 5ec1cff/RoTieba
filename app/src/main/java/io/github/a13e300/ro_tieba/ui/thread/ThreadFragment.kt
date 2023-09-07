@@ -73,7 +73,6 @@ import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.IPost
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.openPostAtOtherClient
-import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
@@ -585,7 +584,10 @@ class ThreadFragment : BaseFragment() {
             var lastString: SpannableStringBuilder? = null
             holder.binding.avatar.displayImage(post.user.avatarUrl)
             holder.binding.avatar.setOnClickListener {
-                openUserAtOtherClient(post.user, requireContext())
+                // openUserAtOtherClient(post.user, requireContext())
+                findNavController().navigate(
+                    MobileNavigationDirections.showProfile().setPortrait(post.user.portrait)
+                )
             }
             fun addTextView() {
                 if (lastString == null) return

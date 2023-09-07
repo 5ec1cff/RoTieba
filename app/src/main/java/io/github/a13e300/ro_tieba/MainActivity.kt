@@ -2,6 +2,7 @@ package io.github.a13e300.ro_tieba
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import io.github.a13e300.ro_tieba.databinding.ActivityMainBinding
@@ -14,6 +15,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         /* prevent from navigation clearing our task (maybe dirty) */
         intent.flags = intent.flags.and(Intent.FLAG_ACTIVITY_NEW_TASK.inv())
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }

@@ -17,6 +17,7 @@ import com.github.panpf.sketch.request.DownloadRequest
 import com.github.panpf.sketch.request.DownloadResult
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
+import io.github.a13e300.ro_tieba.models.UserProfile
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -122,6 +123,7 @@ object PhotoUtils {
                             val key = when (val source = photo.source) {
                                 is Post -> "rotieba_t${source.tid}_p${source.postId}_f${source.floor}_c${photo.order}"
                                 is TiebaThread -> "rotieba_t${source.tid}_p${source.postId}_f1_c${photo.order}"
+                                is UserProfile -> "rotieba_u${source.uid}_${source.portrait}"
                                 else -> "rotieba"
                             }
                             save(

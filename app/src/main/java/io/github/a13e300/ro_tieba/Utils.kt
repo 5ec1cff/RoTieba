@@ -12,7 +12,7 @@ import androidx.core.os.bundleOf
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.models.Content
-import io.github.a13e300.ro_tieba.models.User
+import io.github.a13e300.ro_tieba.models.UserProfile
 import okhttp3.OkHttpClient
 import tbclient.PbContentOuterClass
 import java.io.InputStream
@@ -202,7 +202,7 @@ fun openAtOtherClient(uri: Uri, context: Context): Boolean {
     return true
 }
 
-fun openUserAtOtherClient(user: User, context: Context) =
+fun openUserAtOtherClient(user: UserProfile, context: Context) =
 // com.baidu.tieba://unidispatch/usercenter?portrait={}
     // or com.baidu.tieba://usercenter//uid={}
     openAtOtherClient(

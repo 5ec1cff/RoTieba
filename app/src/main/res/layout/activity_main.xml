@@ -11,5 +11,4 @@
     app:defaultNavHost="true"
     app:navGraph="@navigation/mobile_navigation"
     app:consumeSystemWindowsInsets="start|end"
-    app:edgeToEdge="true"
     app:fitsSystemWindowsInsets="start|end" />
