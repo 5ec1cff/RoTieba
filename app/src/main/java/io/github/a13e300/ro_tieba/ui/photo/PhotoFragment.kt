@@ -1,5 +1,6 @@
 package io.github.a13e300.ro_tieba.ui.photo
 
+import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.ContextMenu
@@ -20,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.github.panpf.sketch.displayImage
+import com.github.panpf.sketch.viewability.showSectorProgressIndicator
 import com.github.panpf.sketch.zoom.SketchZoomImageView
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.BaseFragment
@@ -220,6 +222,11 @@ class PhotoFragment : BaseFragment() {
         override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
             holder.imageView.apply {
                 displayImage(items[position].url)
+                val ta =
+                    requireContext().obtainStyledAttributes(intArrayOf(androidx.appcompat.R.attr.colorPrimary))
+                val color = ta.getColor(0, Color.WHITE)
+                ta.recycle()
+                showSectorProgressIndicator(color = color)
                 ViewCompat.setTransitionName(this, "${TRANSITION_NAME_PREFIX}_$position")
             }
         }

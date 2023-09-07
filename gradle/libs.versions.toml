@@ -68,6 +68,7 @@ sketch-main = { module = "io.github.panpf.sketch3:sketch", version.ref = "sketch
 sketch-okhttp = { module = "io.github.panpf.sketch3:sketch-okhttp", version.ref = "sketch" }
 sketch-zoom = { module = "io.github.panpf.sketch3:sketch-zoom", version.ref = "sketch" }
 sketch-movie = { module = "io.github.panpf.sketch3:sketch-gif-movie", version.ref = "sketch" }
+sketch-extension = { module = "io.github.panpf.sketch3:sketch-extensions", version.ref = "sketch" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "com-android-application" }
@@ -93,5 +94,6 @@ sketch = [
     "sketch-main",
     "sketch-okhttp",
     "sketch-zoom",
-    "sketch-movie"
+    "sketch-movie",
+    "sketch-extension"
 ]
