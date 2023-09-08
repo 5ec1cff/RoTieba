@@ -5,12 +5,14 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.search.SearchPostFragment"
-    android:clipChildren="false">
+    android:clipChildren="false"
+    android:id="@+id/root">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:liftOnScroll="false"
+        android:id="@+id/app_bar"
         app:liftOnScrollColor="#00000000">
 
         <androidx.constraintlayout.widget.ConstraintLayout

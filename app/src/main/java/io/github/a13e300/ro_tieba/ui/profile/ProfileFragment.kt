@@ -27,6 +27,7 @@ import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 class ProfileFragment : BaseFragment() {
     private lateinit var binding: FragmentProfileBinding
@@ -41,6 +42,10 @@ class ProfileFragment : BaseFragment() {
     ): View {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
         setupToolbar(binding.toolbar)
+        binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+            binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
+                viewModel.user.value?.showName else null
+        }
         binding.toolbar.setOnMenuItemClickListener {
             val profile = viewModel.user.value ?: return@setOnMenuItemClickListener false
             when (it.itemId) {
