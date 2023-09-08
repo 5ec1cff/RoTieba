@@ -97,7 +97,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:fitsSystemWindowsInsets="bottom"
         android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:paddingHorizontal="4dp" />
 
 
     <TextView

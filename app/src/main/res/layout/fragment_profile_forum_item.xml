@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.RoTieba.FilledCardPrimary"
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_margin="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/slogan_card"
+            android:layout_margin="8dp"
+            app:round="5dp"
+            android:id="@+id/forum_avatar" />
+
+        <TextView
+            android:id="@+id/bar_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            style="?attr/textAppearanceListItem"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="@id/forum_avatar"
+            app:layout_constraintBottom_toBottomOf="@id/forum_avatar"
+            app:layout_constraintStart_toEndOf="@id/forum_avatar"
+            app:layout_constraintEnd_toStartOf="@id/bar_level" />
+
+        <TextView
+            android:id="@+id/bar_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/bar_name"
+            app:layout_constraintBottom_toBottomOf="@id/bar_name"
+            app:layout_constraintStart_toEndOf="@id/bar_name"
+            android:layout_marginHorizontal="8dp"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:id="@+id/slogan_card"
+            app:layout_constraintTop_toBottomOf="@id/forum_avatar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/Widget.RoTieba.FilledCardSecondary">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:id="@+id/slogan"
+                android:maxLines="3"
+                android:ellipsize="end" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

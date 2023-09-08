@@ -18,13 +18,14 @@ import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
-import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileBinding
+import io.github.a13e300.ro_tieba.databinding.FragmentProfileForumItemBinding
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.ui.photo.Photo
@@ -88,6 +89,8 @@ class ProfileFragment : BaseFragment() {
             }
         }
         binding.forumList.adapter = forumAdapter
+        binding.forumList.layoutManager =
+            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         forumAdapter.addLoadStateListener { state ->
             binding.resultTips.isVisible =
                 state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0 && viewModel.followedForumsHidden
@@ -108,7 +111,7 @@ class ProfileFragment : BaseFragment() {
     inner class FollowForumAdapter(
         diffCallback: DiffUtil.ItemCallback<UserForum>
     ) : PagingDataAdapter<UserForum, FollowForumAdapter.FollowForumViewHolder>(diffCallback) {
-        inner class FollowForumViewHolder(val binding: FragmentHomeBarItemBinding) :
+        inner class FollowForumViewHolder(val binding: FragmentProfileForumItemBinding) :
             RecyclerView.ViewHolder(binding.root)
 
         override fun onBindViewHolder(holder: FollowForumViewHolder, position: Int) {
@@ -120,12 +123,13 @@ class ProfileFragment : BaseFragment() {
                 findNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
             }
             holder.binding.forumAvatar.displayImage(bar.avatarUrl)
+            holder.binding.slogan.text = bar.desc
             ViewCompat.setTooltipText(holder.binding.root, bar.name)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowForumViewHolder {
             return FollowForumViewHolder(
-                FragmentHomeBarItemBinding.inflate(
+                FragmentProfileForumItemBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
