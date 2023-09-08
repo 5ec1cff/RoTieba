@@ -98,4 +98,15 @@
         app:fitsSystemWindowsInsets="bottom"
         android:clipToPadding="false"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?textAppearanceBody1"
+        android:id="@+id/result_tips"
+        android:visibility="gone"
+        app:layout_anchor="@id/forum_list"
+        app:layout_anchorGravity="center"
+        android:text="@string/user_follow_forums_hidden" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

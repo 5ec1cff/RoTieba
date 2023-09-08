@@ -69,4 +69,14 @@
         app:fitsSystemWindowsInsets="bottom"
         android:clipToPadding="false" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?textAppearanceBody1"
+        android:id="@+id/result_tips"
+        android:visibility="gone"
+        app:layout_anchor="@id/post_list"
+        app:layout_anchorGravity="center"
+        android:text="@string/no_result_tips" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

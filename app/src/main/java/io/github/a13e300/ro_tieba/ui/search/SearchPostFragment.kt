@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -114,6 +115,8 @@ class SearchPostFragment : Fragment() {
                     .setMessage(it.message)
                     .show()
             }
+            binding.resultTips.isVisible =
+                state.append is LoadState.NotLoading && state.append.endOfPaginationReached && postAdapter.itemCount == 0
         }
         lifecycleScope.launch {
             postAdapter.loadStateFlow
@@ -136,12 +139,11 @@ class SearchPostFragment : Fragment() {
 
     inner class StateAdapter : LoadStateAdapter<LoadStateHolder>() {
         override fun onBindViewHolder(holder: LoadStateHolder, loadState: LoadState) {
-            if (listEmpty(loadState)) {
-                holder.binding.errorMessage.text = getString(R.string.empty)
-                holder.binding.retryButton.isGone = true
-            } else if (loadState is LoadState.Error) {
+            if (loadState is LoadState.Error) {
                 holder.binding.errorMessage.text = loadState.error.message
                 holder.binding.retryButton.isGone = false
+            } else {
+                holder.binding.retryButton.isGone = true
             }
         }
 

@@ -48,25 +48,20 @@ class SearchResultFragment : Fragment() {
 
     private fun updateData() {
         if (!viewModel.searched) {
-            binding.resultList.visibility = View.GONE
-            binding.resultTips.visibility = View.GONE
             return
         }
         viewModel.searchedForums.let { frs ->
             when (frs) {
                 is SearchResult.Result -> {
                     if (frs.data.isEmpty()) {
-                        binding.resultList.visibility = View.GONE
                         binding.resultTips.visibility = View.VISIBLE
                         binding.resultTips.setText(R.string.no_result_tips)
                     } else {
-                        binding.resultList.visibility = View.VISIBLE
                         binding.resultTips.visibility = View.GONE
                     }
                 }
 
                 is SearchResult.Error -> {
-                    binding.resultList.visibility = View.GONE
                     binding.resultTips.visibility = View.VISIBLE
                     binding.resultTips.text = frs.error.message
                 }

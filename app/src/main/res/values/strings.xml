@@ -25,7 +25,7 @@
     <string name="saved_to_gallery">已保存到相册</string>
     <string name="error_dialog_title">错误</string>
     <string name="search_tab_bar_title">吧</string>
-    <string name="no_result_tips">没有结果</string>
+    <string name="no_result_tips">未搜索到内容</string>
     <string name="share_photo_title">分享图片</string>
     <string name="back_title">返回</string>
     <string name="bawu_type_manager_name">吧主</string>
@@ -49,4 +49,5 @@
     <string name="jump_page_title">跳页</string>
     <string name="jump_page_hint">页数</string>
     <string name="ok">确定</string>
+    <string name="user_follow_forums_hidden">该用户已隐藏关注的吧</string>
 </resources>

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 
 class ProfileViewModel : ViewModel() {
     var uid = 0L
+    var followedForumsHidden = false
     val user = MutableLiveData<UserProfile>()
     suspend fun requestUser(uid: Long, portrait: String?) {
         val p = withContext(Dispatchers.IO) {
@@ -42,6 +43,7 @@ class ProfileViewModel : ViewModel() {
             val result = mutableListOf<UserForum>()
             response.forumList?.nonGconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
             response.forumList?.gconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
+            followedForumsHidden = response.forumList == null
             return LoadResult.Page(
                 data = result,
                 prevKey = null,

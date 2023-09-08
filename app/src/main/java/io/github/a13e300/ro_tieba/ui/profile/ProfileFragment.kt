@@ -9,10 +9,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -86,6 +88,10 @@ class ProfileFragment : BaseFragment() {
             }
         }
         binding.forumList.adapter = forumAdapter
+        forumAdapter.addLoadStateListener { state ->
+            binding.resultTips.isVisible =
+                state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0 && viewModel.followedForumsHidden
+        }
         lifecycleScope.launch {
             viewModel.flow.collect {
                 forumAdapter.submitData(it)
