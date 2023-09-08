@@ -24,9 +24,10 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
-import io.github.a13e300.ro_tieba.api.json.GetFollowForums
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBinding
+import io.github.a13e300.ro_tieba.models.UserForum
+import io.github.a13e300.ro_tieba.ui.profile.UserForumComparator
 import io.github.a13e300.ro_tieba.utils.appendLevelSpan
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -61,26 +62,26 @@ class HomeFragment : BaseFragment() {
                 return false
             }
         })
-        val barAdapter = BarAdapter(BarComparator)
+        val forumAdapter = ForumAdapter(UserForumComparator)
         binding.barList.apply {
             layoutManager = GridLayoutManager(context, 2)
-            adapter = barAdapter
+            adapter = forumAdapter
         }
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val currentUid = App.instance.accountManager.currentAccount.first().uid
                 viewModel.updateUid(currentUid)
                 viewModel.flow.collect {
-                    barAdapter.submitData(it)
+                    forumAdapter.submitData(it)
                 }
             }
         }
         return binding.root
     }
 
-    inner class BarAdapter(
-        diffCallback: DiffUtil.ItemCallback<GetFollowForums.Forum>
-    ) : PagingDataAdapter<GetFollowForums.Forum, BarAdapter.BarViewHolder>(diffCallback) {
+    inner class ForumAdapter(
+        diffCallback: DiffUtil.ItemCallback<UserForum>
+    ) : PagingDataAdapter<UserForum, ForumAdapter.BarViewHolder>(diffCallback) {
         inner class BarViewHolder(val binding: FragmentHomeBarItemBinding) :
             RecyclerView.ViewHolder(binding.root)
 
@@ -88,11 +89,11 @@ class HomeFragment : BaseFragment() {
             val bar = getItem(position) ?: return
             holder.binding.barName.text = bar.name
             holder.binding.barLevel.text =
-                SpannableStringBuilder().appendLevelSpan(requireContext(), bar.levelId.toInt())
+                SpannableStringBuilder().appendLevelSpan(requireContext(), bar.levelId)
             holder.binding.root.setOnClickListener {
                 findMainNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
             }
-            holder.binding.forumAvatar.displayImage(bar.avatar)
+            holder.binding.forumAvatar.displayImage(bar.avatarUrl)
             ViewCompat.setTooltipText(holder.binding.root, bar.name)
         }
 
@@ -110,21 +111,5 @@ class HomeFragment : BaseFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-}
-
-object BarComparator : DiffUtil.ItemCallback<GetFollowForums.Forum>() {
-    override fun areItemsTheSame(
-        oldItem: GetFollowForums.Forum,
-        newItem: GetFollowForums.Forum
-    ): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(
-        oldItem: GetFollowForums.Forum,
-        newItem: GetFollowForums.Forum
-    ): Boolean {
-        return oldItem == newItem
     }
 }

@@ -11,7 +11,8 @@ import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.api.TiebaClient
-import io.github.a13e300.ro_tieba.api.json.GetFollowForums
+import io.github.a13e300.ro_tieba.models.UserForum
+import io.github.a13e300.ro_tieba.models.toUserForum
 import kotlinx.coroutines.flow.Flow
 
 class HomeViewModel : ViewModel() {
@@ -20,16 +21,16 @@ class HomeViewModel : ViewModel() {
     inner class BarPagingSource(
         private val client: TiebaClient,
         private val uid: String = client.account.uid
-    ) : PagingSource<Int, GetFollowForums.Forum>() {
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GetFollowForums.Forum> {
+    ) : PagingSource<Int, UserForum>() {
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UserForum> {
             val page = params.key ?: 1
             if (uid == AccountManager.ACCOUNT_ANONYMOUS) {
                 return LoadResult.Page(data = emptyList(), prevKey = null, nextKey = null)
             }
             val response = client.jsonAPI.getFollowForums(uid, page, 50)
-            val result = mutableListOf<GetFollowForums.Forum>()
-            response.forumList?.nonGconForum?.also { result.addAll(it) }
-            response.forumList?.gconForum?.also { result.addAll(it) }
+            val result = mutableListOf<UserForum>()
+            response.forumList?.nonGconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
+            response.forumList?.gconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
             return LoadResult.Page(
                 data = result,
                 prevKey = null,
@@ -37,7 +38,7 @@ class HomeViewModel : ViewModel() {
             )
         }
 
-        override fun getRefreshKey(state: PagingState<Int, GetFollowForums.Forum>): Int? {
+        override fun getRefreshKey(state: PagingState<Int, UserForum>): Int? {
             return state.anchorPosition?.let { anchorPosition ->
                 val anchorPage = state.closestPageToPosition(anchorPosition)
                 anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
@@ -45,7 +46,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    lateinit var flow: Flow<PagingData<GetFollowForums.Forum>>
+    lateinit var flow: Flow<PagingData<UserForum>>
 
     fun updateUid(uid: String) {
         if (uid == currentUid) return
