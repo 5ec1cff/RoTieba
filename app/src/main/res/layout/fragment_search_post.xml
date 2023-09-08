@@ -19,8 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|enterAlways"
-            android:elevation="5dp"
-            android:background="@drawable/rect"
+            android:background="@drawable/background"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButtonToggleGroup
@@ -61,6 +60,11 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginEnd="16dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?colorSurfaceVariant" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

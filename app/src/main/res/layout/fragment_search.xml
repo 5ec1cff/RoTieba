@@ -28,6 +28,7 @@
         <com.google.android.material.tabs.TabLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?colorSurface"
             android:id="@+id/search_tab_layout">
 
             <com.google.android.material.tabs.TabItem

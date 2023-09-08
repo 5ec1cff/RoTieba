@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isGone
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.search.SearchView
 import com.google.android.material.tabs.TabLayoutMediator
 import io.github.a13e300.ro_tieba.BaseFragment
@@ -96,7 +98,18 @@ class SearchFragment : BaseFragment() {
         }
         if (viewModel.searchAtForum) {
             binding.searchTabLayout.isGone = true
+            binding.searchViewPager.isUserInputEnabled = false
         } else {
+            binding.searchViewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    binding.searchTabLayout.background = AppCompatResources.getDrawable(
+                        requireContext(), when (position) {
+                            0 -> R.drawable.background_with_divider
+                            else -> R.drawable.background
+                        }
+                    )
+                }
+            })
             val myAdapter = SearchSuggestionAdapter()
             TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
                 tab.text = when (position) {
