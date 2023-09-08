@@ -6,7 +6,7 @@ data class GetFollowForums(
     @SerializedName("has_more")
     val hasMore: Boolean,
     @SerializedName("forum_list")
-    val forumList: ForumList,
+    val forumList: ForumList?,
 ) {
     data class ForumList(
         @SerializedName("non-gconforum")

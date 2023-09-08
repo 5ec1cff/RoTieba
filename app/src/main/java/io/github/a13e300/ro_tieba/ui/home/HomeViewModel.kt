@@ -28,8 +28,8 @@ class HomeViewModel : ViewModel() {
             }
             val response = client.jsonAPI.getFollowForums(uid, page, 50)
             val result = mutableListOf<GetFollowForums.Forum>()
-            response.forumList.nonGconForum?.also { result.addAll(it) }
-            response.forumList.gconForum?.also { result.addAll(it) }
+            response.forumList?.nonGconForum?.also { result.addAll(it) }
+            response.forumList?.gconForum?.also { result.addAll(it) }
             return LoadResult.Page(
                 data = result,
                 prevKey = null,

@@ -42,7 +42,7 @@ data class UserProfile(
     val desc: String = "",
     val fanNum: Int = 0,
     val followNum: Int = 0,
-    val threadNum: Int = 0
+    val threadNum: Int = 0,
 ) {
     val showName: String
         get() = nick.ifEmpty { name }
