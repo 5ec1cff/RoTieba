@@ -122,6 +122,15 @@
             android:name="portrait"
             app:nullable="true"
             android:defaultValue="@null" />
+        <deepLink
+            app:uri="com.baidu.tieba://unidispatch/usercenter?portrait={portrait}"
+            app:action="android.intent.action.VIEW" />
+        <deepLink
+            app:uri="com.baidu.tieba://usercenter//uid={uid}"
+            app:action="android.intent.action.VIEW" />
+        <deepLink
+            app:uri="rotieba://user/profile?uid={uid}&amp;portrait={portrait}"
+            app:action="android.intent.action.VIEW" />
     </fragment>
 
     <action
