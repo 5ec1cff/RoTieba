@@ -88,25 +88,16 @@
                 android:layout_height="?actionBarSize"
                 app:layout_collapseMode="pin" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_tab_layout" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/forum_list"
+    <androidx.viewpager2.widget.ViewPager2
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:fitsSystemWindowsInsets="bottom"
-        android:clipToPadding="false"
-        android:paddingHorizontal="4dp" />
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?textAppearanceBody1"
-        android:id="@+id/result_tips"
-        android:visibility="gone"
-        app:layout_anchor="@id/forum_list"
-        app:layout_anchorGravity="center"
-        android:text="@string/user_follow_forums_hidden" />
+        android:id="@+id/profile_view_pager" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

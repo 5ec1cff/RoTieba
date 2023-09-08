@@ -1,0 +1,89 @@
+package io.github.a13e300.ro_tieba.ui.profile
+
+import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.github.panpf.sketch.displayImage
+import io.github.a13e300.ro_tieba.MobileNavigationDirections
+import io.github.a13e300.ro_tieba.databinding.FragmentProfileFollowedForumsBinding
+import io.github.a13e300.ro_tieba.databinding.FragmentProfileForumItemBinding
+import io.github.a13e300.ro_tieba.models.UserForum
+import io.github.a13e300.ro_tieba.utils.appendLevelSpan
+import kotlinx.coroutines.launch
+
+class ProfileForumsFragment : Fragment() {
+    private val viewModel: ProfileViewModel by viewModels({ requireParentFragment() })
+    private lateinit var binding: FragmentProfileFollowedForumsBinding
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentProfileFollowedForumsBinding.inflate(inflater, container, false)
+        val forumAdapter = FollowForumAdapter(UserForumComparator)
+        viewModel.user.observe(viewLifecycleOwner) { profile ->
+            if (viewModel.uid == 0L) {
+                viewModel.uid = profile.uid
+                forumAdapter.refresh()
+            }
+        }
+        binding.forumList.adapter = forumAdapter
+        binding.forumList.layoutManager =
+            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        forumAdapter.addLoadStateListener { state ->
+            binding.resultTips.isVisible =
+                state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0 && viewModel.followedForumsHidden
+        }
+        lifecycleScope.launch {
+            viewModel.forumsFlow.collect {
+                forumAdapter.submitData(it)
+            }
+        }
+        return binding.root
+    }
+
+
+    inner class FollowForumAdapter(
+        diffCallback: DiffUtil.ItemCallback<UserForum>
+    ) : PagingDataAdapter<UserForum, FollowForumAdapter.FollowForumViewHolder>(diffCallback) {
+        inner class FollowForumViewHolder(val binding: FragmentProfileForumItemBinding) :
+            RecyclerView.ViewHolder(binding.root)
+
+        override fun onBindViewHolder(holder: FollowForumViewHolder, position: Int) {
+            val bar = getItem(position) ?: return
+            holder.binding.barName.text = bar.name
+            holder.binding.barLevel.text =
+                SpannableStringBuilder().appendLevelSpan(requireContext(), bar.levelId)
+            holder.binding.root.setOnClickListener {
+                findNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
+            }
+            holder.binding.forumAvatar.displayImage(bar.avatarUrl)
+            holder.binding.slogan.text = bar.desc
+            ViewCompat.setTooltipText(holder.binding.root, bar.name)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowForumViewHolder {
+            return FollowForumViewHolder(
+                FragmentProfileForumItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+        }
+    }
+}

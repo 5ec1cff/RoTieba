@@ -8,29 +8,24 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.ViewCompat
-import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.paging.LoadState
-import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayoutMediator
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileBinding
-import io.github.a13e300.ro_tieba.databinding.FragmentProfileForumItemBinding
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
-import io.github.a13e300.ro_tieba.utils.appendLevelSpan
 import kotlinx.coroutines.launch
 
 class ProfileFragment : BaseFragment() {
@@ -62,8 +57,8 @@ class ProfileFragment : BaseFragment() {
             }
             false
         }
-        val forumAdapter = FollowForumAdapter(UserForumComparator)
         viewModel.uid = args.uid
+        viewModel.portrait = args.portrait
         viewModel.user.observe(viewLifecycleOwner) { profile ->
             binding.userName.text = SpannableStringBuilder()
                 .append(profile.name, StyleSpan(Typeface.BOLD), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -83,60 +78,36 @@ class ProfileFragment : BaseFragment() {
             binding.userStat.text =
                 "粉丝 ${profile.fanNum} 关注 ${profile.followNum} 发帖 ${profile.threadNum}"
             binding.userDesc.text = profile.desc
-            if (viewModel.uid == 0L) {
-                viewModel.uid = profile.uid
-                forumAdapter.refresh()
+        }
+        binding.profileViewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int {
+                return 2
+            }
+
+            override fun createFragment(position: Int): Fragment {
+                return when (position) {
+                    0 -> ProfileThreadsFragment()
+                    1 -> ProfileForumsFragment()
+                    else -> throw IllegalArgumentException("unknown position")
+                }
             }
         }
-        binding.forumList.adapter = forumAdapter
-        binding.forumList.layoutManager =
-            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        forumAdapter.addLoadStateListener { state ->
-            binding.resultTips.isVisible =
-                state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0 && viewModel.followedForumsHidden
-        }
-        lifecycleScope.launch {
-            viewModel.flow.collect {
-                forumAdapter.submitData(it)
+        TabLayoutMediator(binding.profileTabLayout, binding.profileViewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "帖子"
+                1 -> "关注的吧"
+                else -> null
             }
-        }
+        }.attach()
         if (savedInstanceState == null) {
             lifecycleScope.launch {
                 viewModel.requestUser(args.uid, args.portrait)
             }
+            viewModel.uid = args.uid
         }
         return binding.root
     }
 
-    inner class FollowForumAdapter(
-        diffCallback: DiffUtil.ItemCallback<UserForum>
-    ) : PagingDataAdapter<UserForum, FollowForumAdapter.FollowForumViewHolder>(diffCallback) {
-        inner class FollowForumViewHolder(val binding: FragmentProfileForumItemBinding) :
-            RecyclerView.ViewHolder(binding.root)
-
-        override fun onBindViewHolder(holder: FollowForumViewHolder, position: Int) {
-            val bar = getItem(position) ?: return
-            holder.binding.barName.text = bar.name
-            holder.binding.barLevel.text =
-                SpannableStringBuilder().appendLevelSpan(requireContext(), bar.levelId)
-            holder.binding.root.setOnClickListener {
-                findNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
-            }
-            holder.binding.forumAvatar.displayImage(bar.avatarUrl)
-            holder.binding.slogan.text = bar.desc
-            ViewCompat.setTooltipText(holder.binding.root, bar.name)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowForumViewHolder {
-            return FollowForumViewHolder(
-                FragmentProfileForumItemBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-            )
-        }
-    }
 }
 
 object UserForumComparator : DiffUtil.ItemCallback<UserForum>() {
