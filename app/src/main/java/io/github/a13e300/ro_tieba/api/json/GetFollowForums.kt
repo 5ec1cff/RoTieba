@@ -1,10 +1,13 @@
 package io.github.a13e300.ro_tieba.api.json
 
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
+import io.github.a13e300.ro_tieba.api.adapters.NullAdapter
 
 data class GetFollowForums(
     @SerializedName("has_more")
     val hasMore: Boolean,
+    @JsonAdapter(NullAdapter::class)
     @SerializedName("forum_list")
     val forumList: ForumList?,
 ) {
