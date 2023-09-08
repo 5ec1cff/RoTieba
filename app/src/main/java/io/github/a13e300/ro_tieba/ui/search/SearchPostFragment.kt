@@ -183,6 +183,10 @@ class SearchPostFragment : Fragment() {
             if (avatar.isNotEmpty())
                 holder.binding.threadAvatar.displayImage(avatar)
             holder.binding.threadAvatar.isGone = avatar.isEmpty()
+            val uid = item.post.user.uid
+            holder.binding.threadAvatar.setOnClickListener(if (uid == 0L) null else View.OnClickListener {
+                findNavController().navigate(MobileNavigationDirections.showProfile().setUid(uid))
+            })
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(
                     MobileNavigationDirections.goToThread(item.post.tid).setPid(item.post.postId)

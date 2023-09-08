@@ -87,9 +87,10 @@ fun TiebaThread.toDetail() = Pair(
 )
 
 fun SearchedPost.toDetail() = Pair(
-    arrayListOf("pid", "tid", "贴吧", "作者名字", "作者昵称", "发布时间"),
+    arrayListOf("pid", "tid", "uid", "贴吧", "作者名字", "作者昵称", "发布时间"),
     arrayListOf(post.postId.toString(),
         post.tid.toString(),
+        post.user.uid.toString(),
         forum,
         post.user.name,
         post.user.nick,
