@@ -133,7 +133,7 @@ fun SpannableStringBuilder.appendSimpleContent(
                         MyURLSpan(content.link),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
-                } else append(content.link)
+                } else append(content.text)
             }
 
             is Content.EmojiContent -> {
