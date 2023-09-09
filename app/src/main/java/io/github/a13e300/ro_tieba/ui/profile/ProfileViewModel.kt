@@ -10,6 +10,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.TiebaThread
@@ -46,16 +47,21 @@ class ProfileViewModel : ViewModel() {
             if (uid == 0L) {
                 return LoadResult.Page(data = emptyList(), prevKey = null, nextKey = null)
             }
-            val response = client.jsonAPI.getFollowForums(uid.toString(), page, 50)
-            val result = mutableListOf<UserForum>()
-            response.forumList?.nonGconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
-            response.forumList?.gconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
-            followedForumsHidden = response.forumList == null
-            return LoadResult.Page(
-                data = result,
-                prevKey = null,
-                nextKey = if (response.hasMore) page + 1 else null
-            )
+            return try {
+                val response = client.jsonAPI.getFollowForums(uid.toString(), page, 50)
+                val result = mutableListOf<UserForum>()
+                response.forumList?.nonGconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
+                response.forumList?.gconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
+                followedForumsHidden = response.forumList == null
+                LoadResult.Page(
+                    data = result,
+                    prevKey = null,
+                    nextKey = if (response.hasMore) page + 1 else null
+                )
+            } catch (t: Throwable) {
+                Logger.e("failed to load followed forums", t)
+                LoadResult.Error(t)
+            }
         }
 
         override fun getRefreshKey(state: PagingState<Int, UserForum>): Int? {
