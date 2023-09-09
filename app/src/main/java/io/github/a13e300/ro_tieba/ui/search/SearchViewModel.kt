@@ -12,12 +12,12 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.web.SearchFilter
-import io.github.a13e300.ro_tieba.api.web.SearchForum
 import io.github.a13e300.ro_tieba.api.web.SearchOrder
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.User
+import io.github.a13e300.ro_tieba.models.toForum
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,8 +43,6 @@ sealed class SearchResult<T> {
     data class Result<T>(val data: T) : SearchResult<T>()
     data class Error<T>(val error: Throwable) : SearchResult<T>()
 }
-
-fun SearchForum.ForumInfo.toForum(): Forum = Forum(forumName, forumId.toLong(), avatar, slogan)
 
 class SearchViewModel : ViewModel() {
     var initialized = false
