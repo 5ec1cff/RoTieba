@@ -16,7 +16,7 @@ lifecycle-livedata-ktx = "2.6.2"
 lifecycle-viewmodel-ktx = "2.6.2"
 navigation = "2.7.2"
 
-paging-runtime = "3.2.0"
+paging-runtime = "3.2.1"
 preference = "1.2.1"
 protobuf = "3.24.3"
 retrofit = "2.9.0"
