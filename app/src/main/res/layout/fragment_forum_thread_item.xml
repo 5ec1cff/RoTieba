@@ -74,6 +74,7 @@
             android:id="@+id/image_barrier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/thread_content"
             app:constraint_referenced_ids="preview_image1,preview_image2,preview_image3"
             app:barrierDirection="top" />
 
