@@ -9,6 +9,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.TiebaThread
@@ -59,6 +60,7 @@ class ForumViewModel : ViewModel() {
                     nextKey = if (response.page.hasMore != 0) page + 1 else null
                 )
             } catch (t: Throwable) {
+                Logger.e("failed to load forum", t)
                 return LoadResult.Error(t)
             }
         }
