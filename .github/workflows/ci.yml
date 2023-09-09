@@ -28,10 +28,10 @@ jobs:
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/master' ) || github.ref_type == 'tag' }}
         run: |
           if [ ! -z "${{ secrets.KEY_STORE }}" ]; then
-            echo androidStorePassword='${{ secrets.KEY_STORE_PASSWORD }}' >> gradle.properties
-            echo androidKeyAlias='${{ secrets.ALIAS }}' >> gradle.properties
-            echo androidKeyPassword='${{ secrets.KEY_PASSWORD }}' >> gradle.properties
-            echo androidStoreFile='key.jks' >> gradle.properties
+            echo storePassword='${{ secrets.KEY_STORE_PASSWORD }}' >> gradle.properties
+            echo keyAlias='${{ secrets.ALIAS }}' >> gradle.properties
+            echo keyPassword='${{ secrets.KEY_PASSWORD }}' >> gradle.properties
+            echo storeFile='key.jks' >> gradle.properties
             echo ${{ secrets.KEY_STORE }} | base64 --decode > key.jks
           fi
 
