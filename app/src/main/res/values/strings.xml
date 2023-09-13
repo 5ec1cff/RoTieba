@@ -50,4 +50,6 @@
     <string name="jump_page_hint">页数</string>
     <string name="ok">确定</string>
     <string name="user_follow_forums_hidden">该用户已隐藏关注的吧</string>
+    <string name="user_follow_forums_empty">该用户已隐藏关注的吧</string>
+    <string name="user_thread_empty">该用户未发过帖子或已隐藏</string>
 </resources>

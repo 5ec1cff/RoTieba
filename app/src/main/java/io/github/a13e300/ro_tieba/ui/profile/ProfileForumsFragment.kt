@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
+import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileFollowedForumsBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileForumItemBinding
 import io.github.a13e300.ro_tieba.models.UserForum
@@ -35,18 +36,30 @@ class ProfileForumsFragment : Fragment() {
     ): View {
         binding = FragmentProfileFollowedForumsBinding.inflate(inflater, container, false)
         val forumAdapter = FollowForumAdapter(UserForumComparator)
-        viewModel.user.observe(viewLifecycleOwner) { profile ->
-            if (viewModel.uid == 0L) {
-                viewModel.uid = profile.uid
-                forumAdapter.refresh()
+        viewModel.user.observe(viewLifecycleOwner) { p ->
+            p.onSuccess { profile ->
+                if (viewModel.uid == 0L) {
+                    viewModel.uid = profile.uid
+                    forumAdapter.refresh()
+                }
             }
         }
         binding.forumList.adapter = forumAdapter
         binding.forumList.layoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         forumAdapter.addLoadStateListener { state ->
-            binding.resultTips.isVisible =
-                state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0 && viewModel.followedForumsHidden
+            var showTips = false
+            if (state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0) {
+                showTips = true
+                binding.resultTips.text = if (viewModel.followedForumsHidden)
+                    getString(R.string.user_follow_forums_hidden)
+                else getString(R.string.user_follow_forums_empty)
+            }
+            if (state.refresh is LoadState.Error) {
+                showTips = true
+                binding.resultTips.text = (state.refresh as LoadState.Error).error.message
+            }
+            binding.resultTips.isVisible = showTips
         }
         lifecycleScope.launch {
             viewModel.forumsFlow.collect {

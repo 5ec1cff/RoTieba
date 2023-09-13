@@ -29,13 +29,13 @@ class ProfileViewModel : ViewModel() {
     var uid = 0L
     var portrait: String? = null
     var followedForumsHidden = false
-    val user = MutableLiveData<UserProfile>()
+    val user = MutableLiveData<Result<UserProfile>>()
     suspend fun requestUser(uid: Long, portrait: String?) {
-        val p = withContext(Dispatchers.IO) {
-            App.instance.client.getUserProfile(portrait, uid)
+        user.value = runCatching {
+            withContext(Dispatchers.IO) {
+                App.instance.client.getUserProfile(portrait, uid).user.toUserProfile()
+            }
         }
-        p.postListList
-        user.value = p.user.toUserProfile()
     }
 
     inner class FollowForumSource(

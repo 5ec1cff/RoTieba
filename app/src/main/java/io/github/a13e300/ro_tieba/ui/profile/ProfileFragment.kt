@@ -16,6 +16,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.github.panpf.sketch.displayImage
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 import io.github.a13e300.ro_tieba.BaseFragment
@@ -44,10 +45,11 @@ class ProfileFragment : BaseFragment() {
         setupToolbar(binding.toolbar)
         binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
             binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
-                viewModel.user.value?.showName else null
+                viewModel.user.value?.getOrNull()?.showName else null
         }
         binding.toolbar.setOnMenuItemClickListener {
-            val profile = viewModel.user.value ?: return@setOnMenuItemClickListener false
+            val profile =
+                viewModel.user.value?.getOrNull() ?: return@setOnMenuItemClickListener false
             when (it.itemId) {
                 R.id.open_at_other_client -> {
                     if (!openUserAtOtherClient(profile, requireContext())) {
@@ -64,25 +66,39 @@ class ProfileFragment : BaseFragment() {
         }
         viewModel.uid = args.uid
         viewModel.portrait = args.portrait
-        viewModel.user.observe(viewLifecycleOwner) { profile ->
-            binding.userName.text = SpannableStringBuilder()
-                .append(profile.name, StyleSpan(Typeface.BOLD), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                .apply {
-                    if (profile.nick.isNotEmpty() && profile.nick != profile.name) {
-                        append("(")
-                        append(profile.nick)
-                        append(")")
+        viewModel.user.observe(viewLifecycleOwner) { p ->
+            p.fold({ profile ->
+                binding.userName.text = SpannableStringBuilder()
+                    .append(
+                        profile.name,
+                        StyleSpan(Typeface.BOLD),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    .apply {
+                        if (profile.nick.isNotEmpty() && profile.nick != profile.name) {
+                            append("(")
+                            append(profile.nick)
+                            append(")")
+                        }
                     }
+                binding.userAvatar.displayImage(profile.avatarUrl)
+                binding.userAvatar.setOnClickListener {
+                    photoViewModel.currentIndex.value = 0
+                    photoViewModel.photos = listOf(Photo(profile.realAvatarUrl, 0, profile))
+                    findNavController().navigate(MobileNavigationDirections.viewPhotos())
                 }
-            binding.userAvatar.displayImage(profile.avatarUrl)
-            binding.userAvatar.setOnClickListener {
-                photoViewModel.currentIndex.value = 0
-                photoViewModel.photos = listOf(Photo(profile.realAvatarUrl, 0, profile))
-                findNavController().navigate(MobileNavigationDirections.viewPhotos())
-            }
-            binding.userStat.text =
-                "粉丝 ${profile.fanNum} 关注 ${profile.followNum} 发帖 ${profile.threadNum}"
-            binding.userDesc.text = profile.desc
+                binding.userStat.text =
+                    "粉丝 ${profile.fanNum} 关注 ${profile.followNum} 发帖 ${profile.threadNum}"
+                binding.userDesc.text = profile.desc
+            }, { err ->
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error_dialog_title)
+                    .setMessage(err.message)
+                    .setOnDismissListener {
+                        navigateUp()
+                    }
+                    .show()
+            })
         }
         binding.profileViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int {

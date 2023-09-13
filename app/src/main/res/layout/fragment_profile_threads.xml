@@ -20,5 +20,5 @@
         android:visibility="gone"
         app:layout_anchor="@id/thread_list"
         app:layout_anchorGravity="center"
-        android:text="@string/no_result_tips" />
+        android:text="@string/user_thread_empty" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
