@@ -209,13 +209,6 @@ class ForumFragment : BaseFragment() {
             val thread = getItem(position) ?: return
             holder.binding.threadTitle.text = SpannableStringBuilder().apply {
                 val context = requireContext()
-                if (thread.tabInfo != null) {
-                    append(
-                        "${thread.tabInfo.name} | ",
-                        StyleSpan(Typeface.BOLD),
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                }
                 if (thread.threadType == ThreadType.HELP) {
                     append(
                         "[求助]",
@@ -241,6 +234,13 @@ class ForumFragment : BaseFragment() {
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     append(" ")
+                }
+                if (thread.tabInfo != null) {
+                    append(
+                        "${thread.tabInfo.name} | ",
+                        StyleSpan(Typeface.BOLD),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                 }
                 append(thread.title)
             }
