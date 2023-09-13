@@ -104,14 +104,16 @@ class ForumFragment : BaseFragment() {
         val threadAdapter = ThreadAdapter(ThreadComparator)
         threadAdapter.addLoadStateListener { state ->
             (state.refresh as? LoadState.Error)?.error?.let {
+                if (!viewModel.forumInitialized) {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.error_dialog_title)
+                        .setMessage(it.message)
+                        .setOnDismissListener {
+                            navigateUp()
+                        }
+                        .show()
+                }
                 // TODO: if initially fails, show a refresh button
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.error_dialog_title)
-                    .setMessage(it.message)
-                    .setOnDismissListener {
-                        (requireParentFragment() as BaseFragment).navigateUp()
-                    }
-                    .show()
             }
         }
         binding.threadList.apply {
