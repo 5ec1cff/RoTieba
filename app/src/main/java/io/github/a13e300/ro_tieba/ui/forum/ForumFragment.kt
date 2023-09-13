@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -103,18 +104,30 @@ class ForumFragment : BaseFragment() {
         }
         val threadAdapter = ThreadAdapter(ThreadComparator)
         threadAdapter.addLoadStateListener { state ->
-            (state.refresh as? LoadState.Error)?.error?.let {
-                if (!viewModel.forumInitialized) {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.error_dialog_title)
-                        .setMessage(it.message)
-                        .setOnDismissListener {
-                            navigateUp()
-                        }
-                        .show()
+            when (state.refresh) {
+                is LoadState.Error -> {
+                    val err = (state.refresh as LoadState.Error).error
+                    if (!viewModel.forumInitialized) {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.error_dialog_title)
+                            .setMessage(err.message)
+                            .setOnDismissListener {
+                                navigateUp()
+                            }
+                            .show()
+                    } else {
+                        binding.loadError.isVisible = true
+                        binding.loadErrorText.text = err.message
+                    }
                 }
-                // TODO: if initially fails, show a refresh button
+
+                else -> {
+                    binding.loadError.isVisible = false
+                }
             }
+        }
+        binding.loadErrorRefresh.setOnClickListener {
+            threadAdapter.refresh()
         }
         binding.threadList.apply {
             layoutManager = LinearLayoutManager(context)
