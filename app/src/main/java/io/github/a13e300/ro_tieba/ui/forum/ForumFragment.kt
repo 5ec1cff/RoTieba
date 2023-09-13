@@ -33,6 +33,7 @@ import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.RoundSpan
+import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.toSimpleString
@@ -161,6 +162,7 @@ class ForumFragment : BaseFragment() {
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val thread = getItem(position) ?: return
             holder.binding.threadTitle.text = SpannableStringBuilder().apply {
+                val context = requireContext()
                 if (thread.tabInfo != null) {
                     append(
                         "${thread.tabInfo.name} | ",
@@ -168,8 +170,20 @@ class ForumFragment : BaseFragment() {
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 }
+                if (thread.threadType == ThreadType.HELP) {
+                    append(
+                        "[求助]",
+                        RoundSpan(
+                            context,
+                            context.getColor(R.color.help_span_background),
+                            context.getColor(R.color.help_span_text),
+                            showText = "求助"
+                        ),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    append(" ")
+                }
                 if (thread.isGood) {
-                    val context = requireContext()
                     append(
                         "[精]",
                         RoundSpan(

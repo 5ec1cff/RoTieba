@@ -74,4 +74,6 @@
     <color name="good_span_background">#ED6565</color>
     <color name="good_span_text">#FFFFFF</color>
     <color name="em_span_color">#109AE1</color>
+    <color name="help_span_background">#8E64F1</color>
+    <color name="help_span_text">#FFFFFF</color>
 </resources>

@@ -15,6 +15,7 @@ import io.github.a13e300.ro_tieba.api.protobuf.FrsPageSortType
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.ForumSortType
 import io.github.a13e300.ro_tieba.models.ForumTab
+import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toUser
@@ -91,7 +92,8 @@ class ForumViewModel : ViewModel() {
                     agreeNum = p.agree.agreeNum,
                     disagreeNum = p.agree.disagreeNum,
                     images = p.mediaList.toImageContentList(),
-                    tabInfo = tabs.value!!.find { it is ForumTab.GeneralTab && it.id == p.tabId } as? ForumTab.GeneralTab
+                    tabInfo = tabs.value!!.find { it is ForumTab.GeneralTab && it.id == p.tabId } as? ForumTab.GeneralTab,
+                    threadType = if (p.threadType == 71) ThreadType.HELP else ThreadType.NORMAL
                 )
             } to (response.page.hasMore == 1)
         }
@@ -118,7 +120,8 @@ class ForumViewModel : ViewModel() {
                     agreeNum = p.agree.agreeNum,
                     disagreeNum = p.agree.disagreeNum,
                     images = p.mediaList.toImageContentList(),
-                    tabInfo = tabs.value!!.find { it is ForumTab.GeneralTab && it.id == p.tabId } as? ForumTab.GeneralTab
+                    tabInfo = tabs.value!!.find { it is ForumTab.GeneralTab && it.id == p.tabId } as? ForumTab.GeneralTab,
+                    threadType = if (p.threadType == 71) ThreadType.HELP else ThreadType.NORMAL
                 )
             } to (response.hasMore == 1)
         }
