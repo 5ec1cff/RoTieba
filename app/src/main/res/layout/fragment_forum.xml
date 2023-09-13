@@ -76,12 +76,35 @@
                 app:layout_collapseMode="pin" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <com.google.android.material.tabs.TabLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="scrollable"
-            android:background="?colorSurface"
-            android:id="@+id/forum_tab_layout" />
+            android:background="@drawable/background_with_divider">
+
+            <com.google.android.material.tabs.TabLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:tabMode="scrollable"
+                android:background="@drawable/background_with_divider"
+                android:id="@+id/forum_tab_layout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/order_button" />
+
+            <Button
+                style="@style/Widget.Material3.Button.TextButton.Icon"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:minHeight="0dp"
+                android:id="@+id/order_button"
+                app:icon="@drawable/ic_sort"
+                app:iconGravity="end"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/forum_tab_layout"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -35,7 +35,7 @@ class ForumViewModel : ViewModel() {
             ForumTab.GoodTab
         )
     )
-    var forumSortType: ForumSortType = ForumSortType.REPLY_TIME
+    var forumSortType = MutableLiveData(ForumSortType.REPLY_TIME)
     var tabPosition = 0
 
     inner class ThreadPagingSource(
@@ -128,19 +128,19 @@ class ForumViewModel : ViewModel() {
 
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, TiebaThread> {
             val page = params.key ?: 1
-            try {
+            return try {
                 val (posts, more) = when (tab) {
                     is ForumTab.PrimaryTab -> loadForPrimaryTab(page, tab)
                     is ForumTab.GeneralTab -> loadForGeneralTab(page, tab)
                 }
-                return LoadResult.Page(
+                LoadResult.Page(
                     data = posts,
                     prevKey = null,
                     nextKey = if (more) page + 1 else null
                 )
             } catch (t: Throwable) {
                 Logger.e("failed to load forum", t)
-                return LoadResult.Error(t)
+                LoadResult.Error(t)
             }
         }
 
@@ -155,7 +155,7 @@ class ForumViewModel : ViewModel() {
     val flow = Pager(
         PagingConfig(pageSize = 30)
     ) {
-        ThreadPagingSource(App.instance.client, tabs.value!![tabPosition], forumSortType)
+        ThreadPagingSource(App.instance.client, tabs.value!![tabPosition], forumSortType.value!!)
     }.flow
         .cachedIn(viewModelScope)
 }

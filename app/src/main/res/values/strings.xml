@@ -52,4 +52,6 @@
     <string name="user_follow_forums_hidden">该用户已隐藏关注的吧</string>
     <string name="user_follow_forums_empty">该用户已隐藏关注的吧</string>
     <string name="user_thread_empty">该用户未发过帖子或已隐藏</string>
+    <string name="sort_by_reply_time">回复时间</string>
+    <string name="sort_by_create_time">创建时间</string>
 </resources>

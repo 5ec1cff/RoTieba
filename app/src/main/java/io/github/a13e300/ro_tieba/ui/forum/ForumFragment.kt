@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -34,6 +35,8 @@ import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.RoundSpan
+import io.github.a13e300.ro_tieba.models.ForumSortType
+import io.github.a13e300.ro_tieba.models.ForumTab
 import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.openForumAtOtherClient
@@ -144,6 +147,8 @@ class ForumFragment : BaseFragment() {
                 override fun onTabSelected(tab: TabLayout.Tab) {
                     if (tab.position == viewModel.tabPosition) return
                     viewModel.tabPosition = tab.position
+                    binding.orderButton.isGone =
+                        viewModel.tabs.value!![viewModel.tabPosition] is ForumTab.HotTab
                     threadAdapter.refresh()
                 }
 
@@ -161,6 +166,32 @@ class ForumFragment : BaseFragment() {
                     addTab(newTab().apply { text = forumTab.name }, false)
                 }
                 selectTab(getTabAt(viewModel.tabPosition))
+            }
+        }
+        binding.orderButton.apply {
+            viewModel.forumSortType.observe(viewLifecycleOwner) { sort ->
+                text = when (sort) {
+                    ForumSortType.REPLY_TIME -> getString(R.string.sort_by_reply_time)
+                    ForumSortType.CREATE_TIME -> getString(R.string.sort_by_create_time)
+                }
+            }
+            setOnClickListener { btn ->
+                val popup = PopupMenu(btn.context, btn)
+                popup.menuInflater.inflate(R.menu.forum_sort_menu, popup.menu)
+                popup.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.sort_by_reply_time -> {
+                            viewModel.forumSortType.value = ForumSortType.REPLY_TIME
+                        }
+
+                        R.id.sort_by_create_time -> {
+                            viewModel.forumSortType.value = ForumSortType.CREATE_TIME
+                        }
+                    }
+                    threadAdapter.refresh()
+                    true
+                }
+                popup.show()
             }
         }
         return binding.root
