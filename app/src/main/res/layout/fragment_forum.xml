@@ -75,14 +75,21 @@
                 android:layout_height="?actionBarSize"
                 app:layout_collapseMode="pin" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="scrollable"
+            android:background="?colorSurface"
+            android:id="@+id/forum_tab_layout" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/thread_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:fitsSystemWindowsInsets="bottom"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:clipToPadding="false" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

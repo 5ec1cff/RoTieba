@@ -15,5 +15,7 @@ data class TiebaThread(
     val createTime: Date? = null,
     val viewNum: Int = 0,
     val agreeNum: Long = 0,
-    val disagreeNum: Long = 0
+    val disagreeNum: Long = 0,
+    val images: List<Content.ImageContent> = emptyList(),
+    val tabInfo: ForumTab.GeneralTab? = null
 )

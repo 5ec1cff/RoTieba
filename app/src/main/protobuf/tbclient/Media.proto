@@ -6,6 +6,7 @@ message Media {
   string small_pic = 2;
   string big_pic = 3;
   string water_pic = 4;
+  string src_pic = 8;
   uint32 width = 10;
   uint32 height = 11;
   string origin_pic = 15;

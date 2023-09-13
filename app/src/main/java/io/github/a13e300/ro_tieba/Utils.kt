@@ -14,6 +14,7 @@ import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.UserProfile
 import okhttp3.OkHttpClient
+import tbclient.MediaOuterClass.Media
 import tbclient.PbContentOuterClass
 import java.io.InputStream
 import java.lang.reflect.Method
@@ -95,7 +96,7 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
                 imageOrder += 1
                 val sizes = it.bsize.split(",")
                 Content.ImageContent(
-                    it.cdnSrc,
+                    it.cdnSrc.ifEmpty { it.originSrc },
                     it.originSrc,
                     sizes[0].toInt(),
                     sizes[1].toInt(),
@@ -237,3 +238,7 @@ fun openPostAtOtherClient(tid: Long, pid: Long, context: Context) =
             .build(),
         context
     )
+
+fun List<Media>.toImageContentList() = filter { it.type == 3 }.mapIndexed { i, pic ->
+    Content.ImageContent(pic.srcPic, pic.originPic, pic.width, pic.height, i)
+}

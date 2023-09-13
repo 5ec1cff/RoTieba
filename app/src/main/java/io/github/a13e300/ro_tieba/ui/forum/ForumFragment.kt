@@ -1,20 +1,21 @@
 package io.github.a13e300.ro_tieba.ui.forum
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +23,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import io.github.a13e300.ro_tieba.App
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
@@ -31,7 +33,6 @@ import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.RoundSpan
-import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.toSimpleString
@@ -39,7 +40,6 @@ import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.toDetail
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -55,6 +55,7 @@ class ForumFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentForumBinding.inflate(inflater, container, false)
+        viewModel.forumName = args.fname
         binding.toolbar.setOnMenuItemClickListener {
             return@setOnMenuItemClickListener when (it.itemId) {
                 R.id.search -> {
@@ -78,7 +79,14 @@ class ForumFragment : BaseFragment() {
                 else -> false
             }
         }
-        viewModel.forumName = args.fname
+        setupToolbar(binding.toolbar)
+        binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+            binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
+                viewModel.forumInfo.value?.name else null
+        }
+        binding.toolbar.setOnClickListener {
+            binding.threadList.scrollToPosition(0)
+        }
         viewModel.forumInfo.observe(viewLifecycleOwner) {
             // binding.toolbar.title = it.name
             binding.forumName.text = it.name
@@ -92,22 +100,15 @@ class ForumFragment : BaseFragment() {
                 }
             }
         }
-        setupToolbar(binding.toolbar)
-        binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-            binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
-                viewModel.forumInfo.value?.name else null
-        }
-        binding.toolbar.setOnClickListener {
-            binding.threadList.scrollToPosition(0)
-        }
         val threadAdapter = ThreadAdapter(ThreadComparator)
         threadAdapter.addLoadStateListener { state ->
             (state.refresh as? LoadState.Error)?.error?.let {
+                // TODO: if initially fails, show a refresh button
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error_dialog_title)
                     .setMessage(it.message)
                     .setOnDismissListener {
-                        navigateUp()
+                        (requireParentFragment() as BaseFragment).navigateUp()
                     }
                     .show()
             }
@@ -117,21 +118,38 @@ class ForumFragment : BaseFragment() {
             adapter = threadAdapter
         }
         lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val currentUid = App.instance.accountManager.currentAccount.first().uid
-                if (viewModel.currentUid == null)
-                    viewModel.currentUid = currentUid
-                else if (currentUid != viewModel.currentUid) {
-                    navigateUp()
-                    return@repeatOnLifecycle
+            viewModel.flow.collect {
+                threadAdapter.submitData(PagingData.empty())
+                threadAdapter.submitData(it)
+            }
+        }
+        binding.forumTabLayout.apply {
+            addOnTabSelectedListener(object : OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    if (tab.position == viewModel.tabPosition) return
+                    viewModel.tabPosition = tab.position
+                    threadAdapter.refresh()
                 }
-                viewModel.flow.collect {
-                    threadAdapter.submitData(it)
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
                 }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+                }
+
+            })
+
+            viewModel.tabs.observe(viewLifecycleOwner) { tabs ->
+                removeAllTabs()
+                tabs.forEach { forumTab ->
+                    addTab(newTab().apply { text = forumTab.name }, false)
+                }
+                selectTab(getTabAt(viewModel.tabPosition))
             }
         }
         return binding.root
     }
+
 
     inner class ThreadAdapter(diffCallback: DiffUtil.ItemCallback<TiebaThread>) :
         PagingDataAdapter<TiebaThread, ThreadAdapter.ThreadViewHolder>(
@@ -143,6 +161,13 @@ class ForumFragment : BaseFragment() {
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val thread = getItem(position) ?: return
             holder.binding.threadTitle.text = SpannableStringBuilder().apply {
+                if (thread.tabInfo != null) {
+                    append(
+                        "${thread.tabInfo.name} | ",
+                        StyleSpan(Typeface.BOLD),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
                 if (thread.isGood) {
                     val context = requireContext()
                     append(
@@ -237,7 +262,7 @@ class ForumFragment : BaseFragment() {
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid))
             }
-            val images = thread.content.filterIsInstance<Content.ImageContent>()
+            val images = thread.images
             val image1 = images.firstOrNull()
             val image2 = images.getOrNull(1)
             val image3 = images.getOrNull(2)

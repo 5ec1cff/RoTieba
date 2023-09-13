@@ -2,6 +2,8 @@ package io.github.a13e300.ro_tieba.api
 
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
+import io.github.a13e300.ro_tieba.api.protobuf.FrsPageSortType
+import io.github.a13e300.ro_tieba.api.protobuf.GeneralTabListSortType
 import io.github.a13e300.ro_tieba.db.Account
 import io.github.a13e300.ro_tieba.fromJson
 import io.github.a13e300.ro_tieba.ignoreAllSSLErrorsIfDebug
@@ -18,6 +20,9 @@ import tbclient.CommonReqOuterClass
 import tbclient.FrsPage.FrsPageReqIdlOuterClass.FrsPageReqIdl
 import tbclient.FrsPage.FrsPageResIdlOuterClass.FrsPageResIdl
 import tbclient.FrsPage.errorOrNull
+import tbclient.GeneralTabList.GeneralTabListReqIdlOuterClass.GeneralTabListReqIdl
+import tbclient.GeneralTabList.GeneralTabListResIdlOuterClass.GeneralTabListResIdl
+import tbclient.GeneralTabList.errorOrNull
 import tbclient.PbFloor.PbFloorReqIdlOuterClass.PbFloorReqIdl
 import tbclient.PbFloor.PbFloorResIdlOuterClass.PbFloorResIdl
 import tbclient.PbFloor.errorOrNull
@@ -107,7 +112,12 @@ class TiebaClient(val account: Account = Account()) {
         return result.data
     }
 
-    suspend fun getThreads(fname: String, pn: Int): FrsPageResIdl.DataRes {
+    suspend fun getThreads(
+        fname: String,
+        pn: Int,
+        sort: FrsPageSortType = FrsPageSortType.REPLY_TIME,
+        good: Boolean = false
+    ): FrsPageResIdl.DataRes {
         val req = FrsPageReqIdl.newBuilder()
             .setData(
                 FrsPageReqIdl.DataReq.newBuilder()
@@ -120,13 +130,51 @@ class TiebaClient(val account: Account = Account()) {
                     .setPn(pn)
                     .setRn(30)
                     .setRnNeed(30)
-                    .setIsGood(0)
-                    .setSort(5) // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/client.py
+                    .setIsGood(if (good) 1 else 0)
+                    .setSort(sort.value)
             ).build()
         val part =
             MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
         val result = protobufAPI.getThreads(part).let {
             FrsPageResIdl.parseFrom(it.byteStream())
+        }
+        if (result.errorOrNull?.errorno != 0) throw TiebaApiError(
+            result.error.errorno,
+            result.error.errmsg
+        )
+        return result.data
+    }
+
+    suspend fun getThreadsInTab(
+        fid: Long,
+        tabId: Int,
+        pn: Int,
+        tabName: String,
+        tabType: Int,
+        isGeneralTab: Int,
+        sort: GeneralTabListSortType = GeneralTabListSortType.REPLY_TIME
+    ): GeneralTabListResIdl.DataRes {
+        val req = GeneralTabListReqIdl.newBuilder()
+            .setData(
+                GeneralTabListReqIdl.DataReq.newBuilder()
+                    .setCommon(
+                        CommonReqOuterClass.CommonReq.newBuilder()
+                            .setClientType(2)
+                            .setClientVersion(MAIN_VERSION)
+                    )
+                    .setForumId(fid)
+                    .setPn(pn)
+                    .setRn(30)
+                    .setTabId(tabId)
+                    .setTabType(tabType)
+                    .setIsGeneralTab(isGeneralTab)
+                    .setTabName(tabName)
+                    .setSortType(sort.value)
+            ).build()
+        val part =
+            MultipartBody.Part.createFormData("data", "file", req.toByteArray().toRequestBody())
+        val result = protobufAPI.getThreadsInTab(part).let {
+            GeneralTabListResIdl.parseFrom(it.byteStream())
         }
         if (result.errorOrNull?.errorno != 0) throw TiebaApiError(
             result.error.errorno,
@@ -198,6 +246,17 @@ class TiebaClient(val account: Account = Account()) {
 
     fun getThreadsSync(fname: String, pn: Int) = runBlocking {
         getThreads(fname, pn)
+    }
+
+    fun getThreadsInTabSync(
+        fid: Long,
+        tabId: Int,
+        pn: Int,
+        tabName: String,
+        tabType: Int,
+        isGeneralTab: Int
+    ) = runBlocking {
+        getThreadsInTab(fid, tabId, pn, tabName, tabType, isGeneralTab)
     }
 
     fun getPostsSync(tid: Long, page: Int, pid: Long, rn: Int, sort: Int, seeLz: Boolean) =
