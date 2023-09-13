@@ -3,7 +3,7 @@ package io.github.a13e300.ro_tieba.models
 import tbclient.UserOuterClass
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
-const val AVATAR_ORIG = "https://tb.himg.baidu.com/sys/portraith/item/"
+const val AVATAR_ORIG = "https://gss0.baidu.com/7Ls0a8Sm2Q5IlBGlnYG/sys/portraith/item/"
 
 data class User(
     val name: String = "unknown",
