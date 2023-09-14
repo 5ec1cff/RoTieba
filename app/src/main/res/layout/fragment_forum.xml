@@ -87,6 +87,7 @@
                 app:tabMode="scrollable"
                 android:background="@drawable/background_with_divider"
                 android:id="@+id/forum_tab_layout"
+                android:requiresFadingEdge="horizontal"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

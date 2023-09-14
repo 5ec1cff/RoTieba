@@ -122,12 +122,10 @@ class PhotoFragment : BaseFragment() {
         if (isFullscreen) {
             binding.appBar.hideAnim(false)
             binding.photoBottomBar.hideAnim(true)
-            binding.bottomShadow.isGone = true
             insetsController.hide(WindowInsetsCompat.Type.statusBars())
         } else {
             binding.appBar.showAnim(false)
             binding.photoBottomBar.showAnim(true)
-            binding.bottomShadow.isGone = false
             insetsController.show(WindowInsetsCompat.Type.statusBars())
         }
     }

@@ -38,6 +38,7 @@
         app:fitsSystemWindowsInsets="bottom"
         android:id="@+id/photo_bottom_bar"
         app:layout_behavior="io.github.a13e300.ro_tieba.misc.PhotoDescScrollBehavior"
+        android:requiresFadingEdge="vertical"
         app:behavior_minHeight="100dp">
 
         <TextView
@@ -48,13 +49,5 @@
             android:textSize="@dimen/content_text_size"
             android:padding="16dp" />
     </androidx.core.widget.NestedScrollView>
-
-    <io.github.a13e300.ro_tieba.view.ShadowView
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:layout_gravity="bottom"
-        android:fitsSystemWindows="false"
-        app:fitsSystemWindowsInsets="bottom"
-        android:id="@+id/bottom_shadow" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

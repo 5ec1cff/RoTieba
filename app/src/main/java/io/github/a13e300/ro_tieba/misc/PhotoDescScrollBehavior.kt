@@ -8,10 +8,15 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
 import io.github.a13e300.ro_tieba.R
+import rikka.insets.initialPaddingBottom
+import rikka.insets.initialPaddingLeft
+import rikka.insets.initialPaddingRight
+import rikka.insets.initialPaddingTop
+import rikka.insets.setInitialPadding
 import kotlin.math.min
 
 val NestedScrollView.contentHeight: Int
-    get() = paddingBottom + paddingTop + (getChildAt(0)?.height ?: 0)
+    get() = paddingBottom - initialPaddingBottom + paddingTop + (getChildAt(0)?.height ?: 0)
 
 class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     CoordinatorLayout.Behavior<NestedScrollView>(context, attrs) {
@@ -68,6 +73,11 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
             mMinHeightY = mAppBarHeight
         }
         ViewCompat.offsetTopAndBottom(child, mMinHeightY)
+        child.setInitialPadding(
+            child.initialPaddingLeft,
+            child.initialPaddingTop,
+            child.initialPaddingRight, child.height - (parent.height - child.y.toInt())
+        )
         return true
     }
 
@@ -108,6 +118,12 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
                 consumed[1] = realDy
                 child.translationY = oldTransY + realDy
             }
+            child.setInitialPadding(
+                child.initialPaddingLeft,
+                child.initialPaddingTop,
+                child.initialPaddingRight,
+                child.height - (coordinatorLayout.height - child.y.toInt())
+            )
         }
     }
 
@@ -143,6 +159,12 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
             } else {
                 child.translationY = newTransY + dyUnconsumed / 2
             }
+            child.setInitialPadding(
+                child.initialPaddingLeft,
+                child.initialPaddingTop,
+                child.initialPaddingRight,
+                child.height - (coordinatorLayout.height - child.y.toInt())
+            )
         }
     }
 
@@ -169,6 +191,12 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
                 override fun run() {
                     if (scroller.computeScrollOffset()) {
                         view.translationY = scroller.currY.toFloat()
+                        view.setInitialPadding(
+                            view.initialPaddingLeft,
+                            view.initialPaddingTop,
+                            view.initialPaddingRight,
+                            view.height - ((view.parent as View).height - view.y.toInt())
+                        )
                         ViewCompat.postOnAnimation(view, this)
                     }
                 }
