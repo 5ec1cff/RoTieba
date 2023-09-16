@@ -587,6 +587,7 @@ class ThreadFragment : BaseFragment() {
                 // openUserAtOtherClient(post.user, requireContext())
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile().setPortrait(post.user.portrait)
+                        .setUid(post.user.uid)
                 )
             }
             fun addTextView() {

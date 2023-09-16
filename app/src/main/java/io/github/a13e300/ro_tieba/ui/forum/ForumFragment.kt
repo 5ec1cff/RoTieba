@@ -255,6 +255,7 @@ class ForumFragment : BaseFragment() {
             holder.binding.threadAvatar.setOnClickListener {
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile().setPortrait(thread.author.portrait)
+                        .setUid(thread.author.uid)
                 )
             }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {

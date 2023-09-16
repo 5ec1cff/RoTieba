@@ -30,10 +30,21 @@ class ProfileViewModel : ViewModel() {
     var portrait: String? = null
     var followedForumsHidden = false
     val user = MutableLiveData<Result<UserProfile>>()
+    private var forumSource: FollowForumSource? = null
+    private var threadSource: ThreadPagingSource? = null
     suspend fun requestUser(uid: Long, portrait: String?) {
         user.value = runCatching {
             withContext(Dispatchers.IO) {
                 App.instance.client.getUserProfile(portrait, uid).user.toUserProfile()
+            }
+        }.apply {
+            onSuccess { v ->
+                // refresh if prev uid is 0 (in case that only portrait provided)
+                if (this@ProfileViewModel.uid != v.uid) {
+                    this@ProfileViewModel.uid = v.uid
+                    forumSource?.invalidate()
+                    threadSource?.invalidate()
+                }
             }
         }
     }
@@ -75,21 +86,22 @@ class ProfileViewModel : ViewModel() {
     val forumsFlow: Flow<PagingData<UserForum>> = Pager(
         PagingConfig(pageSize = 50)
     ) {
-        FollowForumSource(App.instance.client, uid)
+        FollowForumSource(App.instance.client, uid).also { forumSource = it }
     }.flow
         .cachedIn(viewModelScope)
 
     inner class ThreadPagingSource(
         private val client: TiebaClient,
-        private val uid: Long,
-        private val portrait: String?
+        private val uid: Long
     ) : PagingSource<Int, TiebaThread>() {
         override fun getRefreshKey(state: PagingState<Int, TiebaThread>): Int? = null
 
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, TiebaThread> {
             val pn = params.key ?: 1
+            if (uid == 0L) return LoadResult.Page(emptyList(), null, null)
             try {
-                val r = client.getUserProfile(portrait, uid, pn = pn, page = 0)
+                // using portrait may return empty list
+                val r = client.getUserProfile(null, uid, pn = pn, page = 0)
                 val u = User()
                 val l = r.postListList.map { p ->
                     TiebaThread(
@@ -118,7 +130,7 @@ class ProfileViewModel : ViewModel() {
     val threadsFlow: Flow<PagingData<TiebaThread>> = Pager(
         PagingConfig(pageSize = 60)
     ) {
-        ThreadPagingSource(App.instance.client, uid, portrait)
+        ThreadPagingSource(App.instance.client, uid).also { threadSource = it }
     }.flow
         .cachedIn(viewModelScope)
 }

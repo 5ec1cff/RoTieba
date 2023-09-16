@@ -36,14 +36,6 @@ class ProfileForumsFragment : Fragment() {
     ): View {
         binding = FragmentProfileFollowedForumsBinding.inflate(inflater, container, false)
         val forumAdapter = FollowForumAdapter(UserForumComparator)
-        viewModel.user.observe(viewLifecycleOwner) { p ->
-            p.onSuccess { profile ->
-                if (viewModel.uid == 0L) {
-                    viewModel.uid = profile.uid
-                    forumAdapter.refresh()
-                }
-            }
-        }
         binding.forumList.adapter = forumAdapter
         binding.forumList.layoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
