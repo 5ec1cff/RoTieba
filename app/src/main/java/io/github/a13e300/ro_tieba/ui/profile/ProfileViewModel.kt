@@ -19,7 +19,7 @@ import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.models.UserProfile
 import io.github.a13e300.ro_tieba.models.toUserForum
 import io.github.a13e300.ro_tieba.models.toUserProfile
-import io.github.a13e300.ro_tieba.toPostContent
+import io.github.a13e300.ro_tieba.utils.toPostContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext

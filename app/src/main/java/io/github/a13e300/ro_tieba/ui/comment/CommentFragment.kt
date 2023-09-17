@@ -14,11 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentItemBinding
 import io.github.a13e300.ro_tieba.models.Comment
-import io.github.a13e300.ro_tieba.toSimpleString
+import io.github.a13e300.ro_tieba.utils.appendSimpleContent
+import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.launch
 
 class CommentFragment : BottomSheetDialogFragment() {

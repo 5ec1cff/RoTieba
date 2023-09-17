@@ -2,7 +2,7 @@ package io.github.a13e300.ro_tieba.api
 
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
 import io.github.a13e300.ro_tieba.api.json.SearchForumPost
-import io.github.a13e300.ro_tieba.toHexString
+import io.github.a13e300.ro_tieba.utils.toHexString
 import okhttp3.FormBody
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded

@@ -1,4 +1,4 @@
-package io.github.a13e300.ro_tieba
+package io.github.a13e300.ro_tieba.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,6 +9,11 @@ import android.text.SpannableStringBuilder
 import android.view.ContextMenu
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
+import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.BuildConfig
+import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
+import io.github.a13e300.ro_tieba.Emotions
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.models.Content

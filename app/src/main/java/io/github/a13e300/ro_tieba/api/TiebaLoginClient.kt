@@ -3,7 +3,7 @@ package io.github.a13e300.ro_tieba.api
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.db.Account
-import io.github.a13e300.ro_tieba.ignoreAllSSLErrors
+import io.github.a13e300.ro_tieba.utils.ignoreAllSSLErrors
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

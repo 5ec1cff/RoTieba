@@ -27,10 +27,10 @@ import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostLoadStateBinding
 import io.github.a13e300.ro_tieba.models.SearchedPost
-import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.replaceEm
+import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.reduce

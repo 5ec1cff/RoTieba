@@ -20,8 +20,8 @@ import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toUser
-import io.github.a13e300.ro_tieba.toPostContent
 import io.github.a13e300.ro_tieba.ui.photo.Photo
+import io.github.a13e300.ro_tieba.utils.toPostContent
 import kotlinx.coroutines.flow.map
 import tbclient.PbPage.PbPageResIdlOuterClass
 import java.util.Date

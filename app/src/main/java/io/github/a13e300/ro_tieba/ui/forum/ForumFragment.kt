@@ -30,7 +30,6 @@ import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
-import io.github.a13e300.ro_tieba.appendSimpleContent
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.misc.IconSpan
@@ -39,12 +38,13 @@ import io.github.a13e300.ro_tieba.models.ForumSortType
 import io.github.a13e300.ro_tieba.models.ForumTab
 import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.models.TiebaThread
-import io.github.a13e300.ro_tieba.openForumAtOtherClient
-import io.github.a13e300.ro_tieba.toSimpleString
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.toDetail
+import io.github.a13e300.ro_tieba.utils.appendSimpleContent
+import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
+import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 

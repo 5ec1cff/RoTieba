@@ -19,8 +19,8 @@ import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toUser
-import io.github.a13e300.ro_tieba.toImageContentList
-import io.github.a13e300.ro_tieba.toPostContent
+import io.github.a13e300.ro_tieba.utils.toImageContentList
+import io.github.a13e300.ro_tieba.utils.toPostContent
 import java.util.Date
 
 

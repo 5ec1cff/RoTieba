@@ -24,9 +24,9 @@ import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileBinding
 import io.github.a13e300.ro_tieba.models.UserForum
-import io.github.a13e300.ro_tieba.openUserAtOtherClient
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.utils.openUserAtOtherClient
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 

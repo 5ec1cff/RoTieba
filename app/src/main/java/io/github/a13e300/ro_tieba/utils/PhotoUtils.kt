@@ -1,4 +1,4 @@
-package io.github.a13e300.ro_tieba
+package io.github.a13e300.ro_tieba.utils
 
 import android.app.Activity
 import android.content.ContentValues
@@ -15,6 +15,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.github.panpf.sketch.request.DownloadRequest
 import com.github.panpf.sketch.request.DownloadResult
+import io.github.a13e300.ro_tieba.BuildConfig
+import io.github.a13e300.ro_tieba.Logger
+import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.UserProfile
@@ -50,7 +53,7 @@ object PhotoUtils {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(
                 MediaStore.MediaColumns.RELATIVE_PATH,
-                "$root/${MY_PATH}"
+                "$root/$MY_PATH"
             )
             put(MediaStore.Video.Media.IS_PENDING, 1)
         }

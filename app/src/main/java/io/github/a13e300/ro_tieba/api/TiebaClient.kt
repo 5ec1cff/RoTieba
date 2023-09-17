@@ -5,8 +5,8 @@ import io.github.a13e300.ro_tieba.api.json.TiebaApiErrorInfo
 import io.github.a13e300.ro_tieba.api.protobuf.FrsPageSortType
 import io.github.a13e300.ro_tieba.api.protobuf.GeneralTabListSortType
 import io.github.a13e300.ro_tieba.db.Account
-import io.github.a13e300.ro_tieba.fromJson
-import io.github.a13e300.ro_tieba.ignoreAllSSLErrorsIfDebug
+import io.github.a13e300.ro_tieba.utils.fromJson
+import io.github.a13e300.ro_tieba.utils.ignoreAllSSLErrorsIfDebug
 import kotlinx.coroutines.runBlocking
 import okhttp3.FormBody
 import okhttp3.Interceptor
