@@ -23,8 +23,8 @@ import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
+import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
-import io.github.a13e300.ro_tieba.view.MySearchView
 
 class SearchFragment : BaseFragment() {
 
@@ -91,10 +91,12 @@ class SearchFragment : BaseFragment() {
             }
 
         }
-        binding.searchView.onBackPressedListener = MySearchView.OnBackPressedListener {
+        binding.searchView.onBackPressedListener = OnPreImeBackPressedListener {
+            binding.searchView.clearFocusAndHideKeyboard()
             if (viewModel.searched)
                 binding.searchView.hide()
             else navigateUp()
+            return@OnPreImeBackPressedListener true
         }
         if (viewModel.searchAtForum) {
             binding.searchTabLayout.isGone = true

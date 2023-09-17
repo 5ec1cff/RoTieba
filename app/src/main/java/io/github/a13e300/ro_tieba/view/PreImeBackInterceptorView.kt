@@ -3,10 +3,10 @@ package io.github.a13e300.ro_tieba.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.KeyEvent
-import com.google.android.material.search.SearchView
+import android.widget.FrameLayout
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 
-class MySearchView : SearchView {
+class PreImeBackInterceptorView : FrameLayout {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 

@@ -21,6 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -67,6 +68,7 @@ import io.github.a13e300.ro_tieba.forceShowIcon
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
+import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
@@ -247,6 +249,12 @@ class ThreadFragment : BaseFragment() {
         }
         dialog.show()
         b.inputText.requestFocus()
+        b.root.onBackPressedListener = OnPreImeBackPressedListener {
+            it.context.getSystemService(InputMethodManager::class.java)
+                .hideSoftInputFromWindow(it.windowToken, 0)
+            dialog.hide()
+            true
+        }
         // context.getSystemService(InputMethodManager::class.java).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
     }
 
