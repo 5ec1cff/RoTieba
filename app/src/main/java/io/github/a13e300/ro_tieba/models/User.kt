@@ -20,6 +20,9 @@ data class User(
 
     val avatarUrl: String
         get() = avatar ?: "$AVATAR_THUMBNAIL/$portrait"
+
+    val uidOrPortrait: String
+        get() = if (uid == 0L) portrait else uid.toString()
 }
 
 fun UserOuterClass.User.toUser() = this.let { user ->

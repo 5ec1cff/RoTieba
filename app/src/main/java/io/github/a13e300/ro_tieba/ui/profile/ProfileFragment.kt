@@ -64,8 +64,6 @@ class ProfileFragment : BaseFragment() {
             }
             false
         }
-        viewModel.uid = args.uid
-        viewModel.portrait = args.portrait
         viewModel.user.observe(viewLifecycleOwner) { p ->
             p.fold({ profile ->
                 binding.userName.text = SpannableStringBuilder()
@@ -121,10 +119,17 @@ class ProfileFragment : BaseFragment() {
             }
         }.attach()
         if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                viewModel.requestUser(args.uid, args.portrait)
+            val uid = args.uidOrPortrait.toLongOrNull()
+            if (uid != null) {
+                viewModel.uid = uid
+                viewModel.portrait = null
+            } else {
+                viewModel.uid = 0L
+                viewModel.portrait = args.uidOrPortrait
             }
-            viewModel.uid = args.uid
+            lifecycleScope.launch {
+                viewModel.requestUser(viewModel.uid, viewModel.portrait)
+            }
         }
         return binding.root
     }

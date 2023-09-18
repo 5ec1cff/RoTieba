@@ -114,22 +114,15 @@
     <fragment
         android:id="@+id/navigation_profile"
         android:name="io.github.a13e300.ro_tieba.ui.profile.ProfileFragment">
-        <argument
-            android:name="uid"
-            app:argType="long"
-            android:defaultValue="0L" />
-        <argument
-            android:name="portrait"
-            app:nullable="true"
-            android:defaultValue="@null" />
+        <argument android:name="uid_or_portrait" />
         <deepLink
-            app:uri="com.baidu.tieba://unidispatch/usercenter?portrait={portrait}"
+            app:uri="com.baidu.tieba://unidispatch/usercenter?portrait={uid_or_portrait}"
             app:action="android.intent.action.VIEW" />
         <deepLink
-            app:uri="com.baidu.tieba://usercenter//uid={uid}"
+            app:uri="com.baidu.tieba://usercenter//uid={uid_or_portrait}"
             app:action="android.intent.action.VIEW" />
         <deepLink
-            app:uri="rotieba://user/profile?uid={uid}&amp;portrait={portrait}"
+            app:uri="rotieba://user/profile?uid_or_portrait={uid_or_portrait}"
             app:action="android.intent.action.VIEW" />
     </fragment>
 

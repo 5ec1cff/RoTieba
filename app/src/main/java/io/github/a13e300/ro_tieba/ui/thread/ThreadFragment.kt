@@ -594,8 +594,7 @@ class ThreadFragment : BaseFragment() {
             holder.binding.avatar.setOnClickListener {
                 // openUserAtOtherClient(post.user, requireContext())
                 findNavController().navigate(
-                    MobileNavigationDirections.showProfile().setPortrait(post.user.portrait)
-                        .setUid(post.user.uid)
+                    MobileNavigationDirections.showProfile(post.user.uidOrPortrait)
                 )
             }
             fun addTextView() {

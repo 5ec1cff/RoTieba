@@ -93,7 +93,7 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
             -> Content.TextContent(it.text)
 
             1 -> Content.LinkContent(it.text, it.link.convertTiebaUrl())
-            4 -> Content.LinkContent(it.text, "rotieba://user/profile?uid=${it.uid}")
+            4 -> Content.LinkContent(it.text, "rotieba://user/profile?uid_or_portrait=${it.uid}")
 
             2, 11 -> Content.EmojiContent(it.text)
 
