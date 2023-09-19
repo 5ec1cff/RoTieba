@@ -3,10 +3,11 @@ package io.github.a13e300.ro_tieba.view
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
+import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
-import io.github.a13e300.ro_tieba.Logger.e
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.BounceScrollHelper
+import kotlin.math.abs
 
 // https://github.com/woxingxiao/BounceScrollView
 class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
@@ -15,6 +16,7 @@ class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     var disableBounce: Boolean
     var disableTopBounce: Boolean = false
     var disableBottomBounce: Boolean = false
+    private var mIsFling: Boolean = false
     private var mAnimator: ObjectAnimator? = null
 
     constructor(context: Context) : this(context, null)
@@ -69,10 +71,10 @@ class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
 
     override fun stopNestedScroll(type: Int) {
         super.stopNestedScroll(type)
-        if (mHelper.overScrolledY == 0) return
+        if (mHelper.overScrolledY == 0 || (mIsFling && type != ViewCompat.TYPE_NON_TOUCH)) return
+        if (mIsFling) mIsFling = false
         mAnimator = mHelper.createScrollBackAnimator(getChildAt(0), TRANSLATION_Y)
         mAnimator!!.start()
-        e("scroll stopped type=$type", Throwable())
     }
 
     override fun dispatchNestedPreScroll(
@@ -84,7 +86,6 @@ class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     ): Boolean {
         cancelAnimator()
         val scrolled = super.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow, type)
-        // Logger.INSTANCE.d("scrolled=" + scrolled + " consumed=" + (consumed == null ? "null" : String.valueOf(consumed[1])));
         if (!disableBounce && !scrolled) {
             val consumedY = mHelper.bouncePreScroll(dy)
             getChildAt(0).translationY = mHelper.overScrolledY.toFloat()
@@ -116,11 +117,16 @@ class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         )
         if (!disableBounce && consumed[1] == 0) {
             if (disableTopBounce && dyUnconsumed < 0 || disableBottomBounce && dyUnconsumed > 0) return
+            if (mIsFling && abs(mHelper.overScrolledY.div(mHelper.totalHeight.toFloat())) > 0.05) return
             consumed[1] = dyUnconsumed
             mHelper.bounceScroll(dyUnconsumed)
-            // if (mHelper.overScrolledY != 0) Logger.d("BounceScrollView consumed=${dyUnconsumed} scroll=${mHelper.overScrolledY}")
             getChildAt(0).translationY = mHelper.overScrolledY.toFloat()
         }
+    }
+
+    override fun dispatchNestedPreFling(velocityX: Float, velocityY: Float): Boolean {
+        mIsFling = !super.dispatchNestedPreFling(velocityX, velocityY)
+        return !mIsFling
     }
 
     companion object {

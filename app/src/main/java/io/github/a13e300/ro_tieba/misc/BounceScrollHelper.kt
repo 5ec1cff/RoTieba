@@ -26,7 +26,9 @@ class BounceScrollHelper {
      */
     fun bouncePreScroll(dy: Int): Int {
         if (totalHeight == 0 || damping == 0f) return 0
+        // only pre-scroll if we're in overScroll state
         if (dy < 0 && overScrolledY >= 0 || dy > 0 && overScrolledY <= 0) return 0
+        // linear scroll back
         // val ratio: Float = (1.0f - (abs(overScrolledY.toFloat()) / totalHeight + 0.2f).pow(2)) / damping
         val delta = dy // * ratio
         val newY = (overScrolledY - delta.toInt()).let {

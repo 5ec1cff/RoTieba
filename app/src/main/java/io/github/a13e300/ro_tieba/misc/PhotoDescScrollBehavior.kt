@@ -8,9 +8,9 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.view.BounceScrollView
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,10 +23,10 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     private var mPeekHeight: Int = 0
     private var mMinHeight: Int = 0
     private var mMinHeightY: Int = 0
-    private var mMaxHeight: Int = 0
     private var mMaxHeightY: Int = 0
     private val mHelper = BounceScrollHelper()
     private var mAnimator: ObjectAnimator? = null
+    private var mIsFling: Boolean = false
 
     init {
         context.theme.obtainStyledAttributes(
@@ -81,7 +81,6 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         child.top = mMinHeightY
         child.bottom = parent.bottom
         if (child is BounceScrollView) child.disableTopBounce = true
-        Logger.d("h=$h child=${child.getChildAt(0)?.height} parent=${parent.height} appbar=$mAppBarHeight maxHeightY=$mMaxHeightY minHeightY=$mMinHeightY")
         return true
     }
 
@@ -107,10 +106,13 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     ) {
         stopAutoScroll()
         if (dy > 0) {
+            // content fills the whole space
             if (child.top == mAppBarHeight) {
                 consumed[1] = 0
+                if (child is BounceScrollView) child.disableBottomBounce = false
                 return
             }
+            // pre-scroll down if we're below the minHeight line
             if (child.top > mMinHeightY) {
                 val consumedY = mHelper.bouncePreScroll(dy)
                 child.top = mMinHeightY + mHelper.overScrolledY - dy + consumedY
@@ -118,6 +120,7 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
                 return
             }
             var consumedY = 0
+            // do linear scroll down
             if (child.top > mMaxHeightY) {
                 consumedY = dy
                 var newTop = child.top - dy
@@ -127,20 +130,27 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
                     if (mMaxHeightY == mAppBarHeight) {
                         consumed[1] = consumedY
                         child.top = newTop
+                        if (child is BounceScrollView) child.disableBottomBounce = false
                         return
                     }
                 }
                 child.top = newTop
             }
             val unconsumedY = dy - consumedY
+            // do bounce scroll down
             if (unconsumedY > 0) {
                 mHelper.totalHeight = mMaxHeightY - mAppBarHeight
+                if (mIsFling && abs(mHelper.overScrolledY.div(mHelper.totalHeight.toFloat())) > 0.05) {
+                    if (child is BounceScrollView) child.disableBottomBounce = true
+                    consumed[1] = consumedY
+                    return
+                }
                 mHelper.bounceScroll(unconsumedY)
                 child.top = mMaxHeightY + mHelper.overScrolledY
-                // Logger.d("pre scroll overScrollY=${mHelper.overScrolledY}")
             }
             consumed[1] = dy
         } else if (dy < 0 && child.top < mMaxHeightY) {
+            // pre-scroll down if we're above the maxHeight line
             val consumedY = mHelper.bouncePreScroll(dy)
             child.top = mMaxHeightY + mHelper.overScrolledY - dy + consumedY
             consumed[1] = dy
@@ -160,7 +170,9 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     ) {
         stopAutoScroll()
         if (dyUnconsumed < 0) {
+            if (mIsFling && abs(mHelper.overScrolledY.div(mHelper.totalHeight.toFloat())) > 0.05) return
             var consumedY = 0
+            // linear scroll up
             if (child.top < mMinHeightY) {
                 consumedY = dyUnconsumed
                 var newTop = child.top - dyUnconsumed
@@ -170,13 +182,14 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
                 }
                 child.top = newTop
             }
+            // bounce scroll up
             val unconsumedY = dyUnconsumed - consumedY
             if (unconsumedY < 0) {
                 mHelper.totalHeight = mMinHeight
                 mHelper.bounceScroll(unconsumedY)
                 child.top = mMinHeightY + mHelper.overScrolledY
             }
-            consumed[1] = unconsumedY
+            consumed[1] = dyUnconsumed
         }
     }
 
@@ -187,7 +200,20 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         type: Int
     ) {
         super.onStopNestedScroll(coordinatorLayout, child, target, type)
+        if (mIsFling && type != ViewCompat.TYPE_NON_TOUCH) return
+        if (mIsFling) mIsFling = false
         startAutoScroll(child)
+    }
+
+    override fun onNestedPreFling(
+        coordinatorLayout: CoordinatorLayout,
+        child: NestedScrollView,
+        target: View,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
+        mIsFling = !super.onNestedPreFling(coordinatorLayout, child, target, velocityX, velocityY)
+        return !mIsFling
     }
 
     private fun startAutoScroll(view: NestedScrollView) {
@@ -195,7 +221,6 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         else if (view.top > mMinHeightY) mMinHeightY
         else return
         val height = view.top - targetTop
-        Logger.d("targetTop=$targetTop height=$height")
         val property = object : FloatProperty<NestedScrollView>("") {
             override fun get(p0: NestedScrollView): Float {
                 return 1f
@@ -213,7 +238,6 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         mAnimator?.let {
             if (it.isRunning) {
                 it.cancel()
-                Logger.d("cancelled")
             }
         }
     }
