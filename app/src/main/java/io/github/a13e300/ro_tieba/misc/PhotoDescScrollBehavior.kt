@@ -1,22 +1,21 @@
 package io.github.a13e300.ro_tieba.misc
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.util.FloatProperty
 import android.view.View
-import android.widget.OverScroller
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
-import rikka.insets.initialPaddingBottom
-import rikka.insets.initialPaddingLeft
-import rikka.insets.initialPaddingRight
-import rikka.insets.initialPaddingTop
-import rikka.insets.setInitialPadding
+import io.github.a13e300.ro_tieba.view.BounceScrollView
+import kotlin.math.max
 import kotlin.math.min
 
 val NestedScrollView.contentHeight: Int
-    get() = paddingBottom - initialPaddingBottom + paddingTop + (getChildAt(0)?.height ?: 0)
+    get() = paddingBottom + paddingTop + (getChildAt(0)?.height ?: 0)
 
 class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     CoordinatorLayout.Behavior<NestedScrollView>(context, attrs) {
@@ -24,7 +23,10 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     private var mPeekHeight: Int = 0
     private var mMinHeight: Int = 0
     private var mMinHeightY: Int = 0
-    private var mScroller: OverScroller? = null
+    private var mMaxHeight: Int = 0
+    private var mMaxHeightY: Int = 0
+    private val mHelper = BounceScrollHelper()
+    private var mAnimator: ObjectAnimator? = null
 
     init {
         context.theme.obtainStyledAttributes(
@@ -39,6 +41,8 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
             ).toInt()
             recycle()
         }
+        mHelper.damping = 4f
+        mHelper.bounceDelay = 400
     }
 
     override fun onMeasureChild(
@@ -71,13 +75,13 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         mMinHeightY = parent.height - mMinHeight
         if (mMinHeightY < mAppBarHeight) {
             mMinHeightY = mAppBarHeight
+            mMinHeight = parent.height - mMinHeightY
         }
-        ViewCompat.offsetTopAndBottom(child, mMinHeightY)
-        child.setInitialPadding(
-            child.initialPaddingLeft,
-            child.initialPaddingTop,
-            child.initialPaddingRight, child.height - (parent.height - child.y.toInt())
-        )
+        mMaxHeightY = max(parent.height - h, mAppBarHeight)
+        child.top = mMinHeightY
+        child.bottom = parent.bottom
+        if (child is BounceScrollView) child.disableTopBounce = true
+        Logger.d("h=$h child=${child.getChildAt(0)?.height} parent=${parent.height} appbar=$mAppBarHeight maxHeightY=$mMaxHeightY minHeightY=$mMinHeightY")
         return true
     }
 
@@ -101,29 +105,45 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         consumed: IntArray,
         type: Int
     ) {
-        super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
         stopAutoScroll()
         if (dy > 0) {
-            val oldTransY = child.translationY
-            val newTransY = oldTransY - dy
-            val newY = newTransY + child.top
-            if (newY >= mAppBarHeight) {
-                consumed[1] = dy
-                if (newY < coordinatorLayout.height - child.contentHeight)
-                    child.translationY = oldTransY - dy / 2
-                else
-                    child.translationY = newTransY
-            } else {
-                val realDy = -(oldTransY + child.top - mAppBarHeight).toInt()
-                consumed[1] = realDy
-                child.translationY = oldTransY + realDy
+            if (child.top == mAppBarHeight) {
+                consumed[1] = 0
+                return
             }
-            child.setInitialPadding(
-                child.initialPaddingLeft,
-                child.initialPaddingTop,
-                child.initialPaddingRight,
-                child.height - (coordinatorLayout.height - child.y.toInt())
-            )
+            if (child.top > mMinHeightY) {
+                val consumedY = mHelper.bouncePreScroll(dy)
+                child.top = mMinHeightY + mHelper.overScrolledY - dy + consumedY
+                consumed[1] = dy
+                return
+            }
+            var consumedY = 0
+            if (child.top > mMaxHeightY) {
+                consumedY = dy
+                var newTop = child.top - dy
+                if (newTop <= mMaxHeightY) {
+                    newTop = mMaxHeightY
+                    consumedY = child.top - newTop
+                    if (mMaxHeightY == mAppBarHeight) {
+                        consumed[1] = consumedY
+                        child.top = newTop
+                        return
+                    }
+                }
+                child.top = newTop
+            }
+            val unconsumedY = dy - consumedY
+            if (unconsumedY > 0) {
+                mHelper.totalHeight = mMaxHeightY - mAppBarHeight
+                mHelper.bounceScroll(unconsumedY)
+                child.top = mMaxHeightY + mHelper.overScrolledY
+                // Logger.d("pre scroll overScrollY=${mHelper.overScrolledY}")
+            }
+            consumed[1] = dy
+        } else if (dy < 0 && child.top < mMaxHeightY) {
+            val consumedY = mHelper.bouncePreScroll(dy)
+            child.top = mMaxHeightY + mHelper.overScrolledY - dy + consumedY
+            consumed[1] = dy
         }
     }
 
@@ -138,33 +158,25 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         type: Int,
         consumed: IntArray
     ) {
-        super.onNestedScroll(
-            coordinatorLayout,
-            child,
-            target,
-            dxConsumed,
-            dyConsumed,
-            dxUnconsumed,
-            dyUnconsumed,
-            type,
-            consumed
-        )
         stopAutoScroll()
         if (dyUnconsumed < 0) {
-            val newTransY = child.translationY - dyUnconsumed
-            val newY = child.top + newTransY
-            consumed[1] = dyUnconsumed
-            if (newY < mMinHeightY) {
-                child.translationY = newTransY
-            } else {
-                child.translationY = newTransY + dyUnconsumed / 2
+            var consumedY = 0
+            if (child.top < mMinHeightY) {
+                consumedY = dyUnconsumed
+                var newTop = child.top - dyUnconsumed
+                if (newTop >= mMinHeightY) {
+                    newTop = mMinHeightY
+                    consumedY = child.top - newTop
+                }
+                child.top = newTop
             }
-            child.setInitialPadding(
-                child.initialPaddingLeft,
-                child.initialPaddingTop,
-                child.initialPaddingRight,
-                child.height - (coordinatorLayout.height - child.y.toInt())
-            )
+            val unconsumedY = dyUnconsumed - consumedY
+            if (unconsumedY < 0) {
+                mHelper.totalHeight = mMinHeight
+                mHelper.bounceScroll(unconsumedY)
+                child.top = mMinHeightY + mHelper.overScrolledY
+            }
+            consumed[1] = unconsumedY
         }
     }
 
@@ -175,39 +187,33 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
         type: Int
     ) {
         super.onStopNestedScroll(coordinatorLayout, child, target, type)
-        val maxY = coordinatorLayout.height - child.contentHeight
-        if (child.y < maxY) {
-            startAutoScroll(child, (maxY - child.y).toInt())
-        } else if (child.y > mMinHeightY) {
-            startAutoScroll(child, (mMinHeightY - child.y).toInt())
-        }
+        startAutoScroll(child)
     }
 
-    private fun startAutoScroll(view: NestedScrollView, distance: Int) {
-        val scroller = mScroller ?: OverScroller(view.context).also { mScroller = it }
-        if (scroller.isFinished) {
-            scroller.startScroll(0, view.translationY.toInt(), 0, distance)
-            ViewCompat.postOnAnimation(view, object : Runnable {
-                override fun run() {
-                    if (scroller.computeScrollOffset()) {
-                        view.translationY = scroller.currY.toFloat()
-                        view.setInitialPadding(
-                            view.initialPaddingLeft,
-                            view.initialPaddingTop,
-                            view.initialPaddingRight,
-                            view.height - ((view.parent as View).height - view.y.toInt())
-                        )
-                        ViewCompat.postOnAnimation(view, this)
-                    }
-                }
-            })
+    private fun startAutoScroll(view: NestedScrollView) {
+        val targetTop = if (view.top < mMaxHeightY) mMaxHeightY
+        else if (view.top > mMinHeightY) mMinHeightY
+        else return
+        val height = view.top - targetTop
+        Logger.d("targetTop=$targetTop height=$height")
+        val property = object : FloatProperty<NestedScrollView>("") {
+            override fun get(p0: NestedScrollView): Float {
+                return 1f
+            }
+
+            override fun setValue(p0: NestedScrollView, p1: Float) {
+                p0.top = (targetTop + p1 * height).toInt()
+            }
         }
+        mAnimator = mHelper.createScrollBackAnimator(view, property)
+        mAnimator!!.start()
     }
 
     private fun stopAutoScroll() {
-        mScroller?.let {
-            if (!it.isFinished) {
-                it.abortAnimation()
+        mAnimator?.let {
+            if (it.isRunning) {
+                it.cancel()
+                Logger.d("cancelled")
             }
         }
     }

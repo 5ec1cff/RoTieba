@@ -30,7 +30,7 @@
             style="@style/PhotoAppBarStyle" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <io.github.a13e300.ro_tieba.view.BounceScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/photo_view_background"
@@ -48,6 +48,6 @@
             android:textColor="@color/white"
             android:textSize="@dimen/content_text_size"
             android:padding="16dp" />
-    </androidx.core.widget.NestedScrollView>
+    </io.github.a13e300.ro_tieba.view.BounceScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

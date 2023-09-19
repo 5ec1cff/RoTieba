@@ -3,4 +3,11 @@
     <declare-styleable name="PhotoDescScrollBehavior_layout">
         <attr format="dimension" name="behavior_minHeight" />
     </declare-styleable>
+
+    <declare-styleable name="BounceScrollView">
+        <attr name="damping" format="float" />
+        <attr name="bounceDelay" format="integer" />
+        <attr name="disableBounce" format="boolean" />
+        <attr name="nestedScrollingEnabled" format="boolean" />
+    </declare-styleable>
 </resources>
