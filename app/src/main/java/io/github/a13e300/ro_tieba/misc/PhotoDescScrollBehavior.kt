@@ -141,7 +141,9 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
             if (unconsumedY > 0) {
                 mHelper.totalHeight = mMaxHeightY - mAppBarHeight
                 if (mIsFling && abs(mHelper.overScrolledY.div(mHelper.totalHeight.toFloat())) > 0.05) {
+                    // Stop fling and prevent BounceScrollView from bounce-scrolling up
                     if (child is BounceScrollView) child.disableBottomBounce = true
+                    // Consume nothing, the BounceScrollView won't scroll because its child is at the top.
                     consumed[1] = consumedY
                     return
                 }
@@ -170,6 +172,7 @@ class PhotoDescScrollBehavior(context: Context, attrs: AttributeSet) :
     ) {
         stopAutoScroll()
         if (dyUnconsumed < 0) {
+            // Consume nothing to cancel fling
             if (mIsFling && abs(mHelper.overScrolledY.div(mHelper.totalHeight.toFloat())) > 0.05) return
             var consumedY = 0
             // linear scroll up

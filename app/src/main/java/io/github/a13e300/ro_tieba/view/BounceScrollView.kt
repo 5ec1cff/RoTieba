@@ -117,6 +117,8 @@ class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         )
         if (!disableBounce && consumed[1] == 0) {
             if (disableTopBounce && dyUnconsumed < 0 || disableBottomBounce && dyUnconsumed > 0) return
+            // If we are flinging and the overScrollY is out of bound, cancel it by consuming nothing.
+            // see NestedScrollView.computeScroll
             if (mIsFling && abs(mHelper.overScrolledY.div(mHelper.totalHeight.toFloat())) > 0.05) return
             consumed[1] = dyUnconsumed
             mHelper.bounceScroll(dyUnconsumed)
@@ -125,6 +127,9 @@ class BounceScrollView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
     }
 
     override fun dispatchNestedPreFling(velocityX: Float, velocityY: Float): Boolean {
+        // NestedScrollView calls dispatchNestedPreFling and if it returns false, the view starts fling
+        // So we record the result to determine whether to fling
+        // see NestedScrollView.onTouchEvent
         mIsFling = !super.dispatchNestedPreFling(velocityX, velocityY)
         return !mIsFling
     }
