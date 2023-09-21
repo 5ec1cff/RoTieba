@@ -72,7 +72,7 @@ fun UserOuterClass.User.toUserProfile() =
     )
 
 fun SearchUser.UserInfo.toUser() = User(
-    name = name,
+    name = name ?: "",
     nick = showNickName.ifEmpty { nickname },
     avatar = avatar,
     uid = id,

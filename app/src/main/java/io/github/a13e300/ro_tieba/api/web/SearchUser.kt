@@ -14,7 +14,7 @@ data class SearchUser(
         val intro: String,
         @SerializedName("user_nickname")
         val nickname: String,
-        val name: String, // empty?
+        val name: String?, // empty!
         @SerializedName("show_nickname")
         val showNickName: String,
         @SerializedName("portrait")
