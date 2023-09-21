@@ -1,6 +1,8 @@
 package io.github.a13e300.ro_tieba.utils
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -9,6 +11,7 @@ import android.text.SpannableStringBuilder
 import android.view.ContextMenu
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
@@ -246,4 +249,14 @@ fun openPostAtOtherClient(tid: Long, pid: Long, context: Context) =
 
 fun List<Media>.toImageContentList() = filter { it.type == 3 }.mapIndexed { i, pic ->
     Content.ImageContent(pic.srcPic, pic.originPic, pic.width, pic.height, i)
+}
+
+fun Context.copyText(text: CharSequence) {
+    getSystemService(ClipboardManager::class.java).setPrimaryClip(
+        ClipData.newPlainText("", text)
+    )
+}
+
+fun Fragment.copyText(text: CharSequence) {
+    requireContext().copyText(text)
 }

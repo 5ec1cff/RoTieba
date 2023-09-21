@@ -11,4 +11,8 @@
         android:title="@string/share_photo_title"
         android:icon="@drawable/ic_share"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/copy_image_url"
+        android:title="@string/copy_image_url_title"
+        app:showAsAction="never" />
 </menu>

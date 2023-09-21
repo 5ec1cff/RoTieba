@@ -26,6 +26,7 @@ import io.github.a13e300.ro_tieba.databinding.FragmentProfileBinding
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.openUserAtOtherClient
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -59,6 +60,19 @@ class ProfileFragment : BaseFragment() {
                             Snackbar.LENGTH_SHORT
                         ).show()
                     }
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.copy_uid -> {
+                    val uid = viewModel.user.value?.getOrNull()?.uid ?: viewModel.uid
+                    copyText(uid.toString())
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.copy_portrait -> {
+                    val portrait =
+                        viewModel.user.value?.getOrNull()?.portrait ?: viewModel.portrait ?: ""
+                    copyText(portrait)
                     return@setOnMenuItemClickListener true
                 }
             }

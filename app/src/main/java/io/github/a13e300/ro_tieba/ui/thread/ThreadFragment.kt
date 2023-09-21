@@ -1,7 +1,5 @@
 package io.github.a13e300.ro_tieba.ui.thread
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Rect
 import android.graphics.Typeface
@@ -78,6 +76,7 @@ import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.PhotoUtils
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
+import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.forceShowIcon
 import io.github.a13e300.ro_tieba.utils.openPostAtOtherClient
 import io.github.a13e300.ro_tieba.utils.toSimpleString
@@ -285,8 +284,7 @@ class ThreadFragment : BaseFragment() {
         if (post != null) {
             when (item.itemId) {
                 R.id.copy_post_content -> {
-                    val cm = requireContext().getSystemService(ClipboardManager::class.java)
-                    cm.setPrimaryClip(ClipData.newPlainText("", post.content.joinToString("") {
+                    copyText(post.content.joinToString("") {
                         when (it) {
                             is Content.TextContent -> it.text
                             is Content.ImageContent -> "[${it.src}]"
@@ -295,23 +293,17 @@ class ThreadFragment : BaseFragment() {
                             is Content.VideoContent -> "[video](${it.src})"
                             is Content.UnknownContent -> it.source
                         }
-                    }))
+                    })
                     return true
                 }
 
                 R.id.copy_post_link -> {
-                    val cm = requireContext().getSystemService(ClipboardManager::class.java)
                     val text = when (post) {
                         is Post -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
                         is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&ppid=${post.ppid}"
-                        else -> null
+                        else -> ""
                     }
-                    cm.setPrimaryClip(
-                        ClipData.newPlainText(
-                            "",
-                            text
-                        )
-                    )
+                    copyText(text)
                     return true
                 }
 
@@ -348,13 +340,7 @@ class ThreadFragment : BaseFragment() {
 
                 R.id.copy_link -> {
                     (selected as? SelectedLink)?.url?.also {
-                        val cm = requireContext().getSystemService(ClipboardManager::class.java)
-                        cm.setPrimaryClip(
-                            ClipData.newPlainText(
-                                "",
-                                it
-                            )
-                        )
+                        copyText(it)
                     }
                     return true
                 }
@@ -443,13 +429,7 @@ class ThreadFragment : BaseFragment() {
 
                 R.id.copy_video_link -> {
                     video?.src?.also {
-                        val cm = requireContext().getSystemService(ClipboardManager::class.java)
-                        cm.setPrimaryClip(
-                            ClipData.newPlainText(
-                                "",
-                                it
-                            )
-                        )
+                        copyText(it)
                     }
                     return true
                 }

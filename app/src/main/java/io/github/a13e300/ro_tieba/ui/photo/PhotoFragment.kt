@@ -32,6 +32,7 @@ import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.utils.PhotoUtils
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
+import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.forceShowIcon
 import io.github.a13e300.ro_tieba.utils.hideAnim
 import io.github.a13e300.ro_tieba.utils.showAnim
@@ -189,6 +190,11 @@ class PhotoFragment : BaseFragment() {
                         }
                     )
                 }
+                true
+            }
+
+            R.id.copy_image_url -> {
+                copyText(viewModel.photos[viewModel.currentIndex.value!!].url)
                 true
             }
 

@@ -6,4 +6,12 @@
         android:icon="@drawable/ic_open"
         android:title="@string/open_at_other_client_title"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/copy_uid"
+        android:title="@string/copy_uid_title"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/copy_portrait"
+        android:title="@string/copy_portrait_title"
+        app:showAsAction="never" />
 </menu>

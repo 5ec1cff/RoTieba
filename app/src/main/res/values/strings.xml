@@ -55,4 +55,7 @@
     <string name="sort_by_reply_time">回复时间</string>
     <string name="sort_by_create_time">创建时间</string>
     <string name="search_tab_user_title">用户</string>
+    <string name="copy_uid_title">复制 UID</string>
+    <string name="copy_portrait_title">复制 portrait</string>
+    <string name="copy_image_url_title">复制图片地址</string>
 </resources>
