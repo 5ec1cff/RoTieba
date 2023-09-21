@@ -20,11 +20,15 @@ import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.search.SearchView
 import com.google.android.material.tabs.TabLayoutMediator
 import io.github.a13e300.ro_tieba.BaseFragment
+import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
+
+val USER_REGEX = Regex("\\d+|tb\\.1\\..*")
+val THREAD_REGEX = Regex("tieba\\.baidu\\.com/p/(\\d+)(.*[\\?&]pid=(\\d+))?")
 
 class SearchFragment : BaseFragment() {
 
@@ -77,7 +81,7 @@ class SearchFragment : BaseFragment() {
         }
         binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int {
-                return if (viewModel.searchAtForum) 1 else 2
+                return if (viewModel.searchAtForum) 1 else 3
             }
 
             override fun createFragment(position: Int): Fragment {
@@ -85,15 +89,17 @@ class SearchFragment : BaseFragment() {
                     if (viewModel.searchAtForum)
                         SearchPostFragment()
                     else
-                        SearchResultFragment()
-                else
+                        SearchForumFragment()
+                else if (position == 1)
                     SearchPostFragment()
+                else
+                    SearchUserFragment()
             }
 
         }
         binding.searchView.onBackPressedListener = OnPreImeBackPressedListener {
             binding.searchView.clearFocusAndHideKeyboard()
-            if (viewModel.searched)
+            if (viewModel.forumSearched)
                 binding.searchView.hide()
             else navigateUp()
             return@OnPreImeBackPressedListener true
@@ -106,8 +112,8 @@ class SearchFragment : BaseFragment() {
                 override fun onPageSelected(position: Int) {
                     binding.searchTabLayout.background = AppCompatResources.getDrawable(
                         requireContext(), when (position) {
-                            0 -> R.drawable.background_with_divider
-                            else -> R.drawable.background
+                            1 -> R.drawable.background
+                            else -> R.drawable.background_with_divider
                         }
                     )
                 }
@@ -116,7 +122,8 @@ class SearchFragment : BaseFragment() {
             TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
                 tab.text = when (position) {
                     0 -> getString(R.string.search_tab_bar_title)
-                    else -> getString(R.string.search_tab_post_title)
+                    1 -> getString(R.string.search_tab_post_title)
+                    else -> getString(R.string.search_tab_user_title)
                 }
             }.attach()
             binding.searchView.editText.doAfterTextChanged { e ->
@@ -127,8 +134,19 @@ class SearchFragment : BaseFragment() {
                     val s = e.toString()
                     l.add(Operation.GoToForum(s))
                     s.toLongOrNull()?.also { l.add(Operation.GoToThread(it)) }
+                    THREAD_REGEX.find(s)?.let {
+                        val tid = it.groupValues[1].toLongOrNull()
+                        val pid = it.groupValues[3].toLongOrNull() ?: 0L
+                        if (tid != null) {
+                            l.add(Operation.GoToThread(tid, pid))
+                        }
+                    }
+                    if (s.matches(USER_REGEX)) {
+                        l.add(Operation.GoToUser(s))
+                    }
                     l.add(Operation.SearchForum(s))
                     l.add(Operation.SearchPosts(s))
+                    l.add(Operation.SearchUsers(s))
                     viewModel.suggestions = l
                 }
                 myAdapter.notifyDataSetChanged()
@@ -145,6 +163,7 @@ class SearchFragment : BaseFragment() {
         binding.searchBar.text = t
         if (!viewModel.searchAtForum) {
             viewModel.fetchForums(t)
+            viewModel.fetchUsers(t)
         }
         viewModel.currentKeyword.value = t
         binding.searchView.hide()
@@ -167,9 +186,12 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.GoToThread -> {
-                    holder.binding.title.text = "进帖：${op.tid}"
+                    holder.binding.title.text =
+                        "进帖：${op.tid}${if (op.pid != 0L) " / ${op.pid}" else ""}"
                     holder.binding.root.setOnClickListener {
-                        findNavController().navigate(ThreadFragmentDirections.goToThread(op.tid))
+                        findNavController().navigate(
+                            ThreadFragmentDirections.goToThread(op.tid).setPid(op.pid)
+                        )
                     }
                 }
 
@@ -184,6 +206,20 @@ class SearchFragment : BaseFragment() {
                     holder.binding.title.text = "搜帖：${op.keyword}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.keyword, 1)
+                    }
+                }
+
+                is Operation.SearchUsers -> {
+                    holder.binding.title.text = "搜人：${op.keyword}"
+                    holder.binding.root.setOnClickListener {
+                        performSearch(op.keyword, 2)
+                    }
+                }
+
+                is Operation.GoToUser -> {
+                    holder.binding.title.text = "查看用户：${op.uidOrPortrait}"
+                    holder.binding.root.setOnClickListener {
+                        findNavController().navigate(MobileNavigationDirections.showProfile(op.uidOrPortrait))
                     }
                 }
             }

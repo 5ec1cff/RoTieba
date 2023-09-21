@@ -18,6 +18,7 @@ import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toForum
+import io.github.a13e300.ro_tieba.models.toUser
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,12 +28,12 @@ import java.util.Date
 
 sealed class Operation {
     data class GoToForum(val name: String) : Operation()
-    data class GoToThread(val tid: Long) : Operation()
+    data class GoToThread(val tid: Long, val pid: Long = 0) : Operation()
 
-    // data class GoToUser
+    data class GoToUser(val uidOrPortrait: String) : Operation()
     data class SearchForum(val name: String) : Operation()
     data class SearchPosts(val keyword: String) : Operation()
-    // data class SearchUsers
+    data class SearchUsers(val keyword: String) : Operation()
 }
 
 enum class LoadState {
@@ -52,18 +53,27 @@ class SearchViewModel : ViewModel() {
     var searchPostKeyWord: String? = null
     var searchPostFilter: SearchFilter = SearchFilter.ALL
     val searchPostOrder = MutableLiveData(SearchOrder.NEW)
-    var searched = false
     var needShowSearch = true
+
+    // search forums
+    var forumSearched = false
     var searchedForums: SearchResult<List<Forum>> = SearchResult.Result(emptyList())
-    val barLoadState = MutableLiveData<LoadState>()
-    var suggestions: List<Operation> = emptyList()
+    val forumLoadState = MutableLiveData<LoadState>()
     private var searchForumJob: Job? = null
+
+    // search users
+    var userSearched = false
+    var searchedUsers: SearchResult<List<User>> = SearchResult.Result(emptyList())
+    val userLoadState = MutableLiveData<LoadState>()
+    private var searchUserJob: Job? = null
+
+    var suggestions: List<Operation> = emptyList()
 
 
     fun fetchForums(keyword: String) {
-        searched = true
+        forumSearched = true
         searchForumJob?.cancel()
-        barLoadState.value = LoadState.FETCHING
+        forumLoadState.value = LoadState.FETCHING
         searchForumJob = viewModelScope.launch {
             val list = mutableListOf<Forum>()
             kotlin.runCatching {
@@ -79,7 +89,31 @@ class SearchViewModel : ViewModel() {
                     searchedForums = SearchResult.Error(it)
                 }
             }
-            barLoadState.value = LoadState.FETCHED
+            forumLoadState.value = LoadState.FETCHED
+        }
+    }
+
+
+    fun fetchUsers(keyword: String) {
+        userSearched = true
+        searchUserJob?.cancel()
+        userLoadState.value = LoadState.FETCHING
+        searchUserJob = viewModelScope.launch {
+            val list = mutableListOf<User>()
+            kotlin.runCatching {
+                withContext(Dispatchers.IO) {
+                    val r = App.instance.client.webAPI.searchUser(keyword)
+                    r.exactMatch?.toUser()?.let { list.add(it) }
+                    r.fuzzyMatch.forEach { list.add(it.toUser()) }
+                }
+                searchedUsers = SearchResult.Result(list)
+            }.onFailure {
+                if (it !is CancellationException) {
+                    Logger.e("failed to search user $keyword", it)
+                    searchedUsers = SearchResult.Error(it)
+                }
+            }
+            userLoadState.value = LoadState.FETCHED
         }
     }
 

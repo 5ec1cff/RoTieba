@@ -16,7 +16,7 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchResultBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchResultBinding
 
-class SearchResultFragment : Fragment() {
+class SearchForumFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() })
     private val myAdapter = Adapter()
     private lateinit var binding: FragmentSearchResultBinding
@@ -30,13 +30,13 @@ class SearchResultFragment : Fragment() {
             adapter = myAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
-        viewModel.barLoadState.observe(viewLifecycleOwner) {
+        viewModel.forumLoadState.observe(viewLifecycleOwner) {
             when (it) {
                 LoadState.FETCHED -> {
                     binding.resultList.scrollToPosition(0)
                     myAdapter.notifyDataSetChanged()
                     updateData()
-                    viewModel.barLoadState.value = LoadState.LOADED
+                    viewModel.forumLoadState.value = LoadState.LOADED
                 }
 
                 else -> {}
@@ -47,7 +47,7 @@ class SearchResultFragment : Fragment() {
     }
 
     private fun updateData() {
-        if (!viewModel.searched) {
+        if (!viewModel.forumSearched) {
             return
         }
         viewModel.searchedForums.let { frs ->

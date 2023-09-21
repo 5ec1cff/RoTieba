@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba.api
 import io.github.a13e300.ro_tieba.api.web.GetFid
 import io.github.a13e300.ro_tieba.api.web.SearchForum
 import io.github.a13e300.ro_tieba.api.web.SearchThread
+import io.github.a13e300.ro_tieba.api.web.SearchUser
 import retrofit2.Call
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -26,4 +27,9 @@ interface TiebaWebAPI {
         @Query("tt") filter: String, // 2 -> all, 1 -> thread
         @Query("ct") ct: String = "2"
     ): SearchThread
+
+    @GET("/mo/q/search/user")
+    suspend fun searchUser(
+        @Query("word") keyword: String
+    ): SearchUser
 }

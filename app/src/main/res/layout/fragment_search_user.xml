@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/result_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:fitsSystemWindowsInsets="bottom"
+        android:clipToPadding="false" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?textAppearanceBody1"
+        android:id="@+id/result_tips"
+        android:visibility="gone"
+        app:layout_anchor="@id/result_list"
+        app:layout_anchorGravity="center"
+        android:text="@string/no_result_tips" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

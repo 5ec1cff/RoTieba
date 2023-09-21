@@ -1,5 +1,6 @@
 package io.github.a13e300.ro_tieba.models
 
+import io.github.a13e300.ro_tieba.api.web.SearchUser
 import tbclient.UserOuterClass
 
 const val AVATAR_THUMBNAIL = "https://gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/"
@@ -13,7 +14,8 @@ data class User(
     val location: String = "",
     val level: Int = 0,
     val bawuType: String? = null,
-    val avatar: String? = null
+    val avatar: String? = null,
+    val desc: String? = null
 ) {
     val showName: String
         get() = nick.ifEmpty { name }
@@ -68,3 +70,11 @@ fun UserOuterClass.User.toUserProfile() =
         followNum = concernNum,
         threadNum = postNum
     )
+
+fun SearchUser.UserInfo.toUser() = User(
+    name = name,
+    nick = showNickName.ifEmpty { nickname },
+    avatar = avatar,
+    uid = id,
+    desc = intro
+)
