@@ -24,6 +24,6 @@ data class SearchUser(
         @SerializedName("has_concerned")
         val concerned: Int,
         @SerializedName("fans_num")
-        val fansNum: Int
+        val fansNum: String // String (3.6w) or Int (36)
     )
 }
