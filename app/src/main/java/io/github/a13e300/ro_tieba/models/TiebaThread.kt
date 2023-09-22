@@ -1,5 +1,6 @@
 package io.github.a13e300.ro_tieba.models
 
+import androidx.recyclerview.widget.DiffUtil
 import java.util.Date
 
 data class TiebaThread(
@@ -18,5 +19,16 @@ data class TiebaThread(
     val disagreeNum: Long = 0,
     val images: List<Content.ImageContent> = emptyList(),
     val tabInfo: ForumTab.GeneralTab? = null,
-    val threadType: ThreadType = ThreadType.NORMAL
+    val threadType: ThreadType = ThreadType.NORMAL,
+    val isTop: Boolean = false
 )
+
+object ThreadComparator : DiffUtil.ItemCallback<TiebaThread>() {
+    override fun areItemsTheSame(oldItem: TiebaThread, newItem: TiebaThread): Boolean {
+        return oldItem.tid == newItem.tid
+    }
+
+    override fun areContentsTheSame(oldItem: TiebaThread, newItem: TiebaThread): Boolean {
+        return oldItem == newItem
+    }
+}

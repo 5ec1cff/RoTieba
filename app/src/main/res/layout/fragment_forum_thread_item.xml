@@ -52,13 +52,25 @@
             android:id="@+id/thread_title"
             android:textAppearance="?attr/textAppearanceListItem"
             tools:text="title"
-            android:layout_marginTop="16dp"
-            android:layout_width="wrap_content"
+            app:layout_goneMarginTop="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/expand_btn"
             app:layout_constraintTop_toBottomOf="@id/thread_avatar"
             app:layout_constraintBottom_toTopOf="@id/thread_content" />
 
+        <androidx.constraintlayout.utils.widget.ImageFilterButton
+            android:layout_width="wrap_content"
+            android:id="@+id/expand_btn"
+            android:src="@drawable/ic_down"
+            android:background="@android:color/transparent"
+            app:layout_constraintTop_toTopOf="@id/thread_title"
+            app:layout_constraintBottom_toBottomOf="@id/thread_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            android:layout_height="0dp" />
         <TextView
             android:id="@+id/thread_content"
             android:layout_width="match_parent"
@@ -80,7 +92,7 @@
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             app:round="8dp"
-            android:layout_marginTop="4dp"
+            app:layout_goneMarginTop="0dp"
             android:layout_marginEnd="4dp"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -96,7 +108,6 @@
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             app:round="8dp"
-            android:layout_marginTop="4dp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:layout_width="0dp"
@@ -113,7 +124,6 @@
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             app:round="8dp"
-            android:layout_marginTop="4dp"
             android:layout_marginStart="4dp"
             android:layout_width="0dp"
             android:layout_height="0dp"

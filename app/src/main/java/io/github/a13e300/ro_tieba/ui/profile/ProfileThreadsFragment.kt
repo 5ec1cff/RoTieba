@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileThreadItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileThreadsBinding
+import io.github.a13e300.ro_tieba.models.ThreadComparator
 import io.github.a13e300.ro_tieba.models.TiebaThread
-import io.github.a13e300.ro_tieba.ui.forum.ThreadComparator
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.launch

@@ -76,4 +76,6 @@
     <color name="em_span_color">#109AE1</color>
     <color name="help_span_background">#8E64F1</color>
     <color name="help_span_text">#FFFFFF</color>
+    <color name="top_span_background">#1173C8</color>
+    <color name="top_span_text">#FFFFFF</color>
 </resources>

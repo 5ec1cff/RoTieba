@@ -37,7 +37,6 @@ import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.ForumSortType
 import io.github.a13e300.ro_tieba.models.ForumTab
 import io.github.a13e300.ro_tieba.models.ThreadType
-import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
@@ -105,7 +104,7 @@ class ForumFragment : BaseFragment() {
                 }
             }
         }
-        val threadAdapter = ThreadAdapter(ThreadComparator)
+        val threadAdapter = ThreadAdapter(ForumThreadUiStateComparator)
         threadAdapter.addLoadStateListener { state ->
             when (state.refresh) {
                 is LoadState.Error -> {
@@ -138,8 +137,8 @@ class ForumFragment : BaseFragment() {
         }
         lifecycleScope.launch {
             viewModel.flow.collect {
-                threadAdapter.submitData(PagingData.empty())
                 threadAdapter.submitData(it)
+                threadAdapter.submitData(PagingData.empty())
             }
         }
         binding.forumTabLayout.apply {
@@ -198,17 +197,31 @@ class ForumFragment : BaseFragment() {
     }
 
 
-    inner class ThreadAdapter(diffCallback: DiffUtil.ItemCallback<TiebaThread>) :
-        PagingDataAdapter<TiebaThread, ThreadAdapter.ThreadViewHolder>(
+    inner class ThreadAdapter(diffCallback: DiffUtil.ItemCallback<ForumThreadUiState>) :
+        PagingDataAdapter<ForumThreadUiState, ThreadAdapter.ThreadViewHolder>(
             diffCallback
         ) {
         inner class ThreadViewHolder(val binding: FragmentForumThreadItemBinding) :
             RecyclerView.ViewHolder(binding.root)
 
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
-            val thread = getItem(position) ?: return
+            val state = getItem(position) ?: return
+            val thread = state.thread
             holder.binding.threadTitle.text = SpannableStringBuilder().apply {
                 val context = requireContext()
+                if (thread.isTop) {
+                    append(
+                        "[置顶]",
+                        RoundSpan(
+                            context,
+                            context.getColor(R.color.top_span_background),
+                            context.getColor(R.color.top_span_text),
+                            showText = "置顶"
+                        ),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    append(" ")
+                }
                 if (thread.threadType == ThreadType.HELP) {
                     append(
                         "[求助]",
@@ -245,6 +258,11 @@ class ForumFragment : BaseFragment() {
                 append(thread.title)
             }
             holder.binding.threadTitle.isGone = holder.binding.threadTitle.text.isEmpty()
+            holder.binding.threadContent.isVisible = state.expanded
+            holder.binding.threadAvatar.isVisible = state.expanded
+            holder.binding.threadInfo.isVisible = state.expanded
+            holder.binding.threadUserName.isVisible = state.expanded
+
             holder.binding.threadContent.text = SpannableStringBuilder()
                 .appendSimpleContent(thread.content, requireContext())
             holder.binding.threadUserName.text = thread.author.nick.ifEmpty { thread.author.name }
@@ -374,10 +392,29 @@ class ForumFragment : BaseFragment() {
                 holder.binding.previewImage3.visibility = View.INVISIBLE
                 holder.binding.previewImage3.setOnClickListener(null)
             }
-            if (images.isEmpty()) {
+            val noImage = images.isEmpty()
+            if (noImage || !state.expanded) {
                 holder.binding.previewImage1.visibility = View.GONE
                 holder.binding.previewImage2.visibility = View.GONE
                 holder.binding.previewImage3.visibility = View.GONE
+            }
+            holder.binding.expandBtn.apply {
+                isVisible = thread.isTop
+                setImageResource(if (state.expanded) R.drawable.ic_up else R.drawable.ic_down)
+                setOnClickListener {
+                    state.expanded = !state.expanded
+                    setImageResource(if (state.expanded) R.drawable.ic_up else R.drawable.ic_down)
+                    holder.binding.threadContent.isVisible = state.expanded
+                    holder.binding.threadAvatar.isVisible = state.expanded
+                    holder.binding.threadInfo.isVisible = state.expanded
+                    holder.binding.threadUserName.isVisible = state.expanded
+                    holder.binding.previewImage1.visibility =
+                        if (!noImage && state.expanded) if (image1 != null) View.VISIBLE else View.INVISIBLE else View.GONE
+                    holder.binding.previewImage2.visibility =
+                        if (!noImage && state.expanded) if (image2 != null) View.VISIBLE else View.INVISIBLE else View.GONE
+                    holder.binding.previewImage3.visibility =
+                        if (!noImage && state.expanded) if (image3 != null) View.VISIBLE else View.INVISIBLE else View.GONE
+                }
             }
         }
 
@@ -391,12 +428,18 @@ class ForumFragment : BaseFragment() {
     }
 }
 
-object ThreadComparator : DiffUtil.ItemCallback<TiebaThread>() {
-    override fun areItemsTheSame(oldItem: TiebaThread, newItem: TiebaThread): Boolean {
-        return oldItem.tid == newItem.tid
+object ForumThreadUiStateComparator : DiffUtil.ItemCallback<ForumThreadUiState>() {
+    override fun areItemsTheSame(
+        oldItem: ForumThreadUiState,
+        newItem: ForumThreadUiState
+    ): Boolean {
+        return oldItem.thread.tid == newItem.thread.tid
     }
 
-    override fun areContentsTheSame(oldItem: TiebaThread, newItem: TiebaThread): Boolean {
+    override fun areContentsTheSame(
+        oldItem: ForumThreadUiState,
+        newItem: ForumThreadUiState
+    ): Boolean {
         return oldItem == newItem
     }
 }

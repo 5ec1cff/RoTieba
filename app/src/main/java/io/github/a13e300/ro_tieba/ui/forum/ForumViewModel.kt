@@ -8,6 +8,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.map
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
@@ -21,8 +22,10 @@ import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.utils.toImageContentList
 import io.github.a13e300.ro_tieba.utils.toPostContent
+import kotlinx.coroutines.flow.map
 import java.util.Date
 
+data class ForumThreadUiState(val thread: TiebaThread, var expanded: Boolean = true)
 
 class ForumViewModel : ViewModel() {
     var forumInitialized = false
@@ -93,7 +96,8 @@ class ForumViewModel : ViewModel() {
                     disagreeNum = p.agree.disagreeNum,
                     images = p.mediaList.toImageContentList(),
                     tabInfo = tabs.value!!.find { it is ForumTab.GeneralTab && it.id == p.tabId } as? ForumTab.GeneralTab,
-                    threadType = if (p.threadType == 71) ThreadType.HELP else ThreadType.NORMAL
+                    threadType = if (p.threadType == 71) ThreadType.HELP else ThreadType.NORMAL,
+                    isTop = p.isTop == 1
                 )
             } to (response.page.hasMore == 1)
         }
@@ -156,6 +160,10 @@ class ForumViewModel : ViewModel() {
         PagingConfig(pageSize = 30)
     ) {
         ThreadPagingSource(App.instance.client, tabs.value!![tabPosition], forumSortType.value!!)
-    }.flow
+    }.flow.map { data ->
+        data.map {
+            ForumThreadUiState(it, !it.isTop)
+        }
+    }
         .cachedIn(viewModelScope)
 }
