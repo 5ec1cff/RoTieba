@@ -66,6 +66,7 @@
             android:id="@+id/expand_btn"
             android:src="@drawable/ic_down"
             android:background="@android:color/transparent"
+            app:layout_constraintStart_toEndOf="@id/thread_title"
             app:layout_constraintTop_toTopOf="@id/thread_title"
             app:layout_constraintBottom_toBottomOf="@id/thread_title"
             app:layout_constraintEnd_toEndOf="parent"
@@ -78,10 +79,18 @@
             android:maxLines="3"
             android:ellipsize="end"
             app:layout_goneMarginTop="16dp"
-            app:layout_constraintBottom_toTopOf="@id/image_barrier"
+            app:layout_constraintBottom_toTopOf="@id/image_space"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/thread_title" />
 
+        <androidx.legacy.widget.Space
+            android:layout_height="4dp"
+            android:layout_width="match_parent"
+            android:id="@+id/image_space"
+            app:layout_constraintTop_toBottomOf="@id/thread_content"
+            app:layout_constraintBottom_toTopOf="@id/image_barrier"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/image_barrier"
             android:layout_width="wrap_content"
