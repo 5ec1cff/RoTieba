@@ -40,9 +40,11 @@ import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
+import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -207,6 +209,7 @@ class ForumFragment : BaseFragment() {
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val state = getItem(position) ?: return
             val thread = state.thread
+            holder.binding.root.setData(thread)
             holder.binding.threadTitle.text = SpannableStringBuilder().apply {
                 val context = requireContext()
                 if (thread.isTop) {
@@ -337,7 +340,7 @@ class ForumFragment : BaseFragment() {
                 append(thread.disagreeNum.toString())
             }
             holder.binding.threadAvatar.displayImage(thread.author.avatarUrl)
-            holder.binding.root.setOnClickListener {
+            holder.binding.cardRoot.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid))
             }
             val images = thread.images
@@ -350,15 +353,18 @@ class ForumFragment : BaseFragment() {
                 holder.binding.previewImage1.setOnClickListener {
                     photoViewModel.currentIndex.value = 0
                     photoViewModel.photos = images.map {
-                        Photo(
-                            it.src, it.order, thread
-                        )
+                        it.toPhoto(thread)
                     }
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+                holder.binding.previewImage1.setOnLongClickListener {
+                    it.setSelectedData(image1.toPhoto(thread))
+                    false
                 }
             } else {
                 holder.binding.previewImage1.visibility = View.INVISIBLE
                 holder.binding.previewImage1.setOnClickListener(null)
+                holder.binding.previewImage1.setOnLongClickListener(null)
             }
             if (image2 != null) {
                 holder.binding.previewImage2.visibility = View.VISIBLE
@@ -366,15 +372,18 @@ class ForumFragment : BaseFragment() {
                 holder.binding.previewImage2.setOnClickListener {
                     photoViewModel.currentIndex.value = 1
                     photoViewModel.photos = images.map {
-                        Photo(
-                            it.src, it.order, thread
-                        )
+                        it.toPhoto(thread)
                     }
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+                holder.binding.previewImage2.setOnLongClickListener {
+                    it.setSelectedData(image2.toPhoto(thread))
+                    false
                 }
             } else {
                 holder.binding.previewImage2.visibility = View.INVISIBLE
                 holder.binding.previewImage2.setOnClickListener(null)
+                holder.binding.previewImage2.setOnLongClickListener(null)
             }
             if (image3 != null) {
                 holder.binding.previewImage3.visibility = View.VISIBLE
@@ -382,15 +391,18 @@ class ForumFragment : BaseFragment() {
                 holder.binding.previewImage3.setOnClickListener {
                     photoViewModel.currentIndex.value = 2
                     photoViewModel.photos = images.map {
-                        Photo(
-                            it.src, it.order, thread
-                        )
+                        it.toPhoto(thread)
                     }
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
+                }
+                holder.binding.previewImage3.setOnLongClickListener {
+                    it.setSelectedData(image3.toPhoto(thread))
+                    false
                 }
             } else {
                 holder.binding.previewImage3.visibility = View.INVISIBLE
                 holder.binding.previewImage3.setOnClickListener(null)
+                holder.binding.previewImage3.setOnLongClickListener(null)
             }
             val noImage = images.isEmpty()
             if (noImage || !state.expanded) {
@@ -426,7 +438,10 @@ class ForumFragment : BaseFragment() {
             return ThreadViewHolder(
                 FragmentForumThreadItemBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false
-                )
+                ).apply {
+                    registerForContextMenu(root)
+                    cardRoot.setOnLongClickListener { false }
+                }
             )
         }
     }

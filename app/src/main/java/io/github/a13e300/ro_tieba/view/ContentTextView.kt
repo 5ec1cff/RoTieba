@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatTextView
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
+import io.github.a13e300.ro_tieba.utils.setSelectedData
 
 class ContentTextView : AppCompatTextView {
     companion object {
@@ -41,14 +42,7 @@ class ContentTextView : AppCompatTextView {
                     MyLinkMovementMethod.CheckForLongClick(this, event.x, event.y)
                 postDelayed(checkForLongClick, LONG_PRESS_THRESHOLD)
                 setTag(R.id.tag_movement_method_longclick, checkForLongClick)
-                var parent = parent
-                while (parent != null) {
-                    if (parent is ItemView) {
-                        parent.setSelectedData(SelectedLink(span.url))
-                        break
-                    }
-                    parent = parent.parent
-                }
+                setSelectedData(SelectedLink(span.url))
                 return true
             }
 

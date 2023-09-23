@@ -1,6 +1,5 @@
 package io.github.a13e300.ro_tieba.ui.thread
 
-import android.content.Intent
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.net.Uri
@@ -9,7 +8,6 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.util.TypedValue
-import android.view.ContextMenu
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
@@ -23,7 +21,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -44,10 +41,8 @@ import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
-import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
@@ -64,24 +59,17 @@ import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
-import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
-import io.github.a13e300.ro_tieba.models.IPost
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.toDetail
-import io.github.a13e300.ro_tieba.utils.PhotoUtils
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
-import io.github.a13e300.ro_tieba.utils.copyText
-import io.github.a13e300.ro_tieba.utils.forceShowIcon
-import io.github.a13e300.ro_tieba.utils.openPostAtOtherClient
+import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
-import io.github.a13e300.ro_tieba.view.ItemView
-import io.github.a13e300.ro_tieba.view.SelectedLink
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -253,187 +241,6 @@ class ThreadFragment : BaseFragment() {
             true
         }
         // context.getSystemService(InputMethodManager::class.java).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-    }
-
-    override fun onCreateContextMenu(
-        menu: ContextMenu,
-        v: View,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        MenuInflater(requireContext()).inflate(R.menu.post_item_menu, menu)
-        menu.forceShowIcon()
-        val selected = (menuInfo as? ItemView.ContextMenuInfo)?.selectedData
-        if (selected is SelectedLink) {
-            menu.setGroupVisible(R.id.group_link, true)
-        }
-        if (selected is Photo) {
-            menu.setGroupVisible(R.id.group_photo, true)
-        }
-        ((menuInfo as? ItemView.ContextMenuInfo)?.data as? IPost)?.content?.find { it is Content.VideoContent }
-            ?.let { menu.setGroupVisible(R.id.group_video, true) }
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info = item.menuInfo as? ItemView.ContextMenuInfo
-        val selected = info?.selectedData
-        val post = if (selected is IPost) selected else info?.data as? IPost
-        val video = post?.content?.find { it is Content.VideoContent } as? Content.VideoContent
-        if (post != null) {
-            when (item.itemId) {
-                R.id.copy_post_content -> {
-                    copyText(post.content.joinToString("") {
-                        when (it) {
-                            is Content.TextContent -> it.text
-                            is Content.ImageContent -> "[${it.src}]"
-                            is Content.LinkContent -> "[${it.text}](${it.link})"
-                            is Content.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
-                            is Content.VideoContent -> "[video](${it.src})"
-                            is Content.UnknownContent -> it.source
-                        }
-                    })
-                    return true
-                }
-
-                R.id.copy_post_link -> {
-                    val text = when (post) {
-                        is Post -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
-                        is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&ppid=${post.ppid}"
-                        else -> ""
-                    }
-                    copyText(text)
-                    return true
-                }
-
-                R.id.open_at_other_client -> {
-                    val tid = when (post) {
-                        is Post -> post.tid
-                        is Comment -> post.tid
-                        else -> return false
-                    }
-                    val pid = when (post) {
-                        is Post -> post.postId
-                        is Comment -> post.postId
-                        else -> return false
-                    }
-                    if (!openPostAtOtherClient(tid, pid, requireContext())) {
-                        Snackbar.make(
-                            binding.root,
-                            getString(R.string.no_other_apps_tips),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
-                    return true
-                }
-
-                R.id.open_link -> {
-                    (selected as? SelectedLink)?.url?.also {
-                        startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(it)),
-                            bundleOf(EXTRA_DONT_USE_NAV to true)
-                        )
-                    }
-                    return true
-                }
-
-                R.id.copy_link -> {
-                    (selected as? SelectedLink)?.url?.also {
-                        copyText(it)
-                    }
-                    return true
-                }
-
-                R.id.save_photo -> {
-                    (selected as? Photo)?.let { photo ->
-                        lifecycleScope.launch {
-                            PhotoUtils.downloadPhoto(
-                                activity = requireActivity(),
-                                photo = photo,
-                                onSuccess = {
-                                    Snackbar.make(
-                                        binding.root,
-                                        getString(R.string.saved_to_gallery),
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                },
-                                onFailure = {
-                                    Snackbar.make(
-                                        binding.root,
-                                        "error:${it.message}",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                            )
-                        }
-                    }
-                    return true
-                }
-
-                R.id.share_photo -> {
-                    lifecycleScope.launch {
-                        (selected as? Photo)?.let { photo ->
-                            PhotoUtils.sharePhoto(
-                                context = requireContext(),
-                                photo = photo,
-                                onFailure = {
-                                    Snackbar.make(
-                                        binding.root,
-                                        "failed to share:${it.message}",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                            )
-                        }
-                    }
-                    return true
-                }
-
-                R.id.save_video -> {
-                    video?.src?.let {
-                        lifecycleScope.launch {
-                            PhotoUtils.downloadVideo(
-                                activity = requireActivity(),
-                                url = it,
-                                post = post as Post,
-                                onSuccess = {
-                                    Snackbar.make(
-                                        binding.root,
-                                        getString(R.string.saved_to_gallery),
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                },
-                                onFailure = {
-                                    Snackbar.make(
-                                        binding.root,
-                                        "error:${it.message}",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                }
-                            )
-                        }
-                    }
-                    return true
-                }
-
-                R.id.open_video -> {
-                    video?.text?.let {
-                        startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(it)),
-                            bundleOf(EXTRA_DONT_USE_NAV to true)
-                        )
-                    }
-                    return true
-                }
-
-                R.id.copy_video_link -> {
-                    video?.src?.also {
-                        copyText(it)
-                    }
-                    return true
-                }
-            }
-        }
-        return super.onContextItemSelected(item)
     }
 
     class MyItemDecoration(private val mMargin: Int) : ItemDecoration() {
@@ -628,9 +435,7 @@ class ThreadFragment : BaseFragment() {
 
                                     }
                                     setOnLongClickListener {
-                                        var parent = it.parent
-                                        while (parent !is ItemView) parent = parent.parent
-                                        (parent as? ItemView)?.setSelectedData(
+                                        it.setSelectedData(
                                             Photo(
                                                 content.src, content.order, post
                                             )
@@ -769,9 +574,7 @@ class ThreadFragment : BaseFragment() {
                     preview.text.text = sb
                     preview.root.setOnClickListener { showComments() }
                     preview.root.setOnLongClickListener {
-                        var parent = it.parent
-                        while (parent !is ItemView) parent = parent.parent
-                        (parent as? ItemView)?.setSelectedData(comment)
+                        it.setSelectedData(comment)
                         false
                     }
                     holder.binding.commentsContent.addView(preview.root)

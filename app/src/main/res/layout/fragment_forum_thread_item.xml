@@ -1,150 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<io.github.a13e300.ro_tieba.view.ItemView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Widget.RoTieba.FilledCardPrimary"
-    android:orientation="horizontal"
-    android:clickable="true"
-    android:focusable="true"
-    android:layout_marginVertical="8dp"
-    android:layout_marginHorizontal="16dp">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="wrap_content"
+        style="@style/Widget.RoTieba.FilledCardPrimary"
+        android:id="@+id/card_root"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginVertical="8dp"
+        android:layout_marginHorizontal="16dp">
 
-        <androidx.constraintlayout.utils.widget.ImageFilterView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:round="24dp"
-            android:id="@+id/thread_avatar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/thread_user_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="user"
-            android:maxLines="1"
-            android:layout_marginStart="8dp"
-            android:textAppearance="?attr/textAppearanceListItem"
-            app:layout_constraintStart_toEndOf="@id/thread_avatar"
-            app:layout_constraintTop_toTopOf="@id/thread_avatar"
-            app:layout_constraintBottom_toTopOf="@id/thread_info" />
-
-        <TextView
-            android:id="@+id/thread_info"
-            android:textAppearance="?attr/textAppearanceListItemSecondary"
-            tools:text="time"
-            android:maxLines="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:foreground="?selectableItemBackground"
-            app:layout_constraintStart_toStartOf="@id/thread_user_name"
-            app:layout_constraintTop_toBottomOf="@id/thread_user_name"
-            app:layout_constraintBottom_toBottomOf="@id/thread_avatar" />
-
-        <TextView
-            android:id="@+id/thread_title"
-            android:textAppearance="?attr/textAppearanceListItem"
-            tools:text="title"
-            app:layout_goneMarginTop="0dp"
-            android:layout_marginTop="8dp"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/expand_btn"
-            app:layout_constraintTop_toBottomOf="@id/thread_avatar"
-            app:layout_constraintBottom_toTopOf="@id/thread_content" />
-
-        <androidx.constraintlayout.utils.widget.ImageFilterButton
-            android:layout_width="wrap_content"
-            android:id="@+id/expand_btn"
-            android:src="@drawable/ic_down"
-            android:background="@android:color/transparent"
-            app:layout_constraintStart_toEndOf="@id/thread_title"
-            app:layout_constraintTop_toTopOf="@id/thread_title"
-            app:layout_constraintBottom_toBottomOf="@id/thread_title"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="gone"
-            android:layout_height="0dp" />
-        <TextView
-            android:id="@+id/thread_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="3"
-            android:ellipsize="end"
-            app:layout_goneMarginTop="16dp"
-            app:layout_constraintBottom_toTopOf="@id/image_space"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/thread_title" />
+            android:layout_height="match_parent"
+            android:padding="16dp">
 
-        <androidx.legacy.widget.Space
-            android:layout_height="4dp"
-            android:layout_width="match_parent"
-            android:id="@+id/image_space"
-            app:layout_constraintTop_toBottomOf="@id/thread_content"
-            app:layout_constraintBottom_toTopOf="@id/image_barrier"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/image_barrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/thread_content"
-            app:constraint_referenced_ids="preview_image1,preview_image2,preview_image3"
-            app:barrierDirection="top" />
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:round="24dp"
+                android:id="@+id/thread_avatar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.utils.widget.ImageFilterView
-            app:round="8dp"
-            app:layout_goneMarginTop="0dp"
-            android:layout_marginEnd="4dp"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:id="@+id/preview_image1"
-            android:visibility="invisible"
-            android:maxHeight="150dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintTop_toTopOf="@id/image_barrier"
-            app:layout_constraintDimensionRatio="W,1:1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/preview_image2" />
+            <TextView
+                android:id="@+id/thread_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="user"
+                android:maxLines="1"
+                android:layout_marginStart="8dp"
+                android:textAppearance="?attr/textAppearanceListItem"
+                app:layout_constraintStart_toEndOf="@id/thread_avatar"
+                app:layout_constraintTop_toTopOf="@id/thread_avatar"
+                app:layout_constraintBottom_toTopOf="@id/thread_info" />
 
-        <androidx.constraintlayout.utils.widget.ImageFilterView
-            app:round="8dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:id="@+id/preview_image2"
-            android:visibility="invisible"
-            android:maxHeight="150dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintTop_toTopOf="@id/image_barrier"
-            app:layout_constraintDimensionRatio="W,1:1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/preview_image1"
-            app:layout_constraintEnd_toStartOf="@id/preview_image3" />
+            <TextView
+                android:id="@+id/thread_info"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
+                tools:text="time"
+                android:maxLines="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:foreground="?selectableItemBackground"
+                app:layout_constraintStart_toStartOf="@id/thread_user_name"
+                app:layout_constraintTop_toBottomOf="@id/thread_user_name"
+                app:layout_constraintBottom_toBottomOf="@id/thread_avatar" />
 
-        <androidx.constraintlayout.utils.widget.ImageFilterView
-            app:round="8dp"
-            android:layout_marginStart="4dp"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:id="@+id/preview_image3"
-            android:visibility="invisible"
-            android:maxHeight="150dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintTop_toTopOf="@id/image_barrier"
-            app:layout_constraintDimensionRatio="W,1:1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/preview_image2"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/thread_title"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="title"
+                app:layout_goneMarginTop="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/expand_btn"
+                app:layout_constraintTop_toBottomOf="@id/thread_avatar"
+                app:layout_constraintBottom_toTopOf="@id/thread_content" />
+
+            <androidx.constraintlayout.utils.widget.ImageFilterButton
+                android:layout_width="wrap_content"
+                android:id="@+id/expand_btn"
+                android:src="@drawable/ic_down"
+                android:background="@android:color/transparent"
+                app:layout_constraintStart_toEndOf="@id/thread_title"
+                app:layout_constraintTop_toTopOf="@id/thread_title"
+                app:layout_constraintBottom_toBottomOf="@id/thread_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone"
+                android:layout_height="0dp" />
+
+            <TextView
+                android:id="@+id/thread_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="3"
+                android:ellipsize="end"
+                app:layout_goneMarginTop="16dp"
+                app:layout_constraintBottom_toTopOf="@id/image_space"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/thread_title" />
+
+            <androidx.legacy.widget.Space
+                android:layout_height="4dp"
+                android:layout_width="match_parent"
+                android:id="@+id/image_space"
+                app:layout_constraintTop_toBottomOf="@id/thread_content"
+                app:layout_constraintBottom_toTopOf="@id/image_barrier"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/image_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/thread_content"
+                app:constraint_referenced_ids="preview_image1,preview_image2,preview_image3"
+                app:barrierDirection="top" />
+
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                app:round="8dp"
+                app:layout_goneMarginTop="0dp"
+                android:layout_marginEnd="4dp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/preview_image1"
+                android:visibility="invisible"
+                android:maxHeight="150dp"
+                android:scaleType="centerCrop"
+                android:foreground="?selectableItemBackground"
+                app:layout_constraintTop_toTopOf="@id/image_barrier"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/preview_image2" />
+
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                app:round="8dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/preview_image2"
+                android:visibility="invisible"
+                android:maxHeight="150dp"
+                android:scaleType="centerCrop"
+                android:foreground="?selectableItemBackground"
+                app:layout_constraintTop_toTopOf="@id/image_barrier"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/preview_image1"
+                app:layout_constraintEnd_toStartOf="@id/preview_image3" />
+
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                app:round="8dp"
+                android:layout_marginStart="4dp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/preview_image3"
+                android:visibility="invisible"
+                android:maxHeight="150dp"
+                android:scaleType="centerCrop"
+                android:foreground="?selectableItemBackground"
+                app:layout_constraintTop_toTopOf="@id/image_barrier"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/preview_image2"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</io.github.a13e300.ro_tieba.view.ItemView>

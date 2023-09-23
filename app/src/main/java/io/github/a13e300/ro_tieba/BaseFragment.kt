@@ -1,10 +1,32 @@
 package io.github.a13e300.ro_tieba
 
+import android.content.Intent
+import android.net.Uri
+import android.view.ContextMenu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.os.bundleOf
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
+import io.github.a13e300.ro_tieba.models.Comment
+import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.IPost
+import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.models.TiebaThread
+import io.github.a13e300.ro_tieba.ui.photo.Photo
+import io.github.a13e300.ro_tieba.utils.PhotoUtils
+import io.github.a13e300.ro_tieba.utils.copyText
+import io.github.a13e300.ro_tieba.utils.forceShowIcon
+import io.github.a13e300.ro_tieba.utils.openPostAtOtherClient
+import io.github.a13e300.ro_tieba.view.ItemView
+import io.github.a13e300.ro_tieba.view.SelectedLink
+import kotlinx.coroutines.launch
 
 data class StatusBarConfig(
     val light: Boolean,
@@ -48,5 +70,200 @@ abstract class BaseFragment : Fragment() {
             light = isLight,
             show = true
         )
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        MenuInflater(requireContext()).inflate(R.menu.post_item_menu, menu)
+        menu.forceShowIcon()
+        val selected = (menuInfo as? ItemView.ContextMenuInfo)?.selectedData
+        if (selected is SelectedLink) {
+            menu.setGroupVisible(R.id.group_link, true)
+        }
+        if (selected is Photo) {
+            menu.setGroupVisible(R.id.group_photo, true)
+        }
+        ((menuInfo as? ItemView.ContextMenuInfo)?.data as? IPost)?.content?.find { it is Content.VideoContent }
+            ?.let { menu.setGroupVisible(R.id.group_video, true) }
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val info = item.menuInfo as? ItemView.ContextMenuInfo
+        val data = info?.data
+        val selected = info?.selectedData
+        when (item.itemId) {
+            R.id.copy_post_content -> {
+                val content = when (data) {
+                    is TiebaThread -> data.content
+                    is Post -> data.content
+                    is Comment -> data.content
+                    else -> return false
+                }
+                val text = content.joinToString("") {
+                    when (it) {
+                        is Content.TextContent -> it.text
+                        is Content.ImageContent -> "[${it.src}]"
+                        is Content.LinkContent -> "[${it.text}](${it.link})"
+                        is Content.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
+                        is Content.VideoContent -> "[video](${it.src})"
+                        is Content.UnknownContent -> it.source
+                    }
+                }
+                if (data is TiebaThread) copyText("${data.title}\n$text")
+                else copyText(text)
+                return true
+            }
+
+            R.id.copy_post_link -> {
+                val text = when (data) {
+                    is TiebaThread -> "https://tieba.baidu.com/p/${data.tid}"
+                    is Post -> "https://tieba.baidu.com/p/${data.tid}?pid=${data.postId}"
+                    is Comment -> "https://tieba.baidu.com/p/${data.tid}?pid=${data.postId}&ppid=${data.ppid}"
+                    else -> ""
+                }
+                copyText(text)
+                return true
+            }
+
+            R.id.open_at_other_client -> {
+                val tid = when (data) {
+                    is Post -> data.tid
+                    is Comment -> data.tid
+                    is TiebaThread -> data.tid
+                    else -> return false
+                }
+                val pid = when (data) {
+                    is Post -> data.postId
+                    is Comment -> data.postId
+                    is TiebaThread -> 0L
+                    else -> return false
+                }
+                if (!openPostAtOtherClient(tid, pid, requireContext())) {
+                    Snackbar.make(
+                        requireView(),
+                        getString(R.string.no_other_apps_tips),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+                return true
+            }
+
+            R.id.open_link -> {
+                (selected as? SelectedLink)?.url?.also {
+                    startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(it)),
+                        bundleOf(EXTRA_DONT_USE_NAV to true)
+                    )
+                }
+                return true
+            }
+
+            R.id.copy_link -> {
+                (selected as? SelectedLink)?.url?.also {
+                    copyText(it)
+                }
+                return true
+            }
+
+            R.id.save_photo -> {
+                (selected as? Photo)?.let { photo ->
+                    lifecycleScope.launch {
+                        PhotoUtils.downloadPhoto(
+                            activity = requireActivity(),
+                            photo = photo,
+                            onSuccess = {
+                                Snackbar.make(
+                                    requireView(),
+                                    getString(R.string.saved_to_gallery),
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            },
+                            onFailure = {
+                                Snackbar.make(
+                                    requireView(),
+                                    "error:${it.message}",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    }
+                }
+                return true
+            }
+
+            R.id.share_photo -> {
+                lifecycleScope.launch {
+                    (selected as? Photo)?.let { photo ->
+                        PhotoUtils.sharePhoto(
+                            context = requireContext(),
+                            photo = photo,
+                            onFailure = {
+                                Snackbar.make(
+                                    requireView(),
+                                    "failed to share:${it.message}",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    }
+                }
+                return true
+            }
+
+            R.id.save_video -> {
+                val video =
+                    (data as? Post)?.content?.find { it is Content.VideoContent } as? Content.VideoContent
+                video?.src?.let {
+                    lifecycleScope.launch {
+                        PhotoUtils.downloadVideo(
+                            activity = requireActivity(),
+                            url = it,
+                            post = data,
+                            onSuccess = {
+                                Snackbar.make(
+                                    requireView(),
+                                    getString(R.string.saved_to_gallery),
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            },
+                            onFailure = {
+                                Snackbar.make(
+                                    requireView(),
+                                    "error:${it.message}",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                    }
+                }
+                return true
+            }
+
+            R.id.open_video -> {
+                val video =
+                    (selected as? Post)?.content?.find { it is Content.VideoContent } as? Content.VideoContent
+                video?.text?.let {
+                    startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(it)),
+                        bundleOf(EXTRA_DONT_USE_NAV to true)
+                    )
+                }
+                return true
+            }
+
+            R.id.copy_video_link -> {
+                val video =
+                    (selected as? Post)?.content?.find { it is Content.VideoContent } as? Content.VideoContent
+                video?.src?.also {
+                    copyText(it)
+                }
+                return true
+            }
+        }
+        return super.onContextItemSelected(item)
     }
 }

@@ -9,6 +9,7 @@ import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.view.ContextMenu
+import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -21,6 +22,7 @@ import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.UserProfile
+import io.github.a13e300.ro_tieba.view.ItemView
 import okhttp3.OkHttpClient
 import tbclient.MediaOuterClass.Media
 import tbclient.PbContentOuterClass
@@ -242,7 +244,9 @@ fun openPostAtOtherClient(tid: Long, pid: Long, context: Context) =
             .authority("unidispatch")
             .appendPath("pb")
             .appendQueryParameter("tid", tid.toString())
-            .appendQueryParameter("hightlight_anchor_pid", pid.toString())
+            .apply {
+                if (pid != 0L) appendQueryParameter("hightlight_anchor_pid", pid.toString())
+            }
             .build(),
         context
     )
@@ -259,4 +263,10 @@ fun Context.copyText(text: CharSequence) {
 
 fun Fragment.copyText(text: CharSequence) {
     requireContext().copyText(text)
+}
+
+fun <T> View.setSelectedData(data: T) {
+    var parent = this.parent
+    while (parent != null && parent !is ItemView) parent = parent.parent
+    (parent as? ItemView)?.setSelectedData(data)
 }
