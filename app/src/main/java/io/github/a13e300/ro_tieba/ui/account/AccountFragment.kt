@@ -88,7 +88,6 @@ class AccountFragment : Fragment(), AccountRecyclerViewAdapter.OnItemClickedList
                         }
                         launch {
                             App.instance.accountManager.currentAccount.collect {
-                                Logger.d("current account=$it")
                                 updateChecked(it.uid)
                             }
                         }

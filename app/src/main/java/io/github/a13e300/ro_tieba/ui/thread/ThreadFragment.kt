@@ -49,7 +49,6 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
-import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.DialogJumpPageBinding
@@ -225,7 +224,6 @@ class ThreadFragment : BaseFragment() {
             b.inputLayout.error = if (canJump) null else "请输入 1 到 $totalPage 的整数"
         }
         b.inputText.setOnEditorActionListener { textView, i, keyEvent ->
-            Logger.d("OnEditorActionListener $i $keyEvent")
             if (i != EditorInfo.IME_ACTION_DONE &&
                 !(keyEvent?.action == KeyEvent.ACTION_DOWN
                         && keyEvent.keyCode in intArrayOf(
