@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatTextView
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
+import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 
 class ContentTextView : AppCompatTextView {
@@ -42,7 +43,11 @@ class ContentTextView : AppCompatTextView {
                     MyLinkMovementMethod.CheckForLongClick(this, event.x, event.y)
                 postDelayed(checkForLongClick, LONG_PRESS_THRESHOLD)
                 setTag(R.id.tag_movement_method_longclick, checkForLongClick)
-                setSelectedData(SelectedLink(span.url))
+                if (span is UserSpan) {
+                    setSelectedData(SelectedUser(span.uid))
+                } else {
+                    setSelectedData(SelectedLink(span.url))
+                }
                 return true
             }
 

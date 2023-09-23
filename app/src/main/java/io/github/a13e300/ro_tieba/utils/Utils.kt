@@ -20,6 +20,7 @@ import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
+import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.UserProfile
 import io.github.a13e300.ro_tieba.view.ItemView
@@ -98,7 +99,7 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
             -> Content.TextContent(it.text)
 
             1 -> Content.LinkContent(it.text, it.link.convertTiebaUrl())
-            4 -> Content.LinkContent(it.text, "rotieba://user/profile?uid_or_portrait=${it.uid}")
+            4 -> Content.UserContent(it.text, it.uid)
 
             2, 11 -> Content.EmojiContent(it.text)
 
@@ -142,6 +143,16 @@ fun SpannableStringBuilder.appendSimpleContent(
                     append(
                         content.text.ifEmpty { "[link]" },
                         MyURLSpan(content.link),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                } else append(content.text)
+            }
+
+            is Content.UserContent -> {
+                if (useUrlSpan) {
+                    append(
+                        content.text.ifEmpty { "UID:${content.uid}" },
+                        UserSpan(content.uid),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 } else append(content.text)

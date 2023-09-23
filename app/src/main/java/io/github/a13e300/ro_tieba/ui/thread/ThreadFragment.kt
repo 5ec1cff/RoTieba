@@ -59,6 +59,7 @@ import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
+import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
@@ -405,6 +406,15 @@ class ThreadFragment : BaseFragment() {
                         lastString!!.append(
                             content.text.ifEmpty { "[link]" },
                             MyURLSpan(content.link),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
+                    }
+
+                    is Content.UserContent -> {
+                        if (lastString == null) lastString = SpannableStringBuilder()
+                        lastString!!.append(
+                            content.text.ifEmpty { "UID:${content.uid}" },
+                            UserSpan(content.uid),
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
                     }

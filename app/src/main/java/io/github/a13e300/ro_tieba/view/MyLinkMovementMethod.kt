@@ -8,11 +8,17 @@ import android.view.View
 import android.widget.TextView
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
+import io.github.a13e300.ro_tieba.misc.UserSpan
 
 data class SelectedLink(
     val url: String
 )
 
+data class SelectedUser(
+    val uid: Long
+)
+
+@Deprecated("")
 object MyLinkMovementMethod : ScrollingMovementMethod() {
     private const val LONG_PRESS_THRESHOLD = 200L
 
@@ -49,7 +55,11 @@ object MyLinkMovementMethod : ScrollingMovementMethod() {
                 var parent = widget.parent
                 while (parent != null) {
                     if (parent is ItemView) {
-                        parent.setSelectedData(SelectedLink(span.url))
+                        if (span is UserSpan) {
+                            parent.setSelectedData(SelectedUser(span.uid))
+                        } else {
+                            parent.setSelectedData(SelectedLink(span.url))
+                        }
                         break
                     }
                     parent = parent.parent

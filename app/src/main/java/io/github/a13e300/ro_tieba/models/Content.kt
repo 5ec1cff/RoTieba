@@ -15,6 +15,7 @@ sealed class Content {
     ) : Content()
 
     data class LinkContent(val text: String, val link: String) : Content()
+    data class UserContent(val text: String, val uid: Long) : Content()
 
     data class VideoContent(
         val src: String,

@@ -110,6 +110,7 @@ abstract class BaseFragment : Fragment() {
                         is Content.LinkContent -> "[${it.text}](${it.link})"
                         is Content.EmojiContent -> Emotions.emotionMap.get(it.id)?.name ?: it.id
                         is Content.VideoContent -> "[video](${it.src})"
+                        is Content.UserContent -> it.text
                         is Content.UnknownContent -> it.source
                     }
                 }
