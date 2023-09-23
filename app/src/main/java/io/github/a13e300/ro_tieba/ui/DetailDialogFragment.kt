@@ -21,6 +21,7 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.DialogDetailBinding
 import io.github.a13e300.ro_tieba.databinding.DialogDetailItemContentBinding
 import io.github.a13e300.ro_tieba.databinding.DialogDetailItemTitleBinding
+import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.TiebaThread
@@ -97,6 +98,30 @@ fun SearchedPost.toDetail() = Pair(
         post.time.let {
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it)
         }
+    )
+)
+
+fun Comment.toDetail() = Pair(
+    arrayListOf(
+        "pid",
+        "tid",
+        "ppid",
+        "作者名字",
+        "作者昵称",
+        "IP位置",
+        "portrait",
+        "uid",
+        "发布时间"
+    ),
+    arrayListOf(postId.toString(),
+        tid.toString(),
+        ppid.toString(),
+        user.name,
+        user.nick,
+        user.location,
+        user.portrait,
+        user.uid.toString(),
+        time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) }
     )
 )
 

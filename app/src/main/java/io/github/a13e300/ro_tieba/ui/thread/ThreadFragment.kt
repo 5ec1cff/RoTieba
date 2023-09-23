@@ -572,7 +572,6 @@ class ThreadFragment : BaseFragment() {
             var lastString: SpannableStringBuilder? = null
             holder.binding.avatar.displayImage(post.user.avatarUrl)
             holder.binding.avatar.setOnClickListener {
-                // openUserAtOtherClient(post.user, requireContext())
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile(post.user.uidOrPortrait)
                 )
