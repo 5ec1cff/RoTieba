@@ -399,6 +399,7 @@ class ForumFragment : BaseFragment() {
                 holder.binding.previewImage3.visibility = View.GONE
             }
             holder.binding.imageSpace.isGone = noImage || !state.expanded
+            holder.binding.threadTitle.maxLines = if (state.expanded) Int.MAX_VALUE else 1
             holder.binding.expandBtn.apply {
                 isVisible = thread.isTop
                 setImageResource(if (state.expanded) R.drawable.ic_up else R.drawable.ic_down)
@@ -416,6 +417,7 @@ class ForumFragment : BaseFragment() {
                     holder.binding.previewImage3.visibility =
                         if (!noImage && state.expanded) if (image3 != null) View.VISIBLE else View.INVISIBLE else View.GONE
                     holder.binding.imageSpace.isGone = noImage || !state.expanded
+                    holder.binding.threadTitle.maxLines = if (state.expanded) Int.MAX_VALUE else 1
                 }
             }
         }
