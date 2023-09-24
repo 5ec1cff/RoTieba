@@ -93,14 +93,14 @@ abstract class BaseFragment : Fragment() {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val info = item.menuInfo as? ItemView.ContextMenuInfo
-        val data = info?.data
         val selected = info?.selectedData
+        val post = if (selected is Comment) selected else info?.data
         when (item.itemId) {
             R.id.copy_post_content -> {
-                val content = when (data) {
-                    is TiebaThread -> data.content
-                    is Post -> data.content
-                    is Comment -> data.content
+                val content = when (post) {
+                    is TiebaThread -> post.content
+                    is Post -> post.content
+                    is Comment -> post.content
                     else -> return false
                 }
                 val text = content.joinToString("") {
@@ -114,16 +114,16 @@ abstract class BaseFragment : Fragment() {
                         is Content.UnknownContent -> it.source
                     }
                 }
-                if (data is TiebaThread) copyText("${data.title}\n$text")
+                if (post is TiebaThread) copyText("${post.title}\n$text")
                 else copyText(text)
                 return true
             }
 
             R.id.copy_post_link -> {
-                val text = when (data) {
-                    is TiebaThread -> "https://tieba.baidu.com/p/${data.tid}"
-                    is Post -> "https://tieba.baidu.com/p/${data.tid}?pid=${data.postId}"
-                    is Comment -> "https://tieba.baidu.com/p/${data.tid}?pid=${data.postId}&ppid=${data.ppid}"
+                val text = when (post) {
+                    is TiebaThread -> "https://tieba.baidu.com/p/${post.tid}"
+                    is Post -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
+                    is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&ppid=${post.ppid}"
                     else -> ""
                 }
                 copyText(text)
@@ -131,15 +131,15 @@ abstract class BaseFragment : Fragment() {
             }
 
             R.id.open_at_other_client -> {
-                val tid = when (data) {
-                    is Post -> data.tid
-                    is Comment -> data.tid
-                    is TiebaThread -> data.tid
+                val tid = when (post) {
+                    is Post -> post.tid
+                    is Comment -> post.tid
+                    is TiebaThread -> post.tid
                     else -> return false
                 }
-                val pid = when (data) {
-                    is Post -> data.postId
-                    is Comment -> data.postId
+                val pid = when (post) {
+                    is Post -> post.postId
+                    is Comment -> post.postId
                     is TiebaThread -> 0L
                     else -> return false
                 }
@@ -217,13 +217,13 @@ abstract class BaseFragment : Fragment() {
 
             R.id.save_video -> {
                 val video =
-                    (data as? Post)?.content?.find { it is Content.VideoContent } as? Content.VideoContent
+                    (post as? Post)?.content?.find { it is Content.VideoContent } as? Content.VideoContent
                 video?.src?.let {
                     lifecycleScope.launch {
                         PhotoUtils.downloadVideo(
                             activity = requireActivity(),
                             url = it,
-                            post = data,
+                            post = post,
                             onSuccess = {
                                 Snackbar.make(
                                     requireView(),
