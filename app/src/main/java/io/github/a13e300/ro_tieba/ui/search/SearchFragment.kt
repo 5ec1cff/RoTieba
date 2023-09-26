@@ -22,6 +22,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
+import io.github.a13e300.ro_tieba.arch.Event
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
@@ -72,7 +73,10 @@ class SearchFragment : BaseFragment() {
             )
                 return@setOnEditorActionListener false
             val t = textView.text
-            performSearch(t.toString(), -1)
+            if (t.isNotEmpty())
+                performSearch(t.toString(), -1)
+            else
+                binding.searchView.hide()
             true
         }
         binding.searchView.addTransitionListener { _, _, newState ->
@@ -99,7 +103,7 @@ class SearchFragment : BaseFragment() {
         }
         binding.searchView.onBackPressedListener = OnPreImeBackPressedListener {
             binding.searchView.clearFocusAndHideKeyboard()
-            if (viewModel.forumSearched)
+            if (viewModel.currentKeyword.isNotEmpty())
                 binding.searchView.hide()
             else navigateUp()
             return@OnPreImeBackPressedListener true
@@ -161,14 +165,13 @@ class SearchFragment : BaseFragment() {
 
     private fun performSearch(t: String, tab: Int) {
         binding.searchBar.text = t
-        if (!viewModel.searchAtForum) {
-            viewModel.fetchForums(t)
-            viewModel.fetchUsers(t)
-        }
-        viewModel.currentKeyword.value = t
+        viewModel.currentKeyword = t
         binding.searchView.hide()
         if (tab >= 0)
             binding.searchViewPager.currentItem = tab
+        viewModel.searchForumEvent.value = Event(t)
+        viewModel.searchUserEvent.value = Event(t)
+        viewModel.searchPostEvent.value = Event(t)
     }
 
     class SearchSuggestionViewHolder(val binding: SearchSuggestionItemBinding) :

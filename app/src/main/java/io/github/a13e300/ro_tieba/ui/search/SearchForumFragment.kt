@@ -30,43 +30,51 @@ class SearchForumFragment : Fragment() {
             adapter = myAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
-        viewModel.forumLoadState.observe(viewLifecycleOwner) {
-            when (it) {
-                LoadState.FETCHED -> {
-                    binding.resultList.scrollToPosition(0)
-                    myAdapter.notifyDataSetChanged()
-                    updateData()
-                    viewModel.forumLoadState.value = LoadState.LOADED
-                }
-
-                else -> {}
-            }
-        }
-        updateData()
         return binding.root
     }
 
-    private fun updateData() {
-        if (!viewModel.forumSearched) {
-            return
-        }
-        viewModel.searchedForums.let { frs ->
-            when (frs) {
-                is SearchResult.Result -> {
-                    if (frs.data.isEmpty()) {
+    override fun onResume() {
+        super.onResume()
+        viewModel.searchedForums.observe(viewLifecycleOwner) {
+            when (it) {
+                SearchState.Uninitialized -> {
+                    binding.resultTips.visibility = View.GONE
+                }
+
+                SearchState.Fetching -> {
+                    binding.resultTips.visibility = View.VISIBLE
+                    binding.resultTips.text = "搜索中"
+                    myAdapter.notifyDataSetChanged()
+                }
+
+                is SearchState.Result -> {
+                    if (it.data.isEmpty()) {
                         binding.resultTips.visibility = View.VISIBLE
                         binding.resultTips.setText(R.string.no_result_tips)
                     } else {
                         binding.resultTips.visibility = View.GONE
                     }
+                    myAdapter.notifyDataSetChanged()
                 }
 
-                is SearchResult.Error -> {
+                is SearchState.Error -> {
                     binding.resultTips.visibility = View.VISIBLE
-                    binding.resultTips.text = frs.error.message
+                    binding.resultTips.text = it.error.message
+                    myAdapter.notifyDataSetChanged()
                 }
             }
         }
+        viewModel.searchForumEvent.observe(viewLifecycleOwner) { event ->
+            event.handle {
+                viewModel.fetchForums(it)
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.searchedForums.removeObservers(viewLifecycleOwner)
+        viewModel.searchForumEvent.removeObservers(viewLifecycleOwner)
     }
 
     class ViewHolder(val binding: FragmentSearchResultBarItemBinding) :
@@ -80,11 +88,12 @@ class SearchForumFragment : Fragment() {
         )
 
         override fun getItemCount(): Int =
-            (viewModel.searchedForums as? SearchResult.Result)?.data?.size ?: 0
+            (viewModel.searchedForums.value as? SearchState.Result)?.data?.size ?: 0
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item =
-                (viewModel.searchedForums as? SearchResult.Result)?.data?.get(position) ?: return
+                (viewModel.searchedForums.value as? SearchState.Result)?.data?.get(position)
+                    ?: return
             holder.binding.barName.text = item.name
             item.avatarUrl?.let { holder.binding.barAvatar.displayImage(it) }
             holder.binding.barDesc.apply {

@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
+import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,13 +40,14 @@ import kotlinx.coroutines.launch
 
 class SearchPostFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() })
+    private lateinit var binding: FragmentSearchPostBinding
     private lateinit var postAdapter: PostAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentSearchPostBinding.inflate(inflater, container, false)
+        binding = FragmentSearchPostBinding.inflate(inflater, container, false)
         postAdapter = PostAdapter(SearchedPostComparator)
         binding.postList.apply {
             adapter = postAdapter.withLoadStateHeader(
@@ -53,15 +55,10 @@ class SearchPostFragment : Fragment() {
             )
             layoutManager = LinearLayoutManager(requireContext())
         }
-        viewModel.currentKeyword.observe(viewLifecycleOwner) {
-            if (it != viewModel.searchPostKeyWord) {
-                postAdapter.refresh()
-                binding.postList.scrollToPosition(0)
-            }
-        }
         lifecycleScope.launch {
             viewModel.flow.collect { data ->
                 postAdapter.submitData(data)
+                postAdapter.submitData(PagingData.empty())
             }
         }
         binding.filterTypeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -132,6 +129,21 @@ class SearchPostFragment : Fragment() {
                 }
         }
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.searchPostEvent.observe(viewLifecycleOwner) { event ->
+            event.handle {
+                viewModel.postKeyWord = it
+                postAdapter.refresh()
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.searchPostEvent.removeObservers(viewLifecycleOwner)
     }
 
     class LoadStateHolder(val binding: FragmentSearchPostLoadStateBinding) :

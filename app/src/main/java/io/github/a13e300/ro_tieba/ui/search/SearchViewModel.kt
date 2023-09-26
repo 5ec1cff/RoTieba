@@ -13,6 +13,7 @@ import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.web.SearchFilter
 import io.github.a13e300.ro_tieba.api.web.SearchOrder
+import io.github.a13e300.ro_tieba.arch.Event
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
@@ -36,44 +37,39 @@ sealed class Operation {
     data class SearchUsers(val keyword: String) : Operation()
 }
 
-enum class LoadState {
-    LOADED, FETCHING, FETCHED
-}
-
-sealed class SearchResult<T> {
-    data class Result<T>(val data: T) : SearchResult<T>()
-    data class Error<T>(val error: Throwable) : SearchResult<T>()
+sealed class SearchState<out T> {
+    data object Uninitialized : SearchState<Nothing>()
+    data object Fetching : SearchState<Nothing>()
+    data class Result<T>(val data: T) : SearchState<T>()
+    data class Error<T>(val error: Throwable) : SearchState<T>()
 }
 
 class SearchViewModel : ViewModel() {
     var initialized = false
     lateinit var forum: String
     var searchAtForum = false
-    val currentKeyword = MutableLiveData<String>()
-    var searchPostKeyWord: String? = null
+    var currentKeyword: String = ""
+    var postKeyWord: String = currentKeyword
     var searchPostFilter: SearchFilter = SearchFilter.ALL
     val searchPostOrder = MutableLiveData(SearchOrder.NEW)
     var needShowSearch = true
+    val searchPostEvent = MutableLiveData<Event<String>>()
 
     // search forums
-    var forumSearched = false
-    var searchedForums: SearchResult<List<Forum>> = SearchResult.Result(emptyList())
-    val forumLoadState = MutableLiveData<LoadState>()
+    val searchForumEvent = MutableLiveData<Event<String>>()
+    var searchedForums = MutableLiveData<SearchState<List<Forum>>>(SearchState.Uninitialized)
     private var searchForumJob: Job? = null
 
     // search users
-    var userSearched = false
-    var searchedUsers: SearchResult<List<User>> = SearchResult.Result(emptyList())
-    val userLoadState = MutableLiveData<LoadState>()
+    val searchUserEvent = MutableLiveData<Event<String>>()
+    var searchedUsers = MutableLiveData<SearchState<List<User>>>(SearchState.Uninitialized)
     private var searchUserJob: Job? = null
 
     var suggestions: List<Operation> = emptyList()
 
-
     fun fetchForums(keyword: String) {
-        forumSearched = true
         searchForumJob?.cancel()
-        forumLoadState.value = LoadState.FETCHING
+        searchedForums.value = SearchState.Fetching
         searchForumJob = viewModelScope.launch {
             val list = mutableListOf<Forum>()
             kotlin.runCatching {
@@ -82,22 +78,20 @@ class SearchViewModel : ViewModel() {
                     r.exactMatch?.toForum()?.let { list.add(it) }
                     r.fuzzyMatch.forEach { list.add(it.toForum()) }
                 }
-                searchedForums = SearchResult.Result(list)
+                searchedForums.value = SearchState.Result(list)
             }.onFailure {
                 if (it !is CancellationException) {
                     Logger.e("failed to search forum $keyword", it)
-                    searchedForums = SearchResult.Error(it)
+                    searchedForums.value = SearchState.Error(it)
                 }
             }
-            forumLoadState.value = LoadState.FETCHED
         }
     }
 
 
     fun fetchUsers(keyword: String) {
-        userSearched = true
         searchUserJob?.cancel()
-        userLoadState.value = LoadState.FETCHING
+        searchedUsers.value = SearchState.Fetching
         searchUserJob = viewModelScope.launch {
             val list = mutableListOf<User>()
             kotlin.runCatching {
@@ -106,21 +100,21 @@ class SearchViewModel : ViewModel() {
                     r.exactMatch?.toUser()?.let { list.add(it) }
                     r.fuzzyMatch.forEach { list.add(it.toUser()) }
                 }
-                searchedUsers = SearchResult.Result(list)
+                searchedUsers.value = SearchState.Result(list)
             }.onFailure {
                 if (it !is CancellationException) {
                     Logger.e("failed to search user $keyword", it)
-                    searchedUsers = SearchResult.Error(it)
+                    searchedUsers.value = SearchState.Error(it)
                 }
             }
-            userLoadState.value = LoadState.FETCHED
         }
     }
 
     inner class PostPagingSource(
-        private val client: TiebaClient
+        private val client: TiebaClient,
+        private val keyword: String
     ) : PagingSource<Int, SearchedPost>() {
-        private suspend fun searchThread(keyword: String, page: Int) = client.webAPI.searchThread(
+        private suspend fun searchThread(page: Int) = client.webAPI.searchThread(
             keyword,
             page,
             searchPostOrder.value!!.value,
@@ -150,7 +144,7 @@ class SearchViewModel : ViewModel() {
             }
         }
 
-        private suspend fun searchForumPost(keyword: String, page: Int) =
+        private suspend fun searchForumPost(page: Int) =
             client.jsonAPI.searchForumPost(
                 forum,
                 keyword,
@@ -184,12 +178,11 @@ class SearchViewModel : ViewModel() {
             }
 
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SearchedPost> {
-            val keyword = currentKeyword.value ?: return LoadResult.Page(emptyList(), null, null)
+            if (keyword.isEmpty()) return LoadResult.Page(emptyList(), null, null)
             try {
                 val page = params.key ?: 1
                 if (searchAtForum) {
-                    val (hasMore, posts) = searchForumPost(keyword, page)
-                    searchPostKeyWord = keyword
+                    val (hasMore, posts) = searchForumPost(page)
                     return LoadResult.Page(
                         data = posts,
                         prevKey = if (page == 1) null else (page - 1),
@@ -197,8 +190,7 @@ class SearchViewModel : ViewModel() {
                     )
 
                 } else {
-                    val (hasMore, posts) = searchThread(keyword, page)
-                    searchPostKeyWord = keyword
+                    val (hasMore, posts) = searchThread(page)
                     return LoadResult.Page(
                         data = posts,
                         prevKey = if (page == 1) null else (page - 1),
@@ -220,7 +212,7 @@ class SearchViewModel : ViewModel() {
     val flow = Pager(
         PagingConfig(pageSize = 30)
     ) {
-        PostPagingSource(App.instance.client)
+        PostPagingSource(App.instance.client, postKeyWord)
     }.flow
         .cachedIn(viewModelScope)
 }
