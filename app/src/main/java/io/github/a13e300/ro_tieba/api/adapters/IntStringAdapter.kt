@@ -13,10 +13,17 @@ class IntStringAdapter : JsonDeserializer<Any?> {
         context: JsonDeserializationContext
     ): Any? {
         if (json is JsonPrimitive) {
-            if (json.isNumber)
-                return json.asInt
-            else if (json.isString)
-                return json.asString.toInt()
+            if (json.isNumber) {
+                if (typeOfT == Integer.TYPE || typeOfT == Integer::class.java)
+                    return json.asInt
+                else if (typeOfT == java.lang.Long.TYPE || typeOfT == java.lang.Long::class.java)
+                    return json.asLong
+            } else if (json.isString) {
+                if (typeOfT == Integer.TYPE || typeOfT == Integer::class.java)
+                    return json.asString.toInt()
+                else if (typeOfT == java.lang.Long.TYPE || typeOfT == java.lang.Long::class.java)
+                    return json.asString.toLong()
+            }
             return context.deserialize(json, typeOfT)
         }
         return null

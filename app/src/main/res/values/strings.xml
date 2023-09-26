@@ -50,7 +50,7 @@
     <string name="jump_page_hint">页数</string>
     <string name="ok">确定</string>
     <string name="user_follow_forums_hidden">该用户已隐藏关注的吧</string>
-    <string name="user_follow_forums_empty">该用户已隐藏关注的吧</string>
+    <string name="user_follow_forums_empty">该用户还没有关注的吧</string>
     <string name="user_thread_empty">该用户未发过帖子或已隐藏</string>
     <string name="sort_by_reply_time">回复时间</string>
     <string name="sort_by_create_time">创建时间</string>
@@ -58,4 +58,6 @@
     <string name="copy_uid_title">复制 UID</string>
     <string name="copy_portrait_title">复制 portrait</string>
     <string name="copy_image_url_title">复制图片地址</string>
+    <string name="user_replies_hidden">该用户已隐藏回帖</string>
+    <string name="user_replies_empty">该用户还没有回帖</string>
 </resources>

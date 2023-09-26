@@ -18,6 +18,7 @@ import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
+import io.github.a13e300.ro_tieba.api.json.UserPostResponse
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.UserSpan
@@ -127,6 +128,19 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
 
             else -> Content.UnknownContent(it.type, it.text, it.toString())
         }
+    }
+}
+
+fun List<UserPostResponse.PostContent>.replyContentToPostContent(): List<Content> = map { c ->
+    when (c.type) {
+        "0" -> {
+            Emotions.getEmotionForName("#${c.text}")?.let {
+                Content.EmojiContent(it.id)
+            } ?: Content.TextContent(c.text)
+            // TODO: image & user
+        }
+
+        else -> Content.TextContent(c.text)
     }
 }
 

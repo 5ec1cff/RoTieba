@@ -13,12 +13,14 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Forum
+import io.github.a13e300.ro_tieba.models.Reply
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.models.UserProfile
 import io.github.a13e300.ro_tieba.models.toUserForum
 import io.github.a13e300.ro_tieba.models.toUserProfile
+import io.github.a13e300.ro_tieba.utils.replyContentToPostContent
 import io.github.a13e300.ro_tieba.utils.toPostContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +31,7 @@ class ProfileViewModel : ViewModel() {
     var uid = 0L
     var portrait: String? = null
     var followedForumsHidden = false
+    var postHidden = false
     val user = MutableLiveData<Result<UserProfile>>()
     private var forumSource: FollowForumSource? = null
     private var threadSource: ThreadPagingSource? = null
@@ -131,6 +134,62 @@ class ProfileViewModel : ViewModel() {
         PagingConfig(pageSize = 60)
     ) {
         ThreadPagingSource(App.instance.client, uid).also { threadSource = it }
+    }.flow
+        .cachedIn(viewModelScope)
+
+    inner class ReplyPagingSource(
+        private val client: TiebaClient,
+        private val uid: Long
+    ) : PagingSource<Int, Reply>() {
+        override fun getRefreshKey(state: PagingState<Int, Reply>): Int? = null
+
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Reply> {
+            val pn = params.key ?: 1
+            if (uid == 0L) return LoadResult.Page(emptyList(), null, null)
+            try {
+                // using portrait may return empty list
+                val r = client.getUserPosts(uid, pn = pn)
+                postHidden = r.hidePost
+                val replies = mutableListOf<Reply>()
+                r.postList.forEach { forumPost ->
+                    forumPost.content.forEachIndexed { i, p ->
+                        replies.add(Reply(
+                            pid = p.postId,
+                            content = p.postContent.replyContentToPostContent(),
+                            comment = p.postType == 1,
+                            // FIXME: we can only get quota of the first comment?
+                            quota = if (i == 0 && p.postType == 1) forumPost.quota?.let {
+                                Reply.QuotaInfo(
+                                    pid = it.postId,
+                                    content = it.content,
+                                    username = it.userName,
+                                    uid = it.userId
+                                )
+                            } else null,
+                            forumId = forumPost.forumId,
+                            forumName = forumPost.forumName,
+                            threadTitle = forumPost.title,
+                            threadId = forumPost.threadId,
+                            time = Date(forumPost.createTime * 1000)
+                        ))
+                    }
+                }
+                return LoadResult.Page(
+                    replies,
+                    prevKey = null,
+                    nextKey = if (replies.isEmpty()) null else pn + 1
+                )
+            } catch (t: Throwable) {
+                Logger.e("failed to load replies", t)
+                return LoadResult.Error(t)
+            }
+        }
+    }
+
+    val repliesFlow: Flow<PagingData<Reply>> = Pager(
+        PagingConfig(pageSize = 20)
+    ) {
+        ReplyPagingSource(App.instance.client, uid)
     }.flow
         .cachedIn(viewModelScope)
 }

@@ -114,13 +114,14 @@ class ProfileFragment : BaseFragment() {
         }
         binding.profileViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int {
-                return 2
+                return 3
             }
 
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
                     0 -> ProfileThreadsFragment()
-                    1 -> ProfileForumsFragment()
+                    1 -> ProfileReplyFragment()
+                    2 -> ProfileForumsFragment()
                     else -> throw IllegalArgumentException("unknown position")
                 }
             }
@@ -128,7 +129,8 @@ class ProfileFragment : BaseFragment() {
         TabLayoutMediator(binding.profileTabLayout, binding.profileViewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "帖子"
-                1 -> "关注的吧"
+                1 -> "回复"
+                2 -> "关注的吧"
                 else -> null
             }
         }.attach()

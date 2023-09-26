@@ -2,6 +2,7 @@ package io.github.a13e300.ro_tieba.api
 
 import io.github.a13e300.ro_tieba.api.json.GetFollowForums
 import io.github.a13e300.ro_tieba.api.json.SearchForumPost
+import io.github.a13e300.ro_tieba.api.json.UserPostResponse
 import io.github.a13e300.ro_tieba.utils.toHexString
 import okhttp3.FormBody
 import retrofit2.http.Field
@@ -29,6 +30,20 @@ interface TiebaJsonAPI {
         @Field("rn") rn: Int,
         @Field("sm") order: String
     ): SearchForumPost
+
+    @FormUrlEncoded
+    @POST("/c/u/feed/userpost")
+    suspend fun userPost(
+        @Field("uid") uid: String,
+        @Field("pn") page: Int = 1,
+        @Field("is_thread") isThread: Int,
+        @Field("rn") pageSize: Int = 20,
+        @Field("need_content") need_content: Int = 1,
+        // We must use lower version, so that we can get posts
+        @Field("_client_version") _client_version: String = "7.2.0.0",
+        @Field("_client_type") _client_type: String = "2",
+        @Field("subapp_type") _subapp_type: String = "mini"
+    ): UserPostResponse
 }
 
 fun FormBody.toSignatureBody(bduss: String? = null): FormBody {

@@ -1,5 +1,7 @@
 package io.github.a13e300.ro_tieba
 
+import java.util.concurrent.ConcurrentHashMap
+
 data class Emotion(
     val name: String,
     val id: String,
@@ -1017,5 +1019,11 @@ object Emotions {
             "image_emoticon124",
             Emotion("#(白眼)", "image_emoticon124", R.drawable.emoji_image_emoticon124)
         )
+    }
+    private val emotionNameMap = ConcurrentHashMap<String, Emotion?>()
+    fun getEmotionForName(name: String): Emotion? {
+        return emotionNameMap.computeIfAbsent(name) {
+            emotionMap.firstNotNullOfOrNull { (_, v) -> if (v.name == name) v else null }
+        }
     }
 }

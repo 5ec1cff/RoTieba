@@ -242,6 +242,13 @@ class TiebaClient(val account: Account = Account()) {
         return result.data
     }
 
+    suspend fun getUserPosts(uid: Long, pn: Int) =
+        jsonAPI.userPost(uid.toString(), pn, 0)
+
+    fun getUserPostsSync(uid: Long, pn: Int) = runBlocking {
+        getUserPosts(uid, pn)
+    }
+
     // for debug
 
     fun getThreadsSync(fname: String, pn: Int) = runBlocking {
