@@ -200,6 +200,8 @@ class SearchViewModel : ViewModel() {
             } catch (t: Throwable) {
                 if (t !is CancellationException)
                     Logger.e("failed to search $keyword ${params.key}", t)
+                else
+                    Logger.e("search $keyword ${params.key} has been cancelled")
                 return LoadResult.Error(t)
             }
         }

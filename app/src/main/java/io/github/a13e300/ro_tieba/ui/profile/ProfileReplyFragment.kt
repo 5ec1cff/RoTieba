@@ -44,7 +44,7 @@ class ProfileReplyFragment : Fragment() {
         }
         binding.threadList.adapter = replyAdapter
         binding.threadList.layoutManager = LinearLayoutManager(requireContext())
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.repliesFlow.collect {
                 replyAdapter.submitData(it)
             }

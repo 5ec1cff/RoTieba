@@ -55,7 +55,7 @@ class SearchPostFragment : Fragment() {
             )
             layoutManager = LinearLayoutManager(requireContext())
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect { data ->
                 postAdapter.submitData(data)
                 postAdapter.submitData(PagingData.empty())
@@ -115,7 +115,7 @@ class SearchPostFragment : Fragment() {
             binding.resultTips.isVisible =
                 state.append is LoadState.NotLoading && state.append.endOfPaginationReached && postAdapter.itemCount == 0
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             postAdapter.loadStateFlow
                 .distinctUntilChangedBy { it.refresh }
                 .map {

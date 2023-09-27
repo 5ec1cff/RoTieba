@@ -53,7 +53,7 @@ class ProfileForumsFragment : Fragment() {
             }
             binding.resultTips.isVisible = showTips
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.forumsFlow.collect {
                 forumAdapter.submitData(it)
             }

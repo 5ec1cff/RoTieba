@@ -137,7 +137,7 @@ class ForumFragment : BaseFragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = threadAdapter
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect {
                 threadAdapter.submitData(it)
                 threadAdapter.submitData(PagingData.empty())

@@ -72,7 +72,7 @@ class CommentFragment : BaseFragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = commentAdapter
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect {
                 commentAdapter.submitData(it)
             }
