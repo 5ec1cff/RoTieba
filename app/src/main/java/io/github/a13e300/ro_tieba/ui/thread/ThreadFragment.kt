@@ -571,7 +571,13 @@ class ThreadFragment : BaseFragment() {
                     val sb = SpannableStringBuilder()
                     sb.append(
                         comment.user.showName,
+                        UserSpan(comment.user.uid),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    sb.setSpan(
                         StyleSpan(Typeface.BOLD),
+                        0,
+                        sb.length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     sb.appendUserInfo(
