@@ -17,10 +17,7 @@ import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.datastore.Settings
 import io.github.a13e300.ro_tieba.db.AppDataBase
 import io.github.a13e300.ro_tieba.utils.ignoreAllSSLErrorsIfDebug
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 
 class App : Application(), SketchFactory {
@@ -28,7 +25,6 @@ class App : Application(), SketchFactory {
         lateinit var instance: App
             private set
         val gson = Gson()
-        val appScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     }
 
     lateinit var db: AppDataBase
@@ -44,7 +40,7 @@ class App : Application(), SketchFactory {
         super.onCreate()
         instance = this
         db = Room.databaseBuilder(this, AppDataBase::class.java, "app-db").build()
-        appScope.launch {
+        runBlocking {
             accountManager.initAccount()
         }
     }
