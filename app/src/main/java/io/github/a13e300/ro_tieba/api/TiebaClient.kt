@@ -183,7 +183,7 @@ class TiebaClient(val account: Account = Account()) {
         return result.data
     }
 
-    suspend fun getComments(tid: Long, pid: Long, pn: Int): PbFloorResIdl.DataRes {
+    suspend fun getComments(tid: Long, pid: Long, pn: Int, spid: Long = 0L): PbFloorResIdl.DataRes {
         val req = PbFloorReqIdl.newBuilder()
             .setData(
                 PbFloorReqIdl.DataReq.newBuilder()
@@ -194,6 +194,7 @@ class TiebaClient(val account: Account = Account()) {
                     )
                     .setTid(tid)
                     .setPid(pid)
+                    .setSpid(spid)
                     .setPn(pn)
             ).build()
         val part =
@@ -245,10 +246,6 @@ class TiebaClient(val account: Account = Account()) {
     suspend fun getUserPosts(uid: Long, pn: Int) =
         jsonAPI.userPost(uid.toString(), pn, 0)
 
-    fun getUserPostsSync(uid: Long, pn: Int) = runBlocking {
-        getUserPosts(uid, pn)
-    }
-
     // for debug
 
     fun getThreadsSync(fname: String, pn: Int) = runBlocking {
@@ -273,6 +270,14 @@ class TiebaClient(val account: Account = Account()) {
 
     fun getUserProfileSync(portrait: String?, uid: Long, pn: Int = 1, page: Int) = runBlocking {
         getUserProfile(portrait, uid, pn, page)
+    }
+
+    fun getUserPostsSync(uid: Long, pn: Int) = runBlocking {
+        getUserPosts(uid, pn)
+    }
+
+    fun getCommentsSync(tid: Long, pid: Long, pn: Int, spid: Long = 0L) = runBlocking {
+        getComments(tid, pid, pn, spid)
     }
 
     inner class JsonAPIInterceptor : Interceptor {

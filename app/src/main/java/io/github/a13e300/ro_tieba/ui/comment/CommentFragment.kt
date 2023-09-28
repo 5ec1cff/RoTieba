@@ -17,10 +17,12 @@ import androidx.navigation.fragment.navArgs
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentBinding
@@ -61,6 +63,7 @@ class CommentFragment : BaseFragment() {
         setupToolbar(binding.toolbar)
         viewModel.pid = args.pid
         viewModel.tid = args.tid
+        viewModel.initialSPid = args.spid
         viewModel.floor.observe(viewLifecycleOwner) {
             binding.toolbar.title = "$it 楼的评论"
         }
@@ -69,7 +72,32 @@ class CommentFragment : BaseFragment() {
         }
         val commentAdapter = CommentAdapter(CommentComparator)
         binding.list.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+            layoutManager = object : LinearLayoutManager(requireContext()) {
+                override fun onLayoutChildren(
+                    recycler: RecyclerView.Recycler?,
+                    state: RecyclerView.State?
+                ) {
+                    val request = viewModel.requestedScrollToSPid
+                    if (request != -1L) {
+                        val items = commentAdapter.snapshot().items
+                        if (items.isEmpty()) return
+                        val idx = items.indexOfFirst {
+                            it is CommentItem.Comment && (request == 0L || it.comment.ppid == request)
+                        }
+                        if (idx != -1) {
+                            scrollToPosition(idx)
+                        } else {
+                            Logger.e("failed to find position of spid $request, fallback to first")
+                            val firstIdx = items.indexOfFirst { it is CommentItem.Comment }
+                            if (firstIdx != -1) {
+                                scrollToPosition(firstIdx)
+                            }
+                        }
+                        viewModel.requestedScrollToSPid = -1L
+                    }
+                    super.onLayoutChildren(recycler, state)
+                }
+            }
             adapter = commentAdapter
         }
         viewLifecycleOwner.lifecycleScope.launch {

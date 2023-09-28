@@ -369,19 +369,19 @@ class ThreadFragment : BaseFragment() {
 
         private fun bindForPost(holder: PostViewHolder, post: Post) {
 
-            fun showComments() {
+            fun showComments(spid: Long) {
                 findNavController().navigate(
                     MobileNavigationDirections.showComments(
                         post.tid,
                         post.postId
-                    )
+                    ).setSpid(spid)
                 )
             }
             holder.binding.root.apply {
                 setData(post)
                 if (post.commentCount > 0)
                     setOnClickListener {
-                        showComments()
+                        showComments(0)
                     }
                 else
                     setOnClickListener(null)
@@ -609,7 +609,7 @@ class ThreadFragment : BaseFragment() {
                     sb.append(": ")
                     sb.appendSimpleContent(comment.content, requireContext(), useUrlSpan = true)
                     preview.text.text = sb
-                    preview.root.setOnClickListener { showComments() }
+                    preview.root.setOnClickListener { showComments(comment.ppid) }
                     preview.root.setOnLongClickListener {
                         it.setSelectedData(comment)
                         false
@@ -619,7 +619,7 @@ class ThreadFragment : BaseFragment() {
                 if (post.commentCount > 4) {
                     val preview = FragmentThreadCommentPreviewBinding.inflate(layoutInflater)
                     preview.text.text = "查看全部${post.commentCount}条回复"
-                    preview.root.setOnClickListener { showComments() }
+                    preview.root.setOnClickListener { showComments(0) }
                     holder.binding.commentsContent.addView(preview.root)
                 }
             }

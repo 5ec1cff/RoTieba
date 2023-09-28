@@ -25,6 +25,10 @@ sealed class CommentItem {
 class CommentViewModel : ViewModel() {
     var pid = 0L
     var tid = 0L
+    var initialSPid = 0L
+
+    // -1 -> no request, 0 -> first
+    var requestedScrollToSPid = 0L
     val commentCount = MutableLiveData<Int>()
     val floor = MutableLiveData<Int>()
     private var post: Post? = null
@@ -34,7 +38,7 @@ class CommentViewModel : ViewModel() {
         private val client: TiebaClient
     ) : PagingSource<Int, CommentItem>() {
         override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CommentItem> {
-            val page = params.key ?: 1
+            val page = params.key
             if (page == 0) {
                 return LoadResult.Page(
                     data = post?.let { listOf(CommentItem.Post(it)) } ?: emptyList(),
@@ -43,7 +47,13 @@ class CommentViewModel : ViewModel() {
                 )
             }
             try {
-                val response = client.getComments(tid, pid, page)
+                val response = client.getComments(
+                    tid,
+                    pid,
+                    page ?: 0,
+                    spid = if (page == null) initialSPid else 0L
+                )
+                if (page == null) requestedScrollToSPid = initialSPid
                 val p = response.post
                 if (post == null) post = Post(
                     p.author.toUser(),
@@ -63,6 +73,7 @@ class CommentViewModel : ViewModel() {
                 }
                 floor.postValue(response.post.floor)
                 commentCount.postValue(response.page.totalCount)
+                if (pid == 0L) pid = response.post.id
                 val comments = response.subpostListList.map { sp ->
                     CommentItem.Comment(
                         Comment(
@@ -76,10 +87,11 @@ class CommentViewModel : ViewModel() {
                         )
                     )
                 }
+                val realPage = response.page.currentPage
                 return LoadResult.Page(
                     data = comments,
-                    prevKey = page - 1,
-                    nextKey = if (response.page.currentPage < response.page.totalPage) page + 1 else null
+                    prevKey = realPage - 1,
+                    nextKey = if (realPage < response.page.totalPage) realPage + 1 else null
                 )
             } catch (t: Throwable) {
                 Logger.e("failed to load comment of $pid $tid $page", t)

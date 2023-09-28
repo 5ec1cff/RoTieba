@@ -68,9 +68,15 @@ class ProfileReplyFragment : Fragment() {
                 val pid = if (t.comment) {
                     t.quota?.pid ?: 0L
                 } else t.pid
-                findNavController().navigate(
-                    MobileNavigationDirections.goToThread(t.threadId).setPid(pid)
-                )
+                if (t.comment) {
+                    findNavController().navigate(
+                        MobileNavigationDirections.showComments(t.threadId, pid).setSpid(t.pid)
+                    )
+                } else {
+                    findNavController().navigate(
+                        MobileNavigationDirections.goToThread(t.threadId).setPid(pid)
+                    )
+                }
             }
         }
 

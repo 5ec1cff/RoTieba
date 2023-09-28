@@ -124,7 +124,7 @@ class ThreadViewModel : ViewModel() {
                             postId = p.id,
                             tid = response.thread.id,
                             time = Date(sp.time.toLong() * 1000),
-                            ppid = p.id
+                            ppid = sp.id
                         )
                     }
                     Post(
