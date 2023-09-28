@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.models.Comment
@@ -35,9 +36,11 @@ data class StatusBarConfig(
 
 abstract class BaseFragment : Fragment() {
     protected lateinit var insetsController: WindowInsetsControllerCompat
+    private var mEntry: NavBackStackEntry? = null
     override fun onStart() {
         super.onStart()
         insetsController = (requireActivity() as BaseActivity).insetsController
+        mEntry = findNavController().currentBackStackEntry
         val config = onInitStatusBar()
         if (config.show)
             insetsController.show(WindowInsetsCompat.Type.statusBars())
@@ -56,7 +59,10 @@ abstract class BaseFragment : Fragment() {
 
     fun navigateUp() {
         // we don't like navigate up to home
-        if (!findNavController().popBackStack()) {
+        if (mEntry == null || isRemoving || isDetached || !isAdded || activity == null) return
+        val navController = findNavController()
+        if (mEntry != navController.currentBackStackEntry) return
+        if (!navController.popBackStack()) {
             activity?.finish()
         }
     }
