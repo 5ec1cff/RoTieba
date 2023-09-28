@@ -206,8 +206,11 @@ class SearchPostFragment : Fragment() {
                 val id = item.id
                 findNavController().navigate(
                     when (id) {
-                        is PostId.Comment -> MobileNavigationDirections.showComments(id.tid, id.pid)
-                            .setSpid(id.spid)
+                        is PostId.Comment -> MobileNavigationDirections.showComments(
+                            id.tid,
+                            id.pid,
+                            id.spid
+                        )
 
                         is PostId.Post -> MobileNavigationDirections.goToThread(id.tid)
                             .setPid(id.pid)

@@ -70,7 +70,7 @@ class ProfileReplyFragment : Fragment() {
                 } else t.pid
                 if (t.comment) {
                     findNavController().navigate(
-                        MobileNavigationDirections.showComments(t.threadId, pid).setSpid(t.pid)
+                        MobileNavigationDirections.showComments(t.threadId, pid, t.pid)
                     )
                 } else {
                     findNavController().navigate(

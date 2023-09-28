@@ -373,8 +373,9 @@ class ThreadFragment : BaseFragment() {
                 findNavController().navigate(
                     MobileNavigationDirections.showComments(
                         post.tid,
-                        post.postId
-                    ).setSpid(spid).setShowOrigin(false)
+                        post.postId,
+                        spid
+                    ).setShowOrigin(false)
                 )
             }
             holder.binding.root.apply {

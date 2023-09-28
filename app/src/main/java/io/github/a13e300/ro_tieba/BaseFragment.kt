@@ -121,9 +121,9 @@ abstract class BaseFragment : Fragment() {
 
             R.id.copy_post_link -> {
                 val text = when (post) {
-                    is TiebaThread -> "https://tieba.baidu.com/p/${post.tid}"
+                    is TiebaThread -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
                     is Post -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
-                    is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&ppid=${post.ppid}"
+                    is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&cid=${post.ppid}"
                     else -> ""
                 }
                 copyText(text)
