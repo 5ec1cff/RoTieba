@@ -14,12 +14,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.panpf.sketch.displayImage
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
@@ -56,6 +58,14 @@ class CommentFragment : BaseFragment() {
     private var mHighlightIdx: Int = -1
     private lateinit var binding: FragmentCommentBinding
 
+    private fun showOrigin(popup: Boolean = false) {
+        val navController = findNavController()
+        if (popup) navController.popBackStack()
+        navController.navigate(
+            MobileNavigationDirections.goToThread(viewModel.tid).setPid(viewModel.pid)
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -70,9 +80,7 @@ class CommentFragment : BaseFragment() {
         binding.toolbar.setOnMenuItemClickListener {
             return@setOnMenuItemClickListener when (it.itemId) {
                 R.id.show_origin -> {
-                    findNavController().navigate(
-                        MobileNavigationDirections.goToThread(viewModel.tid).setPid(viewModel.pid)
-                    )
+                    showOrigin()
                     true
                 }
 
@@ -115,6 +123,24 @@ class CommentFragment : BaseFragment() {
                 }
             }
             adapter = commentAdapter
+        }
+        commentAdapter.addLoadStateListener { state ->
+            (state.refresh as? LoadState.Error)?.error?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.error_dialog_title)
+                    .setMessage(it.message)
+                    .setOnDismissListener {
+                        navigateUp()
+                    }
+                    .apply {
+                        if (args.showOrigin) {
+                            setNegativeButton("查看原帖") { _, _ ->
+                                showOrigin(true)
+                            }
+                        }
+                    }
+                    .show()
+            }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect {
