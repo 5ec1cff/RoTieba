@@ -20,6 +20,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
+            app:menu="@menu/comment_menu"
             app:layout_collapseMode="pin" />
     </com.google.android.material.appbar.AppBarLayout>
 

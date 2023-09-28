@@ -64,6 +64,20 @@ class CommentFragment : BaseFragment() {
         viewModel.pid = args.pid
         viewModel.tid = args.tid
         viewModel.initialSPid = args.spid
+        if (!args.showOrigin)
+            binding.toolbar.menu.findItem(R.id.show_origin).isVisible = false
+        binding.toolbar.setOnMenuItemClickListener {
+            return@setOnMenuItemClickListener when (it.itemId) {
+                R.id.show_origin -> {
+                    findNavController().navigate(
+                        MobileNavigationDirections.goToThread(viewModel.tid).setPid(viewModel.pid)
+                    )
+                    true
+                }
+
+                else -> false
+            }
+        }
         viewModel.floor.observe(viewLifecycleOwner) {
             binding.toolbar.title = "$it 楼的评论"
         }

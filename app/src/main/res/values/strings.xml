@@ -60,4 +60,5 @@
     <string name="copy_image_url_title">复制图片地址</string>
     <string name="user_replies_hidden">该用户已隐藏回帖</string>
     <string name="user_replies_empty">该用户还没有回帖</string>
+    <string name="show_origin_title">查看原帖</string>
 </resources>

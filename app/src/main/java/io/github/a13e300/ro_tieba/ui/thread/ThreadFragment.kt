@@ -374,7 +374,7 @@ class ThreadFragment : BaseFragment() {
                     MobileNavigationDirections.showComments(
                         post.tid,
                         post.postId
-                    ).setSpid(spid)
+                    ).setSpid(spid).setShowOrigin(false)
                 )
             }
             holder.binding.root.apply {

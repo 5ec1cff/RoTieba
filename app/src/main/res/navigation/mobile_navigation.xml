@@ -109,6 +109,10 @@
             android:name="spid"
             app:argType="long"
             android:defaultValue="0L" />
+        <argument
+            android:name="show_origin"
+            app:argType="boolean"
+            android:defaultValue="true" />
     </fragment>
 
     <action
