@@ -1,7 +1,11 @@
 package io.github.a13e300.ro_tieba.models
 
+import java.util.Date
+
 data class SearchedPost(
-    val post: Post,
+    val user: User,
+    val id: PostId,
+    val time: Date,
     val title: String,
     val forum: String,
     val content: String

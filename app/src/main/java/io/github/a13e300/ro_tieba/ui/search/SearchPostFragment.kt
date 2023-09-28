@@ -27,6 +27,7 @@ import io.github.a13e300.ro_tieba.api.web.SearchOrder
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostLoadStateBinding
+import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
@@ -186,24 +187,33 @@ class SearchPostFragment : Fragment() {
             val item = getItem(position) ?: return
             holder.binding.threadContent.text =
                 if (viewModel.searchAtForum) item.content.replaceEm(requireContext()) else item.content
-            holder.binding.threadUserName.text = item.post.user.showName
+            holder.binding.threadUserName.text = item.user.showName
             holder.binding.threadTitle.text =
                 if (viewModel.searchAtForum) item.title.replaceEm(requireContext()) else item.title
             if (!viewModel.searchAtForum)
                 holder.binding.threadForum.text = "${item.forum}吧"
             holder.binding.threadForum.isGone = viewModel.searchAtForum
-            holder.binding.threadInfo.text = item.post.time.toSimpleString()
-            val avatar = item.post.user.avatarUrl
+            holder.binding.threadInfo.text = item.time.toSimpleString()
+            val avatar = item.user.avatarUrl
             if (avatar.isNotEmpty())
                 holder.binding.threadAvatar.displayImage(avatar)
             holder.binding.threadAvatar.isGone = avatar.isEmpty()
-            val uid = item.post.user.uid
+            val uid = item.user.uid
             holder.binding.threadAvatar.setOnClickListener(if (uid == 0L) null else View.OnClickListener {
                 findNavController().navigate(MobileNavigationDirections.showProfile(uid.toString()))
             })
             holder.binding.root.setOnClickListener {
+                val id = item.id
                 findNavController().navigate(
-                    MobileNavigationDirections.goToThread(item.post.tid).setPid(item.post.postId)
+                    when (id) {
+                        is PostId.Comment -> MobileNavigationDirections.showComments(id.tid, id.pid)
+                            .setSpid(id.spid)
+
+                        is PostId.Post -> MobileNavigationDirections.goToThread(id.tid)
+                            .setPid(id.pid)
+
+                        is PostId.Thread -> MobileNavigationDirections.goToThread(id.tid)
+                    }
                 )
             }
             holder.binding.threadForum.setOnClickListener {
@@ -232,7 +242,7 @@ class SearchPostFragment : Fragment() {
 
 object SearchedPostComparator : DiffUtil.ItemCallback<SearchedPost>() {
     override fun areItemsTheSame(oldItem: SearchedPost, newItem: SearchedPost): Boolean {
-        return oldItem.post.postId == newItem.post.postId
+        return oldItem.id == newItem.id
     }
 
     override fun areContentsTheSame(oldItem: SearchedPost, newItem: SearchedPost): Boolean {

@@ -32,7 +32,8 @@ data class SearchThread(
         val user: UserInfoBean,
         val type: Int,
         @SerializedName("forum_info")
-        val forumInfo: ForumInfo
+        val forumInfo: ForumInfo,
+        val cid: String
         // main_post : { title, content }
         // media : [ { big_pic, height, size, small_pic, type, water_pic, width } ]
     )

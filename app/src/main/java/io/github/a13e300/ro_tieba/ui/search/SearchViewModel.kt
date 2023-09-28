@@ -15,7 +15,7 @@ import io.github.a13e300.ro_tieba.api.web.SearchFilter
 import io.github.a13e300.ro_tieba.api.web.SearchOrder
 import io.github.a13e300.ro_tieba.arch.Event
 import io.github.a13e300.ro_tieba.models.Forum
-import io.github.a13e300.ro_tieba.models.Post
+import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toForum
@@ -122,21 +122,17 @@ class SearchViewModel : ViewModel() {
         ).let {
             it.hasMore to it.postList.map { p ->
                 SearchedPost(
-                    post = Post(
-                        user = User(
-                            name = p.user.userName ?: "null",
-                            nick = p.user.showNickname,
-                            avatar = p.user.portrait,
-                            uid = p.user.userId?.toLong() ?: 0
-                        ),
-                        content = emptyList(),
-                        floor = 0, // unknown
-                            postId = p.pid.toLong(),
-                        tid = p.tid.toLong(),
-                        time = Date(p.time.toLong() * 1000),
-                        comments = emptyList(),
-                        commentCount = 0,
+                    user = User(
+                        name = p.user.userName ?: "null",
+                        nick = p.user.showNickname,
+                        avatar = p.user.portrait,
+                        uid = p.user.userId?.toLong() ?: 0
                     ),
+                    id = when (p.type) {
+                        3 -> PostId.Comment(p.tid.toLong(), p.pid.toLong(), p.cid.toLong())
+                        else -> PostId.Post(p.tid.toLong(), p.pid.toLong())
+                    },
+                    time = Date(p.time.toLong() * 1000),
                     title = p.title,
                     forum = p.forumName,
                     content = p.content
@@ -155,21 +151,16 @@ class SearchViewModel : ViewModel() {
             ).let {
                 it.page.hasMore to it.postList.map { p ->
                     SearchedPost(
-                        post = Post(
-                            user = User(
-                                name = p.author.name ?: "null",
-                                nick = p.author.showName,
-                                avatar = "",
-                                uid = 0
-                            ),
-                            content = emptyList(),
-                            floor = 0, // unknown
-                            postId = p.pid.toLong(),
-                            tid = p.tid.toLong(),
-                            time = Date(p.time.toLong() * 1000),
-                            comments = emptyList(),
-                            commentCount = 0,
+                        user = User(
+                            name = p.author.name ?: "null",
+                            nick = p.author.showName,
+                            avatar = "",
+                            uid = 0
                         ),
+                        id = if (p.cid != "0") {
+                            PostId.Comment(p.tid.toLong(), p.pid.toLong(), p.cid.toLong())
+                        } else PostId.Post(p.tid.toLong(), p.pid.toLong()),
+                        time = Date(p.time.toLong() * 1000),
                         title = p.title,
                         forum = p.forumName,
                         content = p.content

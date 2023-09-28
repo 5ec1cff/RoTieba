@@ -88,14 +88,16 @@ fun TiebaThread.toDetail() = Pair(
 )
 
 fun SearchedPost.toDetail() = Pair(
-    arrayListOf("pid", "tid", "uid", "贴吧", "作者名字", "作者昵称", "发布时间"),
-    arrayListOf(post.postId.toString(),
-        post.tid.toString(),
-        post.user.uid.toString(),
+    arrayListOf("pid", "tid", "spid", "uid", "贴吧", "作者名字", "作者昵称", "发布时间"),
+    arrayListOf(
+        id.pid.toString(),
+        id.tid.toString(),
+        id.spid.toString(),
+        user.uid.toString(),
         forum,
-        post.user.name,
-        post.user.nick,
-        post.time.let {
+        user.name,
+        user.nick,
+        time.let {
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it)
         }
     )
