@@ -44,6 +44,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
+import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.DialogJumpPageBinding
@@ -103,7 +104,27 @@ class ThreadFragment : BaseFragment() {
                     .show()
             }
         }
-        postLayoutManager = LinearLayoutManager(context)
+        postLayoutManager = object : LinearLayoutManager(context) {
+            override fun onLayoutChildren(
+                recycler: RecyclerView.Recycler?,
+                state: RecyclerView.State?
+            ) {
+                val request = viewModel.requestedScrollToPid
+                if (request != 0L) {
+                    val items = postAdapter.snapshot().items
+                    if (items.isEmpty()) return
+                    val idx =
+                        items.indexOfFirst { it is ThreadViewModel.PostModel.Post && it.post.postId == request }
+                    if (idx != -1) {
+                        scrollToPosition(idx)
+                    } else {
+                        Logger.e("could not find the position of $request at first load!")
+                    }
+                    viewModel.requestedScrollToPid = 0L
+                }
+                super.onLayoutChildren(recycler, state)
+            }
+        }
         binding.list.apply {
             layoutManager = postLayoutManager
             adapter = postAdapter

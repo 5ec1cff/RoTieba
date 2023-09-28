@@ -23,7 +23,6 @@ import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.utils.toPostContent
 import kotlinx.coroutines.flow.map
-import tbclient.PbPage.PbPageResIdlOuterClass
 import java.util.Date
 import java.util.TreeMap
 
@@ -37,7 +36,8 @@ data class ThreadConfig(
 )
 
 class ThreadViewModel : ViewModel() {
-    var totalPage = 0 // FIXME: request totalPage
+    var requestedScrollToPid: Long = 0L
+    var totalPage = 0
     var currentUid: String? = null
     lateinit var threadConfig: ThreadConfig
     val threadInfo = MutableLiveData<TiebaThread>()
@@ -49,13 +49,6 @@ class ThreadViewModel : ViewModel() {
         else 0
     }
 
-    sealed class Key
-    data class PageKey(val pn: Int) : Key()
-    data class PidKey(
-        val pid: Long,
-        val reverse: Boolean
-    ) : Key()
-
     sealed class PostModel {
         data class Post(val post: io.github.a13e300.ro_tieba.models.Post) : PostModel()
         data object Header : PostModel()
@@ -64,183 +57,123 @@ class ThreadViewModel : ViewModel() {
     inner class PostPagingSource(
         private val client: TiebaClient,
         private val threadConfig: ThreadConfig
-    ) : PagingSource<Key, Post>() {
-        override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Post> {
+    ) : PagingSource<Int, Post>() {
+        private suspend fun getInitialPage(): Int {
             val pid = threadConfig.pid
-            val key = params.key ?: if (pid != 0L) {
-                PidKey(pid, false)
-            } else {
-                val p = threadConfig.page
-                if (threadConfig.reverse) PageKey(if (p == 0) totalPage else p)
-                else PageKey(if (p == 0) 1 else p)
-            }
-            return try {
-                // Logger.d("load thread $key $threadConfig")
-                when (key) {
-                    is PageKey -> loadForPageKey(key)
-                    is PidKey -> loadForPidKey(key, params.key == null)
+            val pageOfPid = if (pid != 0L) {
+                // request the page of pid
+                try {
+                    val pageInfo = client.getPosts(
+                        threadConfig.tid,
+                        0, pid, sort = if (threadConfig.reverse) 1 else 0,
+                        seeLz = threadConfig.seeLz
+                    ).page
+                    totalPage = pageInfo.totalPage
+                    requestedScrollToPid = pid
+                    pageInfo.currentPage
+                } catch (t: Throwable) {
+                    // maybe pid not exists
+                    Logger.e("failed to find page of pid $pid in thread ${threadConfig.tid}", t)
+                    0
                 }
+            } else threadConfig.page
+            return if (pageOfPid != 0) {
+                pageOfPid
+            } else if (threadConfig.reverse) {
+                // request total page
+                val pageInfo = client.getPosts(
+                    threadConfig.tid,
+                    0, pid, sort = 1, seeLz = threadConfig.seeLz
+                ).page
+                totalPage = pageInfo.totalPage
+                pageInfo.totalPage
+            } else 1
+        }
+
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Post> {
+            val key = params.key ?: getInitialPage()
+            return try {
+                val response = client.getPosts(
+                    threadConfig.tid, key,
+                    sort = if (threadConfig.reverse) 1 else 0, seeLz = threadConfig.seeLz
+                )
+                threadInfo.value = TiebaThread(
+                    tid = response.thread.id,
+                    title = response.thread.title,
+                    author = response.thread.author.toUser(),
+                    content = listOf(),
+                    replyNum = response.thread.replyNum,
+                    time = Date(response.thread.createTime.toLong() * 1000), // TODO: remove this useless date
+                    postId = response.thread.postId,
+                    isGood = response.thread.isGood == 1,
+                    forum = Forum(response.forum.name, response.forum.id),
+                    createTime = Date(response.thread.createTime.toLong() * 1000),
+                    agreeNum = response.thread.agree.agreeNum,
+                    disagreeNum = response.thread.agree.disagreeNum
+                )
+                totalPage = response.page.totalPage
+                val currentPage = response.page.currentPage
+                val users = response.userListList.associateBy({ it.id },
+                    { it.toUser() })
+                val posts = response.postListList.map { p ->
+                    val comments = p.subPostList.subPostListList.map { sp ->
+                        Comment(
+                            user = users[sp.authorId] ?: User(),
+                            content = sp.contentList.toPostContent(),
+                            floor = sp.floor,
+                            postId = p.id,
+                            tid = response.thread.id,
+                            time = Date(sp.time.toLong() * 1000),
+                            ppid = p.id
+                        )
+                    }
+                    Post(
+                        users[p.authorId] ?: User(),
+                        p.contentList.toPostContent(),
+                        p.floor,
+                        p.id,
+                        response.thread.id,
+                        Date(p.time.toLong() * 1000),
+                        comments,
+                        p.subPostNumber,
+                        agreeNum = p.agree.agreeNum,
+                        disagreeNum = p.agree.disagreeNum,
+                        page = currentPage
+                    )
+                }
+                posts.forEach { p ->
+                    p.content.forEach { c ->
+                        if (c is Content.ImageContent) {
+                            photos[p.floor to c.order] =
+                                Photo(c.src, c.order, p)
+                        }
+                    }
+                }
+                val prevKey: Int?
+                val nextKey: Int?
+                if (threadConfig.reverse) {
+                    prevKey =
+                        if (response.page.hasPrev != 0) currentPage + 1 else null
+                    nextKey =
+                        if (response.page.hasMore != 0) currentPage - 1 else null
+                } else {
+                    prevKey =
+                        if (response.page.hasPrev != 0) currentPage - 1 else null
+                    nextKey =
+                        if (response.page.hasMore != 0) currentPage + 1 else null
+                }
+                return LoadResult.Page(
+                    data = posts,
+                    prevKey = prevKey,
+                    nextKey = nextKey
+                )
             } catch (t: Throwable) {
-                Logger.e("error load thread $key $threadConfig", t)
+                Logger.e("failed to load thread $key $threadConfig", t)
                 LoadResult.Error(t)
             }
         }
 
-        private suspend fun loadForPageKey(key: PageKey): LoadResult.Page<Key, Post> {
-            val response = client.getPosts(
-                threadConfig.tid,
-                key.pn,
-                sort = if (threadConfig.reverse) 1 else 0, seeLz = threadConfig.seeLz
-            )
-            val posts = loadCommon(response, false, key.pn)
-            val prevKey: Key?
-            val nextKey: Key?
-            if (threadConfig.reverse) {
-                val currentPage =
-                    // if (key.pn == 0) response.page.totalPage // use pn = 0 is incorrect
-                    response.page.currentPage
-                prevKey =
-                    if (response.page.hasPrev != 0) PageKey(currentPage + 1) else null
-                nextKey =
-                    if (response.page.hasMore != 0) PageKey(currentPage - 1) else null
-            } else {
-                val currentPage = response.page.currentPage
-                prevKey =
-                    if (response.page.hasPrev != 0) PageKey(currentPage - 1) else null
-                nextKey =
-                    if (response.page.hasMore != 0) PageKey(currentPage + 1) else null
-            }
-            return LoadResult.Page(
-                data = posts,
-                prevKey = prevKey,
-                nextKey = nextKey
-            )
-        }
-
-        private suspend fun loadForPidKey(
-            key: PidKey,
-            initial: Boolean
-        ): LoadResult.Page<Key, Post> {
-            val response = client.getPosts(
-                threadConfig.tid,
-                if (initial) 0 else 1,
-                key.pid, sort = if (key.reverse xor threadConfig.reverse) 1 else 0,
-                seeLz = threadConfig.seeLz
-            )
-            val posts = loadCommon(response, key.reverse, 0)
-            val prevKey: Key?
-            val nextKey: Key?
-            if (threadConfig.reverse) {
-                if (initial) {
-                    prevKey = PidKey(key.pid, true)
-                    nextKey =
-                        if (response.postListList.last().floor == 1) null else PidKey(
-                            response.postListList.last().id,
-                            false
-                        )
-                } else if (key.reverse) {
-                    prevKey = if (response.postListList.isEmpty()) null else PidKey(
-                        response.postListList.last().id,
-                        true
-                    )
-                    nextKey = null
-                } else {
-                    nextKey =
-                        if (response.postListList.last().floor == 1) null else PidKey(
-                            response.postListList.last().id,
-                            false
-                        )
-                    prevKey = null
-                }
-            } else {
-                if (initial) {
-                    prevKey =
-                        if (response.postListList.first().floor == 1) null else PidKey(
-                            key.pid,
-                            true
-                        )
-                    nextKey = if (response.page.hasMore == 0) null else PidKey(
-                        response.postListList.last().id,
-                        false
-                    )
-                } else if (key.reverse) {
-                    val first = response.postListList.last()
-                    prevKey = if (first.floor == 1) null else PidKey(first.id, true)
-                    nextKey = null
-                } else {
-                    nextKey = if (response.postListList.isEmpty()) null else PidKey(
-                        response.postListList.last().id,
-                        false
-                    )
-                    prevKey = null
-                }
-            }
-            return LoadResult.Page(
-                data = posts,
-                prevKey = prevKey,
-                nextKey = nextKey
-            )
-        }
-
-        private fun loadCommon(
-            response: PbPageResIdlOuterClass.PbPageResIdl.DataRes,
-            reverse: Boolean, page: Int
-        ): List<Post> {
-            threadInfo.value = TiebaThread(
-                tid = response.thread.id,
-                title = response.thread.title,
-                author = response.thread.author.toUser(),
-                content = listOf(),
-                replyNum = response.thread.replyNum,
-                time = Date(response.thread.createTime.toLong() * 1000), // TODO: remove this useless date
-                postId = response.thread.postId,
-                isGood = response.thread.isGood == 1,
-                forum = Forum(response.forum.name, response.forum.id),
-                createTime = Date(response.thread.createTime.toLong() * 1000),
-                agreeNum = response.thread.agree.agreeNum,
-                disagreeNum = response.thread.agree.disagreeNum
-            )
-            totalPage = response.page.totalPage
-            val users = response.userListList.associateBy({ it.id },
-                { it.toUser() })
-            val posts = response.postListList.map { p ->
-                val comments = p.subPostList.subPostListList.map { sp ->
-                    Comment(
-                        user = users[sp.authorId] ?: User(),
-                        content = sp.contentList.toPostContent(),
-                        floor = sp.floor,
-                        postId = p.id,
-                        tid = response.thread.id,
-                        time = Date(sp.time.toLong() * 1000),
-                        ppid = p.id
-                    )
-                }
-                Post(
-                    users[p.authorId] ?: User(),
-                    p.contentList.toPostContent(),
-                    p.floor,
-                    p.id,
-                    response.thread.id,
-                    Date(p.time.toLong() * 1000),
-                    comments,
-                    p.subPostNumber,
-                    agreeNum = p.agree.agreeNum,
-                    disagreeNum = p.agree.disagreeNum,
-                    page = page
-                )
-            }.let { if (reverse) it.reversed() else it }
-            posts.forEach { p ->
-                p.content.forEach { c ->
-                    if (c is Content.ImageContent) {
-                        photos[p.floor to c.order] =
-                            Photo(c.src, c.order, p)
-                    }
-                }
-            }
-            return posts
-        }
-
-        override fun getRefreshKey(state: PagingState<Key, Post>): Key? {
+        override fun getRefreshKey(state: PagingState<Int, Post>): Int? {
             return null
         }
     }
