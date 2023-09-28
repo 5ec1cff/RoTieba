@@ -80,6 +80,7 @@ class ThreadFragment : BaseFragment() {
     private val viewModel: ThreadViewModel by viewModels()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
     private val args: ThreadFragmentArgs by navArgs()
+    private var mHighlightIdx: Int = -1
     private lateinit var binding: FragmentThreadBinding
     private lateinit var postAdapter: PostAdapter
     private lateinit var postLayoutManager: LinearLayoutManager
@@ -117,6 +118,7 @@ class ThreadFragment : BaseFragment() {
                         items.indexOfFirst { it is ThreadViewModel.PostModel.Post && it.post.postId == request }
                     if (idx != -1) {
                         scrollToPosition(idx)
+                        mHighlightIdx = idx
                     } else {
                         Logger.e("could not find the position of $request at first load!")
                     }
@@ -320,6 +322,10 @@ class ThreadFragment : BaseFragment() {
             val post = getItem(position) ?: return
             if (holder is PostViewHolder) {
                 bindForPost(holder, (post as ThreadViewModel.PostModel.Post).post)
+                if (position == mHighlightIdx) {
+                    holder.binding.root.isPressed = true
+                    mHighlightIdx = -1
+                }
             } else if (holder is HeaderViewHolder) {
                 bindForHeader(holder)
             }

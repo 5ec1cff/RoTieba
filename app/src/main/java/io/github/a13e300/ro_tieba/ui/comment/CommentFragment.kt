@@ -53,6 +53,7 @@ class CommentFragment : BaseFragment() {
     private val viewModel: CommentViewModel by viewModels()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
     private val args: CommentFragmentArgs by navArgs()
+    private var mHighlightIdx: Int = -1
     private lateinit var binding: FragmentCommentBinding
 
     override fun onCreateView(
@@ -100,6 +101,7 @@ class CommentFragment : BaseFragment() {
                         }
                         if (idx != -1) {
                             scrollToPosition(idx)
+                            if (request != 0L) mHighlightIdx = idx
                         } else {
                             Logger.e("failed to find position of spid $request, fallback to first")
                             val firstIdx = items.indexOfFirst { it is CommentItem.Comment }
@@ -346,7 +348,13 @@ class CommentFragment : BaseFragment() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = getItem(position) ?: return
             when (item) {
-                is CommentItem.Comment -> bindForComment(holder as CommentViewHolder, item.comment)
+                is CommentItem.Comment -> {
+                    bindForComment(holder as CommentViewHolder, item.comment)
+                    if (position == mHighlightIdx) {
+                        holder.binding.root.isPressed = true
+                        mHighlightIdx = -1
+                    }
+                }
                 is CommentItem.Post -> bindForPost(holder as PostViewHolder, item.post)
             }
         }
