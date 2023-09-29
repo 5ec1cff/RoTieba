@@ -10,6 +10,7 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.view.ContextMenu
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -284,6 +285,7 @@ fun Context.copyText(text: CharSequence) {
     getSystemService(ClipboardManager::class.java).setPrimaryClip(
         ClipData.newPlainText("", text)
     )
+    Toast.makeText(this, "已复制到剪贴板", Toast.LENGTH_SHORT).show()
 }
 
 fun Fragment.copyText(text: CharSequence) {

@@ -1,15 +1,12 @@
 package io.github.a13e300.ro_tieba.ui
 
 import android.app.Dialog
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.icu.text.DateFormat
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -25,6 +22,7 @@ import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.TiebaThread
+import io.github.a13e300.ro_tieba.utils.copyText
 
 fun Post.toDetail() = Pair(
     arrayListOf(
@@ -189,11 +187,7 @@ class DetailDialogFragment : DialogFragment() {
                 LayoutInflater.from(parent.context), parent, false
             ).apply {
                 root.setOnClickListener {
-                    val context = it.context
-                    context.getSystemService(ClipboardManager::class.java).setPrimaryClip(
-                        ClipData.newPlainText("", (it as TextView).text)
-                    )
-                    Toast.makeText(context, "copied", Toast.LENGTH_SHORT).show()
+                    it.context.copyText((it as TextView).text)
                 }
             })
         }
