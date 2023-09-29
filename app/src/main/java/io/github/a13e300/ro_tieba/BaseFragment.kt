@@ -18,9 +18,9 @@ import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.IPost
+import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
-import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.utils.PhotoUtils
 import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.forceShowIcon

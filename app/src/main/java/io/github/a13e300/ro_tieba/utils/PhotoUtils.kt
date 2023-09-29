@@ -18,10 +18,8 @@ import com.github.panpf.sketch.request.DownloadResult
 import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.R
+import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.models.Post
-import io.github.a13e300.ro_tieba.models.TiebaThread
-import io.github.a13e300.ro_tieba.models.UserProfile
-import io.github.a13e300.ro_tieba.ui.photo.Photo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -123,12 +121,7 @@ object PhotoUtils {
                         BufferedInputStream(result.data.data.newInputStream()).use { inputStream ->
                             // TODO: maybe tieba data knows the type of the image
                             val ext = inputStream.guessExtension()
-                            val key = when (val source = photo.source) {
-                                is Post -> "rotieba_t${source.tid}_p${source.postId}_f${source.floor}_c${photo.order}"
-                                is TiebaThread -> "rotieba_t${source.tid}_p${source.postId}_f1_c${photo.order}"
-                                is UserProfile -> "rotieba_u${source.uid}_${source.portrait}"
-                                else -> "rotieba"
-                            }
+                            val key = photo.source
                             save(
                                 "${key}_${System.currentTimeMillis()}.$ext",
                                 activity,

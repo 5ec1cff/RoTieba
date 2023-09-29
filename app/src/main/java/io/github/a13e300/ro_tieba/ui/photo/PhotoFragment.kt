@@ -28,8 +28,7 @@ import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.StatusBarConfig
 import io.github.a13e300.ro_tieba.databinding.FragmentPhotoBinding
-import io.github.a13e300.ro_tieba.models.Post
-import io.github.a13e300.ro_tieba.models.TiebaThread
+import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.utils.PhotoUtils
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.copyText
@@ -70,11 +69,7 @@ class PhotoFragment : BaseFragment() {
                 override fun onPageSelected(position: Int) {
                     viewModel.currentIndex.value = position
                     val photo = viewModel.photos[position]
-                    val content = when (val s = photo.source) {
-                        is Post -> s.content
-                        is TiebaThread -> s.content
-                        else -> null
-                    }
+                    val content = photo.content
                     binding.imageText.post {
                         // sometimes the textview only shows 1 line
                         // log shows `requestLayout() improperly called` in this case

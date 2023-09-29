@@ -23,9 +23,10 @@ import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileBinding
+import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.models.UserForum
-import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.ui.photo.imageSource
 import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.openUserAtOtherClient
 import kotlinx.coroutines.launch
@@ -96,7 +97,8 @@ class ProfileFragment : BaseFragment() {
                 binding.userAvatar.displayImage(profile.avatarUrl)
                 binding.userAvatar.setOnClickListener {
                     photoViewModel.currentIndex.value = 0
-                    photoViewModel.photos = listOf(Photo(profile.realAvatarUrl, 0, profile))
+                    photoViewModel.photos =
+                        listOf(Photo(profile.realAvatarUrl, 0, imageSource(profile)))
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
                 }
                 binding.userStat.text =
@@ -134,7 +136,7 @@ class ProfileFragment : BaseFragment() {
                 else -> null
             }
         }.attach()
-        if (savedInstanceState == null) {
+        if (!viewModel.initialized) {
             val uid = args.uidOrPortrait.toLongOrNull()
             if (uid != null) {
                 viewModel.uid = uid
@@ -143,6 +145,7 @@ class ProfileFragment : BaseFragment() {
                 viewModel.uid = 0L
                 viewModel.portrait = args.uidOrPortrait
             }
+            viewModel.initialized = true
             lifecycleScope.launch {
                 viewModel.requestUser(viewModel.uid, viewModel.portrait)
             }

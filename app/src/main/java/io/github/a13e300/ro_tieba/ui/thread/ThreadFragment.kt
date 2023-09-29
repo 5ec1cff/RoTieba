@@ -64,8 +64,8 @@ import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
-import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
@@ -90,7 +90,7 @@ class ThreadFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentThreadBinding.inflate(inflater, container, false)
-        if (savedInstanceState == null) {
+        if (!viewModel.initialized) {
             viewModel.threadConfig = ThreadConfig(args.tid, args.pid)
         }
         postAdapter = PostAdapter(PostComparator)
@@ -474,9 +474,7 @@ class ThreadFragment : BaseFragment() {
                                     }
                                     setOnLongClickListener {
                                         it.setSelectedData(
-                                            Photo(
-                                                content.src, content.order, post
-                                            )
+                                            content.toPhoto(post)
                                         )
                                         false
                                     }

@@ -36,9 +36,9 @@ import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.ForumSortType
 import io.github.a13e300.ro_tieba.models.ForumTab
+import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.models.ThreadType
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
-import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
@@ -101,7 +101,7 @@ class ForumFragment : BaseFragment() {
             binding.forumAvatar.setOnClickListener { _ ->
                 if (it.avatarUrl != null) {
                     photoViewModel.currentIndex.value = 0
-                    photoViewModel.photos = listOf(Photo(it.avatarUrl, 0))
+                    photoViewModel.photos = listOf(Photo(it.avatarUrl, 0, "rotieba"))
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
                 }
             }

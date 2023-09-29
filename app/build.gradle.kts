@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.ksp)
     alias(libs.plugins.navigation.safeargs)
+    id("kotlin-parcelize")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")

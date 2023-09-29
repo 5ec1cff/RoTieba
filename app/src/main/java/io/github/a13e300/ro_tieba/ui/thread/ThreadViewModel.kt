@@ -16,11 +16,12 @@ import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Forum
+import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.TiebaThread
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toUser
-import io.github.a13e300.ro_tieba.ui.photo.Photo
+import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.utils.toPostContent
 import kotlinx.coroutines.flow.map
 import java.util.Date
@@ -40,6 +41,10 @@ class ThreadViewModel : ViewModel() {
     var totalPage = 0
     var currentUid: String? = null
     lateinit var threadConfig: ThreadConfig
+
+    // TODO: use SavedStateHandle
+    val initialized: Boolean
+        get() = this::threadConfig.isInitialized
     val threadInfo = MutableLiveData<TiebaThread>()
     val photos = TreeMap<Pair<Int, Int>, Photo> { p0, p1 ->
         if (p0.first < p1.first) -1
@@ -144,8 +149,7 @@ class ThreadViewModel : ViewModel() {
                 posts.forEach { p ->
                     p.content.forEach { c ->
                         if (c is Content.ImageContent) {
-                            photos[p.floor to c.order] =
-                                Photo(c.src, c.order, p)
+                            photos[p.floor to c.order] = c.toPhoto(p)
                         }
                     }
                 }

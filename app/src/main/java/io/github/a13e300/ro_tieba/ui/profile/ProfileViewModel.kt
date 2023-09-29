@@ -28,6 +28,7 @@ import kotlinx.coroutines.withContext
 import java.util.Date
 
 class ProfileViewModel : ViewModel() {
+    var initialized: Boolean = false
     var uid = 0L
     var portrait: String? = null
     var followedForumsHidden = false

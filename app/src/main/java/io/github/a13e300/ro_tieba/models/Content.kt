@@ -1,6 +1,10 @@
 package io.github.a13e300.ro_tieba.models
 
-sealed class Content {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+sealed class Content : Parcelable {
     data class TextContent(val text: String) : Content()
     data class ImageContent(
         val previewSrc: String,

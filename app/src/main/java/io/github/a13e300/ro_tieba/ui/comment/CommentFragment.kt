@@ -40,8 +40,8 @@ import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
-import io.github.a13e300.ro_tieba.ui.photo.Photo
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
+import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
@@ -269,7 +269,7 @@ class CommentFragment : BaseFragment() {
                                     setOnClickListener {
                                         val photos =
                                             post.content.filterIsInstance<Content.ImageContent>()
-                                                .map { c -> Photo(c.src, c.order, post) }
+                                                .map { c -> c.toPhoto(post) }
                                         val idx = content.order
                                         photoViewModel.photos = photos
                                         photoViewModel.currentIndex.value = idx
@@ -280,9 +280,7 @@ class CommentFragment : BaseFragment() {
                                     }
                                     setOnLongClickListener {
                                         it.setSelectedData(
-                                            Photo(
-                                                content.src, content.order, post
-                                            )
+                                            content.toPhoto(post)
                                         )
                                         false
                                     }
