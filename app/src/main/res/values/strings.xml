@@ -3,10 +3,6 @@
     <string name="title_home">首页</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_settings">设置</string>
-    <string name="bduss_title">BDUSS</string>
-    <string name="bduss_summary">for login</string>
-    <string name="proxy_title">Proxy</string>
-    <string name="proxy_summary">HTTP Proxy</string>
     <string name="account_label">账户</string>
     <string name="anonymous">匿名</string>
     <string name="anonymous_tips">点击右上角新增账号</string>
@@ -61,4 +57,6 @@
     <string name="user_replies_hidden">该用户已隐藏回帖</string>
     <string name="user_replies_empty">该用户还没有回帖</string>
     <string name="show_origin_title">查看原帖</string>
+    <string name="auto_link_title">自动转换文本链接</string>
+    <string name="auto_bv_title">自动识别 av / BV 号</string>
 </resources>

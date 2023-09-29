@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
@@ -232,7 +233,13 @@ class CommentFragment : BaseFragment() {
                 when (content) {
                     is Content.TextContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
-                        lastString!!.appendTextAutoLink(content.text)
+                        val ls = lastString!!
+                        val settings = App.settings
+                        ls.appendTextAutoLink(
+                            content.text,
+                            !settings.disableAutoLink,
+                            !settings.disableAutoBv
+                        )
                     }
 
                     is Content.LinkContent -> {

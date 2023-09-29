@@ -22,6 +22,7 @@ const val BV_CHARS = "fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF
 const val BILIBILI_VIDEO_PATTERN = "av\\d+|BV[$BV_CHARS]{10}"
 
 val URL_REGEX = Regex("(?<url>$URL_PATTERN)")
+val VIDEO_REGEX = Regex("(?<video>$BILIBILI_VIDEO_PATTERN)")
 val URL_OR_VIDEO_REGEX = Regex("(?<url>$URL_PATTERN)|(?<video>$BILIBILI_VIDEO_PATTERN)")
 
 sealed class TextFragment {
@@ -31,21 +32,24 @@ sealed class TextFragment {
 }
 
 inline fun CharSequence.mapText(
+    parseLink: Boolean = true,
     parseVideo: Boolean = false,
     callback: (f: TextFragment, start: Int, end: Int) -> Unit
 ) {
-    val regex = if (parseVideo) URL_OR_VIDEO_REGEX else URL_REGEX
+    val regex =
+        if (parseVideo && parseLink) URL_OR_VIDEO_REGEX else if (!parseLink) VIDEO_REGEX else URL_REGEX
     var start = 0
     var matched = regex.find(this, start)
     while (matched != null) {
         val s = matched.range.first
         if (s > start)
             callback(TextFragment.Text(substring(start, s)), start, s)
-        val url = matched.groups["url"]
+        val url = if (parseLink) matched.groups["url"] else null
         val video = if (parseVideo) matched.groups["video"] else null
         if (url != null) {
             callback(TextFragment.Url(url.value), s, matched.range.last + 1)
-        } else if (video != null) {
+        }
+        if (video != null) {
             callback(TextFragment.BilibiliVideo(video.value), s, matched.range.last + 1)
         }
         start = matched.range.last + 1
@@ -54,8 +58,13 @@ inline fun CharSequence.mapText(
     if (start < length) callback(TextFragment.Text(substring(start, length)), start, length)
 }
 
-fun SpannableStringBuilder.appendTextAutoLink(text: String) {
-    text.mapText(true) { f, _, _ ->
+fun SpannableStringBuilder.appendTextAutoLink(
+    text: String,
+    linkEnabled: Boolean,
+    bvEnabled: Boolean
+): SpannableStringBuilder {
+    if (!linkEnabled && !bvEnabled) return append(text)
+    text.mapText(linkEnabled, bvEnabled) { f, _, _ ->
         when (f) {
             is TextFragment.Text -> {
                 append(f.text)
@@ -79,4 +88,5 @@ fun SpannableStringBuilder.appendTextAutoLink(text: String) {
             }
         }
     }
+    return this
 }

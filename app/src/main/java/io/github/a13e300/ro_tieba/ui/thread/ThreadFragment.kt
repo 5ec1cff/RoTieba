@@ -428,8 +428,12 @@ class ThreadFragment : BaseFragment() {
                     is Content.TextContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         val ls = lastString!!
-                        // TODO: add an option
-                        ls.appendTextAutoLink(content.text)
+                        val settings = App.settings
+                        ls.appendTextAutoLink(
+                            content.text,
+                            !settings.disableAutoLink,
+                            !settings.disableAutoBv
+                        )
                     }
 
                     is Content.LinkContent -> {
