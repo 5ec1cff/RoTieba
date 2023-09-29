@@ -301,7 +301,7 @@ class ForumFragment : BaseFragment() {
                     ),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                append(thread.replyNum.toString())
+                append(thread.replyNum.toSimpleString())
                 append(" ")
                 append(
                     "观看数 ",
@@ -313,7 +313,7 @@ class ForumFragment : BaseFragment() {
                     ),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                append(thread.viewNum.toString())
+                append(thread.viewNum.toSimpleString())
                 append(" ")
                 append(
                     "点赞 ",
@@ -325,7 +325,7 @@ class ForumFragment : BaseFragment() {
                     ),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                append(thread.agreeNum.toString())
+                append(thread.agreeNum.toSimpleString())
                 append(" ")
                 append(
                     "点踩 ",
@@ -337,7 +337,7 @@ class ForumFragment : BaseFragment() {
                     ),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                append(thread.disagreeNum.toString())
+                append(thread.disagreeNum.toSimpleString())
             }
             holder.binding.threadAvatar.displayImage(thread.author.avatarUrl)
             holder.binding.cardRoot.setOnClickListener {

@@ -576,7 +576,7 @@ class ThreadFragment : BaseFragment() {
                     ),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                append(post.agreeNum.toString())
+                append(post.agreeNum.toSimpleString())
                 append("·")
                 append(
                     "点踩 ",
@@ -588,7 +588,7 @@ class ThreadFragment : BaseFragment() {
                     ),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                append(post.disagreeNum.toString())
+                append(post.disagreeNum.toSimpleString())
             }
             val hasComment = post.commentCount != 0
             holder.binding.commentsBox.isVisible = hasComment

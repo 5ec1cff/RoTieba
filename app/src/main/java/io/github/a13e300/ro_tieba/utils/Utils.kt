@@ -297,3 +297,17 @@ fun <T> View.setSelectedData(data: T) {
     while (parent != null && parent !is ItemView) parent = parent.parent
     (parent as? ItemView)?.setSelectedData(data)
 }
+
+fun Int.toSimpleString() =
+    when (this) {
+        in 0 until 10000 -> toString()
+        in 10000 until 100000 -> "%.1fW".format(this.toFloat() / 10000)
+        else -> "10W+"
+    }
+
+fun Long.toSimpleString() =
+    when (this) {
+        in 0L until 10000L -> toString()
+        in 10000L until 100000L -> "%.1fW".format(this.toFloat() / 10000)
+        else -> "10W+"
+    }
