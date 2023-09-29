@@ -163,8 +163,8 @@ class ThreadFragment : BaseFragment() {
                     R.id.see_lz -> {
                         val v = !menuItem.isChecked
                         menuItem.setChecked(v)
-                        // clear pid to prevent from bugs
-                        viewModel.threadConfig = viewModel.threadConfig.copy(seeLz = v, pid = 0L)
+                        viewModel.threadConfig =
+                            viewModel.threadConfig.copy(seeLz = v, pid = 0L, page = 0)
                         postAdapter.refresh()
                         true
                     }
