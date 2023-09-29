@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.util.TypedValue
 import android.view.ContextMenu
 import android.view.View
 import android.widget.Toast
@@ -314,3 +315,9 @@ fun Long.toSimpleString() =
         in 10000L until 100000L -> "%.1fW".format(this.toFloat() / 10000)
         else -> "10W+"
     }
+
+fun Int.dp2px(context: Context) = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    this.toFloat(),
+    context.resources.displayMetrics
+).toInt()

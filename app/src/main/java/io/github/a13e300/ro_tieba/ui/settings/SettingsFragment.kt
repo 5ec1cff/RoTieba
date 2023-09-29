@@ -10,6 +10,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSettingsBinding
 import kotlinx.coroutines.launch
@@ -31,7 +32,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preference, rootKey)
         findPreference<Preference>("user")?.setOnPreferenceClickListener {
             requireActivity().findNavController(R.id.nav_host_fragment_activity_main)
-                .navigate(R.id.navigation_accounts)
+                .navigate(MobileNavigationDirections.manageAccounts())
             true
         }
     }

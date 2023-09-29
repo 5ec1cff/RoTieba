@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <Preference
         android:key="user"
-        android:title="user" />
+        android:title="@string/account_manage_title" />
     <SwitchPreference
         android:key="auto_link"
         android:title="@string/auto_link_title"

@@ -7,6 +7,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.MenuProvider
@@ -23,6 +25,9 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.databinding.FragmentAccountListBinding
 import io.github.a13e300.ro_tieba.db.Account
+import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
+import io.github.a13e300.ro_tieba.utils.dp2px
+import io.github.a13e300.ro_tieba.view.PreImeBackInterceptorView
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -54,20 +59,34 @@ class AccountFragment : Fragment(), AccountRecyclerViewAdapter.OnItemClickedList
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 if (menuItem.itemId == R.id.add_account) {
                     val context = requireActivity()
+                    val dialogContainer = PreImeBackInterceptorView(context)
+                    val margin = 16.dp2px(context)
                     val textView = AppCompatEditText(context).apply {
-                        layoutParams = ViewGroup.LayoutParams(
+                        layoutParams = ViewGroup.MarginLayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
+                        ).apply { setMargins(margin, margin, margin, margin) }
                         maxLines = 1
                     }
-                    MaterialAlertDialogBuilder(context)
+                    dialogContainer.addView(textView)
+                    val dialog = MaterialAlertDialogBuilder(context)
                         .setTitle("BDUSS")
-                        .setView(textView)
+                        .setView(dialogContainer)
                         .setPositiveButton("Ok") { _, _ ->
                             textView.text?.also { login(it.toString()) }
-                        }
-                        .show()
+                        }.create()
+                    textView.requestFocus()
+                    dialog.window?.apply {
+                        clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+                        setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                    }
+                    dialogContainer.onBackPressedListener = OnPreImeBackPressedListener {
+                        it.context.getSystemService(InputMethodManager::class.java)
+                            .hideSoftInputFromWindow(it.windowToken, 0)
+                        dialog.hide()
+                        true
+                    }
+                    dialog.show()
                     return true
                 }
                 return false

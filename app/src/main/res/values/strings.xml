@@ -59,4 +59,5 @@
     <string name="show_origin_title">查看原帖</string>
     <string name="auto_link_title">自动转换文本链接</string>
     <string name="auto_bv_title">自动识别 av / BV 号</string>
+    <string name="account_manage_title">账户管理</string>
 </resources>
