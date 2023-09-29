@@ -10,6 +10,7 @@ import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.map
 import io.github.a13e300.ro_tieba.App
+import io.github.a13e300.ro_tieba.DEFAULT_FORUM_AVATAR
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.protobuf.FrsPageSortType
@@ -60,7 +61,7 @@ class ForumViewModel : ViewModel() {
                 forumInfo.value = Forum(
                     response.forum.name,
                     response.forum.id,
-                    response.forum.avatar,
+                    response.forum.avatar.ifEmpty { DEFAULT_FORUM_AVATAR },
                     response.forum.slogan
                 )
                 val newTabs = mutableListOf<ForumTab>(ForumTab.LatestTab)
