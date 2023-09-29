@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.text.style.ReplacementSpan
+import androidx.core.graphics.drawable.DrawableCompat
 import kotlin.math.roundToInt
 
 class IconSpan(private val mDrawable: Drawable) : ReplacementSpan() {
@@ -46,6 +47,7 @@ class IconSpan(private val mDrawable: Drawable) : ReplacementSpan() {
         canvas.save()
         canvas.translate(x, center - size / 2)
         canvas.scale(scaleX, scaleY)
+        DrawableCompat.setTint(mDrawable, paint.color)
         mDrawable.draw(canvas)
         canvas.restore()
     }
