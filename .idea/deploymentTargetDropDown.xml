@@ -5,6 +5,9 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="forum">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

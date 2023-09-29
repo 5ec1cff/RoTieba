@@ -141,7 +141,6 @@ class PhotoFragment : BaseFragment() {
         v: View,
         menuInfo: ContextMenu.ContextMenuInfo?
     ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
         MenuInflater(requireContext()).inflate(R.menu.post_item_menu, menu)
         menu.forceShowIcon()
         menu.setGroupVisible(R.id.group_post, false)
