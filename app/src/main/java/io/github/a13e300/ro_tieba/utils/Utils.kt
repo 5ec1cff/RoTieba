@@ -152,7 +152,7 @@ fun SpannableStringBuilder.appendSimpleContent(
 ): SpannableStringBuilder {
     contents.forEach { content ->
         when (content) {
-            is Content.TextContent -> append(content.text)
+            is Content.TextContent -> appendTextAutoLink(content.text)
             is Content.LinkContent -> {
                 if (useUrlSpan) {
                     append(

@@ -44,6 +44,7 @@ import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
+import io.github.a13e300.ro_tieba.utils.appendTextAutoLink
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
@@ -231,7 +232,7 @@ class CommentFragment : BaseFragment() {
                 when (content) {
                     is Content.TextContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
-                        lastString!!.append(content.text)
+                        lastString!!.appendTextAutoLink(content.text)
                     }
 
                     is Content.LinkContent -> {
