@@ -156,7 +156,14 @@ fun SpannableStringBuilder.appendSimpleContent(
         when (content) {
             is Content.TextContent -> {
                 val settings = App.settings
-                appendTextAutoLink(content.text, !settings.disableAutoLink, !settings.disableAutoBv)
+                if (useUrlSpan)
+                    appendTextAutoLink(
+                        content.text,
+                        !settings.disableAutoLink,
+                        !settings.disableAutoBv
+                    )
+                else
+                    append(content.text)
             }
             is Content.LinkContent -> {
                 if (useUrlSpan) {
