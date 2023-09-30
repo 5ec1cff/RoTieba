@@ -2,6 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <Preference
+        android:key="version"
+        android:title="@string/version" />
+    <Preference
         android:key="user"
         android:title="@string/account_manage_title" />
     <SwitchPreference

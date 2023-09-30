@@ -38,6 +38,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preference, rootKey)
+        findPreference<Preference>("version")?.let {
+            it.summary = BuildConfig.VERSION_NAME
+            it.setOnPreferenceClickListener {
+                copyText(BuildConfig.VERSION_NAME)
+                true
+            }
+        }
         findPreference<Preference>("user")?.setOnPreferenceClickListener {
             requireActivity().findNavController(R.id.nav_host_fragment_activity_main)
                 .navigate(MobileNavigationDirections.manageAccounts())

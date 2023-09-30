@@ -19,6 +19,9 @@ val keystoreProperties = if (keystorePropertiesFile.exists() && keystoreProperti
     }
 } else null
 
+var verCode: Int by rootProject.extra
+var verName: String by rootProject.extra
+
 android {
     namespace = "io.github.a13e300.ro_tieba"
     compileSdk = 34
@@ -38,8 +41,8 @@ android {
         applicationId = "io.github.a13e300.ro_tieba"
         minSdk = 27
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = verCode
+        versionName = verName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
