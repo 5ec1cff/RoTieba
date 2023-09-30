@@ -16,8 +16,8 @@ import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.datastore.Settings
 import io.github.a13e300.ro_tieba.db.AppDataBase
+import io.github.a13e300.ro_tieba.history.HistoryManager
 import io.github.a13e300.ro_tieba.utils.ignoreAllSSLErrorsIfDebug
-import io.github.a13e300.ro_tieba.utils.mapText
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -33,15 +33,8 @@ class App : Application(), SketchFactory {
 
     lateinit var db: AppDataBase
     lateinit var client: TiebaClient
-    var forTest = object {
-        fun testUrl(s: String, b: Boolean) =
-            mutableListOf<String>().apply {
-                s.mapText(b) { f, s, e ->
-                    add("($s, $e): $f")
-                }
-            }
-    }
     val accountManager = AccountManager()
+    val historyManager = HistoryManager()
 
     val settingsDataStore: DataStore<Settings> by dataStore(
         fileName = "settings.pb",

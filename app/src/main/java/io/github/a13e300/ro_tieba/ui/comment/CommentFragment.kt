@@ -52,7 +52,6 @@ import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CommentFragment : BaseFragment() {
@@ -163,8 +162,8 @@ class CommentFragment : BaseFragment() {
         val floor = viewModel.floor.value ?: return
         val user = viewModel.post?.user ?: return
         val forum = viewModel.forum ?: return
-        lifecycleScope.launch(Dispatchers.IO) {
-            App.instance.db.historyDao().addHistory(
+        lifecycleScope.launch {
+            App.instance.historyManager.updateHistory(
                 HistoryEntry(
                     type = EntryType.THREAD,
                     id = viewModel.tid.toString(),

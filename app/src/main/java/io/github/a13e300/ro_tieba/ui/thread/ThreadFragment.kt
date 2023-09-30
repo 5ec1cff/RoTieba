@@ -75,7 +75,6 @@ import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -282,8 +281,8 @@ class ThreadFragment : BaseFragment() {
     private fun updateHistory() {
         val info = viewModel.threadInfo.value ?: return
         val p = findCurrentPost()
-        lifecycleScope.launch(Dispatchers.IO) {
-            App.instance.db.historyDao().addHistory(
+        lifecycleScope.launch {
+            App.instance.historyManager.updateHistory(
                 HistoryEntry(
                     type = EntryType.THREAD,
                     id = info.tid.toString(),

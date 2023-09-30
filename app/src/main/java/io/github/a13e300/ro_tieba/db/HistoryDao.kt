@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 enum class EntryType {
     FORUM,
@@ -39,4 +40,10 @@ interface HistoryDao {
 
     @Query("SELECT * FROM HistoryEntry ORDER BY time DESC")
     fun getHistories(): PagingSource<Int, HistoryEntry>
+
+    @Query("DELETE FROM HistoryEntry WHERE (id, type) IN (SELECT id, type FROM HistoryEntry ORDER BY time DESC LIMIT 1 OFFSET :limit)")
+    suspend fun purge(limit: Int)
+
+    @Query("SELECT COUNT(*) FROM HistoryEntry")
+    fun count(): Flow<Int>
 }

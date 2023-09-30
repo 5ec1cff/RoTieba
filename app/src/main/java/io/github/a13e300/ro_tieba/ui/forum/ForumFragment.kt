@@ -49,7 +49,6 @@ import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -208,8 +207,8 @@ class ForumFragment : BaseFragment() {
 
     private fun updateHistory() {
         val forumInfo = viewModel.forumInfo.value ?: return
-        lifecycleScope.launch(Dispatchers.IO) {
-            App.instance.db.historyDao().addHistory(
+        lifecycleScope.launch {
+            App.instance.historyManager.updateHistory(
                 HistoryEntry(
                     type = EntryType.FORUM,
                     id = forumInfo.id.toString(),

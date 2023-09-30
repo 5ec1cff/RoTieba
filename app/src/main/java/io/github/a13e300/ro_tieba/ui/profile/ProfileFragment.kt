@@ -32,7 +32,6 @@ import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.imageSource
 import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.openUserAtOtherClient
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -163,8 +162,8 @@ class ProfileFragment : BaseFragment() {
 
     private fun updateHistory() {
         val user = viewModel.user.value?.getOrNull() ?: return
-        lifecycleScope.launch(Dispatchers.IO) {
-            App.instance.db.historyDao().addHistory(
+        lifecycleScope.launch {
+            App.instance.historyManager.updateHistory(
                 HistoryEntry(
                     type = EntryType.USER,
                     id = user.uid.toString(),

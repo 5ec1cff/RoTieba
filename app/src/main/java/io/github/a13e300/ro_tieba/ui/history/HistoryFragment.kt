@@ -25,6 +25,7 @@ import io.github.a13e300.ro_tieba.databinding.FragmentHistoryPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHistoryUserItemBinding
 import io.github.a13e300.ro_tieba.db.EntryType
 import io.github.a13e300.ro_tieba.db.HistoryEntry
+import io.github.a13e300.ro_tieba.history.HistoryManager
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.toSimpleString
@@ -64,6 +65,11 @@ class HistoryFragment : BaseFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect {
                 adapter.submitData(it)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            App.instance.db.historyDao().count().collect {
+                binding.toolbar.subtitle = "$it / ${HistoryManager.MAX_HISTORY_ENTRY_COUNT}"
             }
         }
         adapter.addLoadStateListener { state ->
