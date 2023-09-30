@@ -71,4 +71,5 @@
         <font face="monospace">pm set-app-links-user-selection --package %s --user 0 true tieba.baidu.com</font>]]>
     </string>
     <string name="version">当前版本</string>
+    <string name="no_history">还没有历史记录</string>
 </resources>

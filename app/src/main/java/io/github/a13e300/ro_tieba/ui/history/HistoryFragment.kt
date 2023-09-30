@@ -4,13 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.panpf.sketch.displayImage
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.DEFAULT_FORUM_AVATAR
@@ -41,9 +44,15 @@ class HistoryFragment : BaseFragment() {
         binding.toolbar.setOnMenuItemClickListener {
             return@setOnMenuItemClickListener when (it.itemId) {
                 R.id.remove_all -> {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        App.instance.db.historyDao().removeAll()
-                    }
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("确定删除所有历史记录？")
+                        .setPositiveButton("确定") { _, _ ->
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                App.instance.db.historyDao().removeAll()
+                            }
+                        }
+                        .setNegativeButton("取消", null)
+                        .show()
                     true
                 }
 
@@ -56,6 +65,12 @@ class HistoryFragment : BaseFragment() {
             viewModel.flow.collect {
                 adapter.submitData(it)
             }
+        }
+        adapter.addLoadStateListener { state ->
+            val empty =
+                state.append is LoadState.NotLoading && state.append.endOfPaginationReached && adapter.itemCount == 0
+            binding.resultTips.isVisible = empty
+            binding.toolbar.menu.findItem(R.id.remove_all).isVisible = !empty
         }
         return binding.root
     }

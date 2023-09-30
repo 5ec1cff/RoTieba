@@ -9,5 +9,6 @@
     <item
         android:id="@+id/history"
         android:title="@string/history"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_history"
+        app:showAsAction="ifRoom" />
 </menu>

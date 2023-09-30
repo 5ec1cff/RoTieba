@@ -30,4 +30,13 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:clipToPadding="false" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?textAppearanceBody1"
+        android:id="@+id/result_tips"
+        android:visibility="gone"
+        app:layout_anchor="@id/list"
+        app:layout_anchorGravity="center"
+        android:text="@string/no_history" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
