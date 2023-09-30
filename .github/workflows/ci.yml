@@ -31,7 +31,7 @@ jobs:
             echo storePassword='${{ secrets.KEY_STORE_PASSWORD }}' >> keystore.properties
             echo keyAlias='${{ secrets.ALIAS }}' >> keystore.properties
             echo keyPassword='${{ secrets.KEY_PASSWORD }}' >> keystore.properties
-            echo storeFile='key.jks' >> keystore.properties
+            echo storeFile=$PWD/'key.jks' >> keystore.properties
             echo '${{ secrets.KEY_STORE }}' | base64 --decode > key.jks
           fi
 
