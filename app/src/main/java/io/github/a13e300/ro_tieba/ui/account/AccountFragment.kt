@@ -121,7 +121,8 @@ class AccountFragment : Fragment(), AccountRecyclerViewAdapter.OnItemClickedList
     override fun onItemClicked(item: Account) {
         lifecycleScope.launch {
             App.instance.accountManager.switchAccount(item.uid)
-            Snackbar.make(requireView(), "switch to ${item.name}", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "切换到${item.name ?: "匿名"}", Snackbar.LENGTH_SHORT)
+                .show()
         }
     }
 

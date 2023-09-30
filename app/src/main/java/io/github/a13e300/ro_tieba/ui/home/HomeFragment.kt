@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +25,7 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
+import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBinding
 import io.github.a13e300.ro_tieba.models.UserForum
@@ -76,10 +78,14 @@ class HomeFragment : BaseFragment() {
             layoutManager = GridLayoutManager(context, 2)
             adapter = forumAdapter
         }
+        binding.loginButton.setOnClickListener {
+            findMainNavController().navigate(MobileNavigationDirections.manageAccounts())
+        }
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val currentUid = App.instance.accountManager.currentAccount.first().uid
                 viewModel.updateUid(currentUid)
+                binding.loginTipsScreen.isVisible = currentUid == AccountManager.ACCOUNT_ANONYMOUS
                 viewModel.flow.collect {
                     forumAdapter.submitData(it)
                 }
