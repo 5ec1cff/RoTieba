@@ -61,9 +61,13 @@ class ProfileReplyFragment : Fragment() {
         override fun onBindViewHolder(holder: ReplyViewHolder, position: Int) {
             val t = getItem(position) ?: return
             holder.binding.threadTitle.text = t.threadTitle
-            holder.binding.threadInfo.text = "${t.time.toSimpleString()} ${t.forumName}吧"
+            holder.binding.threadInfo.text = t.time.toSimpleString()
             holder.binding.threadContent.text =
                 SpannableStringBuilder().appendSimpleContent(t.content, requireContext())
+            holder.binding.threadForum.text = "${t.forumName}吧"
+            holder.binding.forumCard.setOnClickListener {
+                findNavController().navigate(MobileNavigationDirections.goToForum(t.forumName))
+            }
             holder.binding.root.setOnClickListener {
                 val pid = if (t.comment) {
                     t.quota?.pid ?: 0L

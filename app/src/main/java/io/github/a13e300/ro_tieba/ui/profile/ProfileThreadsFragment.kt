@@ -58,11 +58,15 @@ class ProfileThreadsFragment : Fragment() {
         override fun onBindViewHolder(holder: ThreadViewHolder, position: Int) {
             val t = getItem(position) ?: return
             holder.binding.threadTitle.text = t.title
-            holder.binding.threadInfo.text = "${t.time.toSimpleString()} ${t.forum?.name}吧"
+            holder.binding.threadInfo.text = t.time.toSimpleString()
             holder.binding.threadContent.text =
                 SpannableStringBuilder().appendSimpleContent(t.content, requireContext())
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(t.tid))
+            }
+            holder.binding.threadForum.text = "${t.forum!!.name}吧"
+            holder.binding.forumCard.setOnClickListener {
+                findNavController().navigate(MobileNavigationDirections.goToForum(t.forum.name))
             }
         }
 
