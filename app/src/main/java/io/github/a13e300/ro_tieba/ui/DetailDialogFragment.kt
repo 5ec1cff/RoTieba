@@ -18,6 +18,7 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.DialogDetailBinding
 import io.github.a13e300.ro_tieba.databinding.DialogDetailItemContentBinding
 import io.github.a13e300.ro_tieba.databinding.DialogDetailItemTitleBinding
+import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.SearchedPost
@@ -122,6 +123,35 @@ fun Comment.toDetail() = Pair(
         user.portrait,
         user.uid.toString(),
         time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) }
+    )
+)
+
+fun HistoryEntry.toDetail() = Pair(
+    arrayListOf(
+        "id",
+        "访问时间",
+        "类型",
+        "回复 id",
+        "楼层",
+        "吧名",
+        "吧头像",
+        "用户 id",
+        "用户头像",
+        "用户名",
+        "用户昵称"
+    ),
+    arrayListOf(
+        id,
+        time.let { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(it) },
+        type.name,
+        postId.toString(),
+        floor.toString(),
+        forumName,
+        forumAvatar,
+        userId.toString(),
+        userAvatar,
+        userName,
+        userNick
     )
 )
 

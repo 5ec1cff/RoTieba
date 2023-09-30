@@ -12,6 +12,7 @@ import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.models.Comment
+import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.Post
 import io.github.a13e300.ro_tieba.models.toUser
 import io.github.a13e300.ro_tieba.utils.toPostContent
@@ -26,12 +27,15 @@ class CommentViewModel : ViewModel() {
     var pid = 0L
     var tid = 0L
     var initialSPid = 0L
+    var historyAdded = false
 
     // -1 -> no request, 0 -> first
     var requestedScrollToSPid = 0L
     val commentCount = MutableLiveData<Int>()
     val floor = MutableLiveData<Int>()
-    private var post: Post? = null
+    var post: Post? = null
+    var title: String = ""
+    var forum: Forum? = null
     var threadAuthorUid: Long = 0L
 
     inner class CommentPagingSource(
@@ -71,9 +75,19 @@ class CommentViewModel : ViewModel() {
                 if (threadAuthorUid == 0L) {
                     threadAuthorUid = response.thread.author.id
                 }
-                floor.postValue(response.post.floor)
                 commentCount.postValue(response.page.totalCount)
-                if (pid == 0L) pid = response.post.id
+                if (pid == 0L) {
+                    pid = response.post.id
+                }
+                if (floor.value == null) {
+                    title = response.thread.title
+                    forum = Forum(
+                        id = response.forum.id,
+                        name = response.forum.name,
+                        avatarUrl = response.forum.avatar
+                    )
+                    floor.postValue(response.post.floor)
+                }
                 val comments = response.subpostListList.map { sp ->
                     CommentItem.Comment(
                         Comment(

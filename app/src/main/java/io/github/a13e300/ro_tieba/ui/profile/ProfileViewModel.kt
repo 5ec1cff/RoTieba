@@ -34,6 +34,7 @@ class ProfileViewModel : ViewModel() {
     var followedForumsHidden = false
     var postHidden = false
     val user = MutableLiveData<Result<UserProfile>>()
+    var historyAdded: Boolean = false
     private var forumSource: FollowForumSource? = null
     private var threadSource: ThreadPagingSource? = null
     suspend fun requestUser(uid: Long, portrait: String?) {

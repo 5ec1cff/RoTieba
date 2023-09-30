@@ -27,11 +27,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
+import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentForumBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
+import io.github.a13e300.ro_tieba.db.EntryType
+import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.ForumSortType
@@ -46,6 +49,7 @@ import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -104,6 +108,10 @@ class ForumFragment : BaseFragment() {
                     photoViewModel.photos = listOf(Photo(it.avatarUrl, 0, "rotieba"))
                     findNavController().navigate(MobileNavigationDirections.viewPhotos())
                 }
+            }
+            if (!viewModel.historyAdded) {
+                updateHistory()
+                viewModel.historyAdded = true
             }
         }
         val threadAdapter = ThreadAdapter(ForumThreadUiStateComparator)
@@ -196,6 +204,21 @@ class ForumFragment : BaseFragment() {
             }
         }
         return binding.root
+    }
+
+    private fun updateHistory() {
+        val forumInfo = viewModel.forumInfo.value ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            App.instance.db.historyDao().addHistory(
+                HistoryEntry(
+                    type = EntryType.FORUM,
+                    id = forumInfo.id.toString(),
+                    time = System.currentTimeMillis(),
+                    forumName = forumInfo.name,
+                    forumAvatar = forumInfo.avatarUrl!!
+                )
+            )
+        }
     }
 
 

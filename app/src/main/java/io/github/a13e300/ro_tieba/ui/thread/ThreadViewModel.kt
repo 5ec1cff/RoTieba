@@ -42,6 +42,8 @@ class ThreadViewModel : ViewModel() {
     var currentUid: String? = null
     lateinit var threadConfig: ThreadConfig
 
+    var historyAdded: Boolean = false
+
     // TODO: use SavedStateHandle
     val initialized: Boolean
         get() = this::threadConfig.isInitialized
@@ -111,7 +113,11 @@ class ThreadViewModel : ViewModel() {
                     time = Date(response.thread.createTime.toLong() * 1000), // TODO: remove this useless date
                     postId = response.thread.postId,
                     isGood = response.thread.isGood == 1,
-                    forum = Forum(response.forum.name, response.forum.id),
+                    forum = Forum(
+                        response.forum.name,
+                        response.forum.id,
+                        avatarUrl = response.forum.avatar
+                    ),
                     createTime = Date(response.thread.createTime.toLong() * 1000),
                     agreeNum = response.thread.agree.agreeNum,
                     disagreeNum = response.thread.agree.disagreeNum

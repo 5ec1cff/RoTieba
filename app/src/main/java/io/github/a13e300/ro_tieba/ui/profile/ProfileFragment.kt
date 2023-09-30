@@ -19,16 +19,20 @@ import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
+import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileBinding
+import io.github.a13e300.ro_tieba.db.EntryType
+import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.models.Photo
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.imageSource
 import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.openUserAtOtherClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -104,6 +108,10 @@ class ProfileFragment : BaseFragment() {
                 binding.userStat.text =
                     "粉丝 ${profile.fanNum} 关注 ${profile.followNum} 发帖 ${profile.threadNum}"
                 binding.userDesc.text = profile.desc
+                if (!viewModel.historyAdded) {
+                    updateHistory()
+                    viewModel.historyAdded = true
+                }
             }, { err ->
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.error_dialog_title)
@@ -151,6 +159,22 @@ class ProfileFragment : BaseFragment() {
             }
         }
         return binding.root
+    }
+
+    private fun updateHistory() {
+        val user = viewModel.user.value?.getOrNull() ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            App.instance.db.historyDao().addHistory(
+                HistoryEntry(
+                    type = EntryType.USER,
+                    id = user.uid.toString(),
+                    time = System.currentTimeMillis(),
+                    userName = user.name,
+                    userNick = user.nick,
+                    userAvatar = user.avatarUrl
+                )
+            )
+        }
     }
 
 }

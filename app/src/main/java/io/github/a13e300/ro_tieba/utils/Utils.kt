@@ -81,6 +81,7 @@ fun String.convertTiebaUrl(): String {
 fun Date.toSimpleString(): String {
     val diff = (System.currentTimeMillis() - time) / 1000
     if (diff >= 0) {
+        if (diff < 10) return "刚刚"
         if (diff < 60) return "${diff}秒前"
         else if (diff < 3600) return "${diff / 60}分钟前"
         else if (diff < 24 * 3600) return "${diff / 3600}小时前"

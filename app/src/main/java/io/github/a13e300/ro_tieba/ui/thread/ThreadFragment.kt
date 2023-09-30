@@ -55,6 +55,8 @@ import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
 import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.databinding.VideoViewBinding
+import io.github.a13e300.ro_tieba.db.EntryType
+import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
@@ -73,6 +75,7 @@ import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -139,6 +142,11 @@ class ThreadFragment : BaseFragment() {
         }
         viewModel.threadInfo.observe(viewLifecycleOwner) {
             binding.toolbar.title = it.forum?.name
+            if (!viewModel.historyAdded) {
+                Logger.d("initial update")
+                updateHistory()
+                viewModel.historyAdded = true
+            }
         }
         setupToolbar(binding.toolbar)
         binding.toolbar.setOnClickListener {
@@ -204,17 +212,7 @@ class ThreadFragment : BaseFragment() {
 
     private fun handleJumpPage() {
         val totalPage = viewModel.totalPage
-        val page = postLayoutManager.findFirstVisibleItemPosition().let {
-            if (it == RecyclerView.NO_POSITION) 0
-            else {
-                val items = postAdapter.snapshot().items
-                (items[it].let { a ->
-                    if (a is ThreadViewModel.PostModel.Header) {
-                        items.getOrNull(it + 1)?.let { b -> (b as? ThreadViewModel.PostModel.Post) }
-                    } else (a as? ThreadViewModel.PostModel.Post)
-                })?.post?.page ?: 0
-            }
-        }
+        val page = findCurrentPost()?.page ?: 0
         val title = if (page != 0) "第 $page / $totalPage 页" else "共 $totalPage 页"
         val b = DialogJumpPageBinding.inflate(layoutInflater)
         val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -266,6 +264,47 @@ class ThreadFragment : BaseFragment() {
             true
         }
         // context.getSystemService(InputMethodManager::class.java).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun findCurrentPost() = postLayoutManager.findFirstVisibleItemPosition().let {
+        if (it == RecyclerView.NO_POSITION) null
+        else {
+            postAdapter.snapshot().items.let { items ->
+                (items[it].let { a ->
+                    if (a is ThreadViewModel.PostModel.Header) {
+                        items.getOrNull(it + 1)?.let { b -> (b as? ThreadViewModel.PostModel.Post) }
+                    } else (a as? ThreadViewModel.PostModel.Post)
+                })?.post
+            }
+        }
+    }
+
+    private fun updateHistory() {
+        val info = viewModel.threadInfo.value ?: return
+        val p = findCurrentPost()
+        lifecycleScope.launch(Dispatchers.IO) {
+            App.instance.db.historyDao().addHistory(
+                HistoryEntry(
+                    type = EntryType.THREAD,
+                    id = info.tid.toString(),
+                    time = System.currentTimeMillis(),
+                    title = info.title,
+                    forumName = info.forum!!.name,
+                    forumAvatar = info.forum.avatarUrl!!,
+                    userId = info.author.uid,
+                    userName = info.author.name,
+                    userNick = info.author.nick,
+                    floor = p?.floor ?: 1,
+                    postId = p?.postId ?: info.postId,
+                    userAvatar = info.author.avatarUrl
+                )
+            )
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        updateHistory()
     }
 
     class MyItemDecoration(private val mMargin: Int) : ItemDecoration() {

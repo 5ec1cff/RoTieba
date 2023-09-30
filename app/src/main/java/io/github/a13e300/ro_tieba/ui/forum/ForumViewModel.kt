@@ -31,6 +31,7 @@ data class ForumThreadUiState(val thread: TiebaThread, var expanded: Boolean = t
 class ForumViewModel : ViewModel() {
     var forumInitialized = false
     val forumInfo = MutableLiveData<Forum>()
+    var historyAdded: Boolean = false
     lateinit var forumName: String
     val tabs = MutableLiveData<List<ForumTab>>(
         listOf(

@@ -60,4 +60,6 @@
     <string name="auto_link_title">自动转换文本链接</string>
     <string name="auto_bv_title">自动识别 av / BV 号</string>
     <string name="account_manage_title">账户管理</string>
+    <string name="remove_all_title">全部删除</string>
+    <string name="history">历史记录</string>
 </resources>

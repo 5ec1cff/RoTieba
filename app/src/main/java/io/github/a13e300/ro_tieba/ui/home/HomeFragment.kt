@@ -54,12 +54,21 @@ class HomeFragment : BaseFragment() {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                if (menuItem.itemId == R.id.search) {
-                    findMainNavController()
-                        .navigate(MobileNavigationDirections.homeSearch())
-                    return true
+                return when (menuItem.itemId) {
+                    R.id.search -> {
+                        findMainNavController()
+                            .navigate(MobileNavigationDirections.homeSearch())
+                        true
+                    }
+
+                    R.id.history -> {
+                        findMainNavController()
+                            .navigate(MobileNavigationDirections.showHistory())
+                        true
+                    }
+
+                    else -> false
                 }
-                return false
             }
         })
         val forumAdapter = ForumAdapter(UserForumComparator)

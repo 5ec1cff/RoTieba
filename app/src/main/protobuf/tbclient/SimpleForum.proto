@@ -4,4 +4,5 @@ option java_package = "tbclient";
 message SimpleForum {
   int64 id = 1;
   string name = 2;
+  string avatar = 4;
 }

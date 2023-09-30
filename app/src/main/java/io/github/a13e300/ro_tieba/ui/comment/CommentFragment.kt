@@ -32,6 +32,8 @@ import io.github.a13e300.ro_tieba.databinding.FragmentCommentBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentCommentItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
+import io.github.a13e300.ro_tieba.db.EntryType
+import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
@@ -50,6 +52,7 @@ import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CommentFragment : BaseFragment() {
@@ -91,6 +94,10 @@ class CommentFragment : BaseFragment() {
         }
         viewModel.floor.observe(viewLifecycleOwner) {
             binding.toolbar.title = "$it 楼的评论"
+            if (!viewModel.historyAdded) {
+                updateHistory()
+                viewModel.historyAdded = true
+            }
         }
         viewModel.commentCount.observe(viewLifecycleOwner) {
             binding.toolbar.subtitle = "共 $it 条"
@@ -150,6 +157,29 @@ class CommentFragment : BaseFragment() {
             }
         }
         return binding.root
+    }
+
+    private fun updateHistory() {
+        val floor = viewModel.floor.value ?: return
+        val user = viewModel.post?.user ?: return
+        val forum = viewModel.forum ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            App.instance.db.historyDao().addHistory(
+                HistoryEntry(
+                    type = EntryType.THREAD,
+                    id = viewModel.tid.toString(),
+                    time = System.currentTimeMillis(),
+                    postId = viewModel.pid,
+                    floor = floor,
+                    userName = user.name,
+                    userNick = user.nick,
+                    userAvatar = user.avatarUrl,
+                    forumName = forum.name,
+                    forumAvatar = forum.avatarUrl!!,
+                    title = viewModel.title
+                )
+            )
+        }
     }
 
     class PostViewHolder(val binding: FragmentThreadPostItemBinding) :

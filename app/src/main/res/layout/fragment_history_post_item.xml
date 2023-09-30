@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.RoTieba.FilledCardPrimary"
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_marginVertical="8dp"
+    android:layout_marginHorizontal="16dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:round="24dp"
+            android:id="@+id/thread_avatar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/thread_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="user"
+            android:maxLines="1"
+            app:layout_goneMarginStart="0dp"
+            android:layout_marginStart="8dp"
+            android:textAppearance="?attr/textAppearanceListItem"
+            app:layout_constraintStart_toEndOf="@id/thread_avatar"
+            app:layout_constraintTop_toTopOf="@id/thread_avatar"
+            app:layout_constraintBottom_toTopOf="@id/thread_info" />
+
+        <TextView
+            android:id="@+id/thread_info"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            tools:text="info"
+            android:maxLines="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_goneMarginStart="0dp"
+            app:layout_constraintStart_toEndOf="@id/thread_avatar"
+            app:layout_constraintTop_toBottomOf="@id/thread_user_name"
+            app:layout_constraintBottom_toBottomOf="@id/thread_avatar" />
+
+        <TextView
+            android:id="@+id/thread_title"
+            android:textAppearance="?attr/textAppearanceListItem"
+            tools:text="title"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/thread_info"
+            app:layout_constraintBottom_toTopOf="@id/forum_card" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/forum_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/thread_title"
+            app:layout_constraintStart_toStartOf="parent"
+            android:foreground="?selectableItemBackground"
+            style="@style/Widget.RoTieba.FilledCardSecondary">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+
+                <androidx.constraintlayout.utils.widget.ImageFilterView
+                    app:round="4dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:id="@+id/forum_avatar"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/thread_forum"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/thread_forum"
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"
+                    tools:text="forum"
+                    android:maxLines="1"
+                    app:layout_constraintStart_toEndOf="@id/forum_avatar"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
