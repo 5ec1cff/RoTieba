@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <Preference
         android:key="user"
         android:title="@string/account_manage_title" />
@@ -11,4 +12,8 @@
         android:key="auto_bv"
         android:title="@string/auto_bv_title"
         android:persistent="false" />
+    <Preference
+        android:key="configure_default_open"
+        android:title="@string/configure_default_open_title"
+        app:isPreferenceVisible="false" />
 </PreferenceScreen>

@@ -62,4 +62,12 @@
     <string name="account_manage_title">账户管理</string>
     <string name="remove_all_title">全部删除</string>
     <string name="history">历史记录</string>
+    <string name="configure_default_open_title">配置默认打开</string>
+    <string name="configure_default_open_detail"><![CDATA[
+        在设置中允许 RoTieba 打开百度贴吧的 http 链接。
+        <br/>
+        如果您的系统不支持设置（如 MIUI），您可以在 ADB 终端输入以下命令
+        <br/>
+        <font face="monospace">pm set-app-links-user-selection --package %s --user 0 true tieba.baidu.com</font>]]>
+    </string>
 </resources>
