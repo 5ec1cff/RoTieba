@@ -93,7 +93,7 @@ fun SearchedPost.toDetail() = Pair(
         id.tid.toString(),
         id.spid.toString(),
         user.uid.toString(),
-        forum,
+        forum.name,
         user.name,
         user.nick,
         time.let {

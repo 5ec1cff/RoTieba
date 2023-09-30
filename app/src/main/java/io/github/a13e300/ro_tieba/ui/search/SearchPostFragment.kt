@@ -190,9 +190,14 @@ class SearchPostFragment : Fragment() {
             holder.binding.threadUserName.text = item.user.showName
             holder.binding.threadTitle.text =
                 if (viewModel.searchAtForum) item.title.replaceEm(requireContext()) else item.title
-            if (!viewModel.searchAtForum)
-                holder.binding.threadForum.text = "${item.forum}吧"
-            holder.binding.threadForum.isGone = viewModel.searchAtForum
+            if (!viewModel.searchAtForum) {
+                holder.binding.threadForum.text = "${item.forum.name}吧"
+                holder.binding.forumAvatar.displayImage(item.forum.avatarUrl)
+                holder.binding.forumCard.setOnClickListener {
+                    findNavController().navigate(MobileNavigationDirections.goToForum(item.forum.name))
+                }
+            }
+            holder.binding.forumCard.isGone = viewModel.searchAtForum
             holder.binding.threadInfo.text = item.time.toSimpleString()
             val avatar = item.user.avatarUrl
             if (avatar.isNotEmpty())
@@ -218,9 +223,6 @@ class SearchPostFragment : Fragment() {
                         is PostId.Thread -> MobileNavigationDirections.goToThread(id.tid)
                     }
                 )
-            }
-            holder.binding.threadForum.setOnClickListener {
-                findNavController().navigate(MobileNavigationDirections.goToForum(item.forum))
             }
             holder.binding.threadInfo.setOnClickListener {
                 val (ks, vs) = item.toDetail()

@@ -7,6 +7,6 @@ data class SearchedPost(
     val id: PostId,
     val time: Date,
     val title: String,
-    val forum: String,
+    val forum: Forum,
     val content: String
 )

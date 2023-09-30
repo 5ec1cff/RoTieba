@@ -134,7 +134,7 @@ class SearchViewModel : ViewModel() {
                     },
                     time = Date(p.time.toLong() * 1000),
                     title = p.title,
-                    forum = p.forumName,
+                    forum = Forum(p.forumName, p.forumId, p.forumInfo.avatar),
                     content = p.content
                 )
             }
@@ -162,7 +162,7 @@ class SearchViewModel : ViewModel() {
                         } else PostId.Post(p.tid.toLong(), p.pid.toLong()),
                         time = Date(p.time.toLong() * 1000),
                         title = p.title,
-                        forum = p.forumName,
+                        forum = Forum(p.forumName, 0),
                         content = p.content
                     )
                 }

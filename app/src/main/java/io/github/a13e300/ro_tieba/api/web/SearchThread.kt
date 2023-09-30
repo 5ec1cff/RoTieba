@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba.api.web
 import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 import io.github.a13e300.ro_tieba.api.adapters.IntBooleanAdapter
+import io.github.a13e300.ro_tieba.api.adapters.IntStringAdapter
 
 data class SearchThread(
     @JsonAdapter(IntBooleanAdapter::class)
@@ -26,7 +27,8 @@ data class SearchThread(
         @SerializedName("share_num")
         val shareNum: String,
         @SerializedName("forum_id")
-        val forumId: String,
+        @JsonAdapter(IntStringAdapter::class)
+        val forumId: Long,
         @SerializedName("forum_name")
         val forumName: String,
         val user: UserInfoBean,
