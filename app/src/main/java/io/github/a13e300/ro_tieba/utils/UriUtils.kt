@@ -7,15 +7,16 @@ import io.github.a13e300.ro_tieba.misc.MyURLSpan
 const val HOST_CHARS = "a-zA-Z0-9_\\-"
 const val HOST_WORD_PATTERN = "[$HOST_CHARS]+"
 
-// prevent from decimals are recognized as url unexpectedly
-const val HOST_PATTERN = "(?:$HOST_WORD_PATTERN\\.)+[a-zA-Z]{2,}"
+const val HOST_PATTERN = "(?:$HOST_WORD_PATTERN\\.)+(com|cn|xyz|net|org|edu|tv|cc)"
 
-const val URL_PREFIX_PATTERN = "(?:https?://)?$HOST_PATTERN"
+const val URL_PREFIX_PATTERN = "https?://(?:$HOST_WORD_PATTERN\\.)*$HOST_WORD_PATTERN|$HOST_PATTERN"
 
-const val URL_PATH_CHARS = "!#\$&'*+\\(\\),-./:;=\\?@_~0-9A-Za-z"
+const val URL_PATH_CHARS = "!#\$&'*+\\(\\),-./:;%=\\?@_~0-9A-Za-z"
 const val URL_PATH_PATTERN = "/[$URL_PATH_CHARS]*"
 
-const val URL_PATTERN = "$URL_PREFIX_PATTERN(?:$URL_PATH_PATTERN)?"
+const val URL_PORT_PATTERN = ":\\d{0,5}"
+
+const val URL_PATTERN = "(?:$URL_PREFIX_PATTERN)(?:$URL_PORT_PATTERN)?(?:$URL_PATH_PATTERN)?"
 
 // https://www.zhihu.com/question/381784377/answer/1099438784
 const val BV_CHARS = "fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF"
