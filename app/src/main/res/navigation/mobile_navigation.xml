@@ -56,8 +56,16 @@
             android:name="pid"
             app:argType="long"
             android:defaultValue="0L" />
+        <argument
+            android:name="pn"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="see_lz"
+            app:argType="integer"
+            android:defaultValue="0" />
         <deepLink
-            app:uri="tieba.baidu.com/p/{tid}?pid={pid}"
+            app:uri="tieba.baidu.com/p/{tid}?pid={pid}&amp;pn={pn}&amp;see_lz={see_lz}"
             app:action="android.intent.action.VIEW" />
         <deepLink
             app:uri="com.baidu.tieba://unidispatch/pb?tid={tid}&amp;hightlight_anchor_pid={pid}"

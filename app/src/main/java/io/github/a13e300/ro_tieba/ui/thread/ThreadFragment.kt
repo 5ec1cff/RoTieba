@@ -95,7 +95,9 @@ class ThreadFragment : BaseFragment() {
     ): View {
         binding = FragmentThreadBinding.inflate(inflater, container, false)
         if (!viewModel.initialized) {
-            viewModel.threadConfig = ThreadConfig(args.tid, args.pid)
+            val pn = if (args.pn > 0 && args.pid == 0L) args.pn else 0
+            viewModel.threadConfig =
+                ThreadConfig(args.tid, args.pid, page = pn, seeLz = args.seeLz != 0)
         }
         postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->
@@ -157,7 +159,7 @@ class ThreadFragment : BaseFragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.refresh -> {
-                        viewModel.threadConfig = viewModel.threadConfig.copy(pid = 0L)
+                        viewModel.threadConfig = viewModel.threadConfig.copy(pid = 0L, page = 0)
                         postAdapter.refresh()
                         true
                     }
@@ -291,7 +293,7 @@ class ThreadFragment : BaseFragment() {
                     time = System.currentTimeMillis(),
                     title = info.title,
                     forumName = info.forum!!.name,
-                    forumAvatar = info.forum.avatarUrl!!,
+                    forumAvatar = info.forum.avatarUrl,
                     userId = info.author.uid,
                     userName = info.author.name,
                     userNick = info.author.nick,
