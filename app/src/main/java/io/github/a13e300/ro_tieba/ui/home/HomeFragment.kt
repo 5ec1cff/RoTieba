@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
@@ -92,6 +93,22 @@ class HomeFragment : BaseFragment() {
                     forumAdapter.submitData(it)
                 }
             }
+        }
+        forumAdapter.addLoadStateListener {
+            val state = it.refresh
+            when (state) {
+                is LoadState.Error -> {
+                    binding.tipsScreen.isVisible = true
+                    binding.errorTips.text = state.error.message
+                }
+
+                else -> {
+                    binding.tipsScreen.isVisible = false
+                }
+            }
+        }
+        binding.refreshButton.setOnClickListener {
+            forumAdapter.refresh()
         }
         return binding.root
     }

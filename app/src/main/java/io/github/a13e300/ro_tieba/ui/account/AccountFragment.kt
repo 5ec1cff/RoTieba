@@ -120,9 +120,15 @@ class AccountFragment : Fragment(), AccountRecyclerViewAdapter.OnItemClickedList
 
     override fun onItemClicked(item: Account) {
         lifecycleScope.launch {
-            App.instance.accountManager.switchAccount(item.uid)
-            Snackbar.make(requireView(), "切换到${item.name ?: "匿名"}", Snackbar.LENGTH_SHORT)
-                .show()
+            try {
+                App.instance.accountManager.switchAccount(item.uid)
+                Snackbar.make(requireView(), "切换到${item.name ?: "匿名"}", Snackbar.LENGTH_SHORT)
+                    .show()
+            } catch (t: Throwable) {
+                Logger.e("failed to switch to account", t)
+                Snackbar.make(requireView(), "无法切换账户，请检查网络", Snackbar.LENGTH_SHORT)
+                    .show()
+            }
         }
     }
 

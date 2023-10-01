@@ -52,4 +52,30 @@
             android:id="@+id/login_button"
             android:text="@string/login" />
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tips_screen"
+        android:visibility="gone"
+        app:layout_anchor="@id/bar_list"
+        app:layout_anchorGravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="16dp">
+
+        <TextView
+            style="?textAppearanceBody1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/error_tips" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/refresh_button"
+            style="@style/Widget.Material3.Button.TextButton.Icon"
+            android:text="@string/refresh_title"
+            app:icon="@drawable/ic_refresh" />
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

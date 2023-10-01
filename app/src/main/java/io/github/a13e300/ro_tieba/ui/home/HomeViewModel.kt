@@ -27,15 +27,19 @@ class HomeViewModel : ViewModel() {
             if (uid == AccountManager.ACCOUNT_ANONYMOUS) {
                 return LoadResult.Page(data = emptyList(), prevKey = null, nextKey = null)
             }
-            val response = client.jsonAPI.getFollowForums(uid, page, 50)
-            val result = mutableListOf<UserForum>()
-            response.forumList?.nonGconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
-            response.forumList?.gconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
-            return LoadResult.Page(
-                data = result,
-                prevKey = null,
-                nextKey = if (response.hasMore) page + 1 else null
-            )
+            return try {
+                val response = client.jsonAPI.getFollowForums(uid, page, 50)
+                val result = mutableListOf<UserForum>()
+                response.forumList?.nonGconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
+                response.forumList?.gconForum?.also { list -> result.addAll(list.map { it.toUserForum() }) }
+                LoadResult.Page(
+                    data = result,
+                    prevKey = null,
+                    nextKey = if (response.hasMore) page + 1 else null
+                )
+            } catch (t: Throwable) {
+                LoadResult.Error(t)
+            }
         }
 
         override fun getRefreshKey(state: PagingState<Int, UserForum>): Int? {
