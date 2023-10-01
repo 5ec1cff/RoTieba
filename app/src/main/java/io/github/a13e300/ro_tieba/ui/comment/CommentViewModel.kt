@@ -101,7 +101,8 @@ class CommentViewModel : ViewModel() {
                         )
                     )
                 }
-                val realPage = response.page.currentPage
+                // if no comment, 0 is returned
+                val realPage = if (response.page.currentPage == 0) 1 else response.page.currentPage
                 return LoadResult.Page(
                     data = comments,
                     prevKey = realPage - 1,

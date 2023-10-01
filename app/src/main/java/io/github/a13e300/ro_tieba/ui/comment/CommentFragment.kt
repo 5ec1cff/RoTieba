@@ -174,7 +174,7 @@ class CommentFragment : BaseFragment() {
                     userNick = user.nick,
                     userAvatar = user.avatarUrl,
                     forumName = forum.name,
-                    forumAvatar = forum.avatarUrl!!,
+                    forumAvatar = forum.avatarUrl,
                     title = viewModel.title
                 )
             )
