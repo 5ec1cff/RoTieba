@@ -16,13 +16,14 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileFollowedForumsBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentProfileForumItemBinding
+import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.utils.appendLevelSpan
+import io.github.a13e300.ro_tieba.utils.displayImageInList
 import kotlinx.coroutines.launch
 
 class ProfileForumsFragment : Fragment() {
@@ -36,9 +37,12 @@ class ProfileForumsFragment : Fragment() {
     ): View {
         binding = FragmentProfileFollowedForumsBinding.inflate(inflater, container, false)
         val forumAdapter = FollowForumAdapter(UserForumComparator)
-        binding.forumList.adapter = forumAdapter
-        binding.forumList.layoutManager =
-            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        binding.forumList.apply {
+            adapter = forumAdapter
+            layoutManager =
+                StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+            addOnScrollListener(PauseLoadOnQuickScrollListener())
+        }
         forumAdapter.addLoadStateListener { state ->
             var showTips = false
             if (state.append is LoadState.NotLoading && state.append.endOfPaginationReached && forumAdapter.itemCount == 0) {
@@ -76,7 +80,7 @@ class ProfileForumsFragment : Fragment() {
             holder.binding.root.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
             }
-            holder.binding.forumAvatar.displayImage(bar.avatarUrl)
+            holder.binding.forumAvatar.displayImageInList(bar.avatarUrl)
             holder.binding.slogan.text = bar.desc
             ViewCompat.setTooltipText(holder.binding.root, bar.name)
         }

@@ -7,7 +7,7 @@ import io.github.a13e300.ro_tieba.api.web.SearchForum
 data class Forum(
     val name: String,
     val id: Long,
-    val avatarUrl: String? = null,
+    val avatarUrl: String = DEFAULT_FORUM_AVATAR,
     val desc: String? = null
 )
 
@@ -17,7 +17,7 @@ fun SearchForum.ForumInfo.toForum(): Forum =
 data class UserForum(
     val name: String,
     val id: Long,
-    val avatarUrl: String? = null,
+    val avatarUrl: String = DEFAULT_FORUM_AVATAR,
     val desc: String? = null,
     val levelId: Int
 )

@@ -39,7 +39,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
@@ -61,6 +60,7 @@ import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
+import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
 import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.models.Content
@@ -72,6 +72,7 @@ import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendTextAutoLink
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
+import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
@@ -138,6 +139,7 @@ class ThreadFragment : BaseFragment() {
                     resources.getDimension(R.dimen.thread_list_margin).toInt()
                 )
             )
+            addOnScrollListener(PauseLoadOnQuickScrollListener())
         }
         viewModel.threadInfo.observe(viewLifecycleOwner) {
             binding.toolbar.title = it.forum?.name
@@ -443,7 +445,7 @@ class ThreadFragment : BaseFragment() {
             val fontSize = context.resources.getDimensionPixelSize(R.dimen.content_text_size)
             contentView.removeAllViews()
             var lastString: SpannableStringBuilder? = null
-            holder.binding.avatar.displayImage(post.user.avatarUrl)
+            holder.binding.avatar.displayImageInList(post.user.avatarUrl)
             holder.binding.avatar.setOnClickListener {
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile(post.user.uidOrPortrait)
@@ -497,7 +499,7 @@ class ThreadFragment : BaseFragment() {
                         val imageView =
                             ImageContentBinding.inflate(layoutInflater, contentView, false)
                                 .root.apply {
-                                    displayImage(content.previewSrc) {
+                                    displayImageInList(content.previewSrc) {
                                         placeholder(
                                             PlaceHolderDrawable(
                                                 content.width,
@@ -551,7 +553,7 @@ class ThreadFragment : BaseFragment() {
                         (videoView.video.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio =
                             "W,${content.height}:${content.width}"
                         // videoView.video.start()
-                        videoView.previewImage.displayImage(content.previewSrc)
+                        videoView.previewImage.displayImageInList(content.previewSrc)
                         videoView.previewImage.setOnClickListener {
                             it.isGone = true
                             videoView.video.start()

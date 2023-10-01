@@ -11,6 +11,7 @@ import com.github.panpf.sketch.SketchFactory
 import com.github.panpf.sketch.decode.GifAnimatedDrawableDecoder
 import com.github.panpf.sketch.decode.GifMovieDrawableDecoder
 import com.github.panpf.sketch.http.OkHttpStack
+import com.github.panpf.sketch.request.PauseLoadWhenScrollingDrawableDecodeInterceptor
 import com.google.gson.Gson
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.api.TiebaClient
@@ -59,6 +60,7 @@ class App : Application(), SketchFactory {
                         else -> GifMovieDrawableDecoder.Factory()
                     }
                 )
+                addDrawableDecodeInterceptor(PauseLoadWhenScrollingDrawableDecodeInterceptor())
             }
             httpStack(OkHttpStack(OkHttpClient.Builder().ignoreAllSSLErrorsIfDebug().build()))
         }.build()

@@ -18,7 +18,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.panpf.sketch.displayImage
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
@@ -27,10 +26,12 @@ import io.github.a13e300.ro_tieba.api.web.SearchOrder
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostLoadStateBinding
+import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
 import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
+import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.replaceEm
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -55,6 +56,7 @@ class SearchPostFragment : Fragment() {
                 StateAdapter()
             )
             layoutManager = LinearLayoutManager(requireContext())
+            addOnScrollListener(PauseLoadOnQuickScrollListener())
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect { data ->
@@ -192,7 +194,7 @@ class SearchPostFragment : Fragment() {
                 if (viewModel.searchAtForum) item.title.replaceEm(requireContext()) else item.title
             if (!viewModel.searchAtForum) {
                 holder.binding.threadForum.text = "${item.forum.name}吧"
-                holder.binding.forumAvatar.displayImage(item.forum.avatarUrl)
+                holder.binding.forumAvatar.displayImageInList(item.forum.avatarUrl)
                 holder.binding.forumCard.setOnClickListener {
                     findNavController().navigate(MobileNavigationDirections.goToForum(item.forum.name))
                 }
@@ -201,7 +203,7 @@ class SearchPostFragment : Fragment() {
             holder.binding.threadInfo.text = item.time.toSimpleString()
             val avatar = item.user.avatarUrl
             if (avatar.isNotEmpty())
-                holder.binding.threadAvatar.displayImage(avatar)
+                holder.binding.threadAvatar.displayImageInList(avatar)
             holder.binding.threadAvatar.isGone = avatar.isEmpty()
             val uid = item.user.uid
             holder.binding.threadAvatar.setOnClickListener(if (uid == 0L) null else View.OnClickListener {

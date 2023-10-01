@@ -36,6 +36,7 @@ import io.github.a13e300.ro_tieba.databinding.FragmentForumThreadItemBinding
 import io.github.a13e300.ro_tieba.db.EntryType
 import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.misc.IconSpan
+import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
 import io.github.a13e300.ro_tieba.misc.RoundSpan
 import io.github.a13e300.ro_tieba.models.ForumSortType
 import io.github.a13e300.ro_tieba.models.ForumTab
@@ -46,6 +47,7 @@ import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
+import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
@@ -143,6 +145,7 @@ class ForumFragment : BaseFragment() {
         binding.threadList.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = threadAdapter
+            addOnScrollListener(PauseLoadOnQuickScrollListener())
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.flow.collect {
@@ -361,7 +364,7 @@ class ForumFragment : BaseFragment() {
                 )
                 append(thread.disagreeNum.toSimpleString())
             }
-            holder.binding.threadAvatar.displayImage(thread.author.avatarUrl)
+            holder.binding.threadAvatar.displayImageInList(thread.author.avatarUrl)
             holder.binding.cardRoot.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.goToThread(thread.tid))
             }
@@ -371,7 +374,7 @@ class ForumFragment : BaseFragment() {
             val image3 = images.getOrNull(2)
             if (image1 != null) {
                 holder.binding.previewImage1.visibility = View.VISIBLE
-                holder.binding.previewImage1.displayImage(image1.previewSrc)
+                holder.binding.previewImage1.displayImageInList(image1.previewSrc)
                 holder.binding.previewImage1.setOnClickListener {
                     photoViewModel.currentIndex.value = 0
                     photoViewModel.photos = images.map {
@@ -390,7 +393,7 @@ class ForumFragment : BaseFragment() {
             }
             if (image2 != null) {
                 holder.binding.previewImage2.visibility = View.VISIBLE
-                holder.binding.previewImage2.displayImage(image2.previewSrc)
+                holder.binding.previewImage2.displayImageInList(image2.previewSrc)
                 holder.binding.previewImage2.setOnClickListener {
                     photoViewModel.currentIndex.value = 1
                     photoViewModel.photos = images.map {
@@ -409,7 +412,7 @@ class ForumFragment : BaseFragment() {
             }
             if (image3 != null) {
                 holder.binding.previewImage3.visibility = View.VISIBLE
-                holder.binding.previewImage3.displayImage(image3.previewSrc)
+                holder.binding.previewImage3.displayImageInList(image3.previewSrc)
                 holder.binding.previewImage3.setOnClickListener {
                     photoViewModel.currentIndex.value = 2
                     photoViewModel.photos = images.map {

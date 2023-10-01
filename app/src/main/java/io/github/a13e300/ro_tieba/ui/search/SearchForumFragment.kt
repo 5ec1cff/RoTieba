@@ -10,11 +10,12 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchResultBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchResultBinding
+import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
+import io.github.a13e300.ro_tieba.utils.displayImageInList
 
 class SearchForumFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels({ requireParentFragment() })
@@ -29,6 +30,7 @@ class SearchForumFragment : Fragment() {
         binding.resultList.apply {
             adapter = myAdapter
             layoutManager = LinearLayoutManager(requireContext())
+            addOnScrollListener(PauseLoadOnQuickScrollListener())
         }
         return binding.root
     }
@@ -95,7 +97,7 @@ class SearchForumFragment : Fragment() {
                 (viewModel.searchedForums.value as? SearchState.Result)?.data?.get(position)
                     ?: return
             holder.binding.barName.text = item.name
-            item.avatarUrl?.let { holder.binding.barAvatar.displayImage(it) }
+            item.avatarUrl?.let { holder.binding.barAvatar.displayImageInList(it) }
             holder.binding.barDesc.apply {
                 if (!item.desc.isNullOrEmpty()) {
                     text = item.desc

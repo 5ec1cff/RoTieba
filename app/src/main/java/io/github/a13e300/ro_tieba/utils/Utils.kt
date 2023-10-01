@@ -11,10 +11,14 @@ import android.text.SpannableStringBuilder
 import android.util.TypedValue
 import android.view.ContextMenu
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.github.panpf.sketch.displayImage
+import com.github.panpf.sketch.request.DisplayRequest
+import com.github.panpf.sketch.request.pauseLoadWhenScrolling
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
@@ -329,3 +333,11 @@ fun Int.dp2px(context: Context) = TypedValue.applyDimension(
     this.toFloat(),
     context.resources.displayMetrics
 ).toInt()
+
+fun ImageView.displayImageInList(
+    uri: String,
+    configBlock: (DisplayRequest.Builder.() -> Unit)? = null
+) = displayImage(uri) {
+    pauseLoadWhenScrolling(true)
+    configBlock?.invoke(this)
+}

@@ -20,7 +20,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
@@ -28,9 +27,11 @@ import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBinding
+import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.ui.profile.UserForumComparator
 import io.github.a13e300.ro_tieba.utils.appendLevelSpan
+import io.github.a13e300.ro_tieba.utils.displayImageInList
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -77,6 +78,7 @@ class HomeFragment : BaseFragment() {
         binding.barList.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = forumAdapter
+            addOnScrollListener(PauseLoadOnQuickScrollListener())
         }
         binding.loginButton.setOnClickListener {
             findMainNavController().navigate(MobileNavigationDirections.manageAccounts())
@@ -108,7 +110,7 @@ class HomeFragment : BaseFragment() {
             holder.binding.root.setOnClickListener {
                 findMainNavController().navigate(MobileNavigationDirections.goToForum(bar.name))
             }
-            holder.binding.forumAvatar.displayImage(bar.avatarUrl)
+            holder.binding.forumAvatar.displayImageInList(bar.avatarUrl)
             ViewCompat.setTooltipText(holder.binding.root, bar.name)
         }
 
