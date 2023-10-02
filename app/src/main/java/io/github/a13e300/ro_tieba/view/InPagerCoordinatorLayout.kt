@@ -12,6 +12,7 @@ class InPagerCoordinatorLayout : CoordinatorLayout {
 
     private var mStartX = 0f
     private var mStartY = 0f
+    private var mDisallow: Boolean? = null
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         when (ev.action) {
@@ -19,12 +20,19 @@ class InPagerCoordinatorLayout : CoordinatorLayout {
                 mStartX = ev.x
                 mStartY = ev.y
                 parent.requestDisallowInterceptTouchEvent(true)
+                mDisallow = null
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val dx = abs(ev.x - mStartX)
-                val dy = abs(ev.y - mStartY)
-                parent.requestDisallowInterceptTouchEvent(dx < 2 * dy)
+                val disallow = mDisallow
+                if (disallow != null) {
+                    parent.requestDisallowInterceptTouchEvent(disallow)
+                } else {
+                    val dx = abs(ev.x - mStartX)
+                    val dy = abs(ev.y - mStartY)
+                    mDisallow = dx < 2 * dy
+                    parent.requestDisallowInterceptTouchEvent(dx < 2 * dy)
+                }
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
