@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
 import com.github.panpf.sketch.displayImage
 import com.github.panpf.sketch.request.DisplayRequest
 import com.github.panpf.sketch.request.pauseLoadWhenScrolling
@@ -24,11 +25,13 @@ import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
+import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.api.json.UserPostResponse
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.models.Content
+import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.UserProfile
 import io.github.a13e300.ro_tieba.view.ItemView
 import okhttp3.OkHttpClient
@@ -340,4 +343,42 @@ fun ImageView.displayImageInList(
 ) = displayImage(uri) {
     pauseLoadWhenScrolling(true)
     configBlock?.invoke(this)
+}
+
+fun String.parseThreadLink(): PostId? {
+    val uri = Uri.parse(this)
+    if ((uri.scheme == "http" || uri.scheme == "https") && uri.host == "tieba.baidu.com"
+        && uri.pathSegments.size == 2 && uri.pathSegments[0] == "p"
+    ) {
+        val tid = uri.pathSegments[1].toLongOrNull() ?: return null
+        val pid = uri.getQueryParameter("pid")?.toLongOrNull()
+        val cid = uri.getQueryParameter("cid")?.toLongOrNull()
+        if (pid != null) {
+            if (cid != null) {
+                return PostId.Comment(tid, pid, cid)
+            } else {
+                return PostId.Post(tid, pid)
+            }
+        } else {
+            return PostId.Thread(tid)
+        }
+    }
+    return null
+}
+
+fun NavController.navigateToPost(id: PostId) {
+    navigate(
+        when (id) {
+            is PostId.Comment -> MobileNavigationDirections.showComments(
+                id.tid,
+                id.pid,
+                id.spid
+            )
+
+            is PostId.Post -> MobileNavigationDirections.goToThread(id.tid)
+                .setPid(id.pid)
+
+            is PostId.Thread -> MobileNavigationDirections.goToThread(id.tid)
+        }
+    )
 }

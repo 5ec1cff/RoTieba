@@ -29,7 +29,7 @@ import java.util.Date
 
 sealed class Operation {
     data class GoToForum(val name: String) : Operation()
-    data class GoToThread(val tid: Long, val pid: Long = 0) : Operation()
+    data class GoToThread(val id: PostId, val fromClip: Boolean = false) : Operation()
 
     data class GoToUser(val uidOrPortrait: String) : Operation()
     data class SearchForum(val name: String) : Operation()
@@ -64,8 +64,6 @@ class SearchViewModel : ViewModel() {
     val searchUserEvent = MutableLiveData<Event<String>>()
     var searchedUsers = MutableLiveData<SearchState<List<User>>>(SearchState.Uninitialized)
     private var searchUserJob: Job? = null
-
-    var suggestions: List<Operation> = emptyList()
 
     fun fetchForums(keyword: String) {
         searchForumJob?.cancel()

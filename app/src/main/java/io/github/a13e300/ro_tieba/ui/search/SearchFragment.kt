@@ -1,5 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.search
 
+import android.annotation.SuppressLint
+import android.content.ClipboardManager
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -26,17 +28,25 @@ import io.github.a13e300.ro_tieba.arch.Event
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
+import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
+import io.github.a13e300.ro_tieba.utils.navigateToPost
+import io.github.a13e300.ro_tieba.utils.parseThreadLink
 
 val USER_REGEX = Regex("\\d+|tb\\.1\\..*")
 val THREAD_REGEX = Regex("tieba\\.baidu\\.com/p/(\\d+)(.*[\\?&]pid=(\\d+))?")
 
+@SuppressLint("NotifyDataSetChanged")
 class SearchFragment : BaseFragment() {
 
     private val viewModel: SearchViewModel by viewModels()
     private val args by navArgs<SearchFragmentArgs>()
 
     private lateinit var binding: FragmentSearchBinding
+    private var mClipboardContent: CharSequence? = null
+    private var mSearchText: String = ""
+    private val mSuggestions = mutableListOf<Operation>()
+    private lateinit var mSuggestionAdapter: SearchSuggestionAdapter
 
     override fun onResume() {
         super.onResume()
@@ -81,7 +91,14 @@ class SearchFragment : BaseFragment() {
         }
         binding.searchView.addTransitionListener { _, _, newState ->
             if (newState == SearchView.TransitionState.HIDDEN) viewModel.needShowSearch = false
-            else if (newState == SearchView.TransitionState.SHOWN) viewModel.needShowSearch = true
+            else if (newState == SearchView.TransitionState.SHOWN) {
+                viewModel.needShowSearch = true
+                mClipboardContent =
+                    requireContext().getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(
+                        0
+                    )?.text
+                updateOperations()
+            }
         }
         binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int {
@@ -122,7 +139,7 @@ class SearchFragment : BaseFragment() {
                     )
                 }
             })
-            val myAdapter = SearchSuggestionAdapter()
+            mSuggestionAdapter = SearchSuggestionAdapter()
             TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
                 tab.text = when (position) {
                     0 -> getString(R.string.search_tab_bar_title)
@@ -131,36 +148,38 @@ class SearchFragment : BaseFragment() {
                 }
             }.attach()
             binding.searchView.editText.doAfterTextChanged { e ->
-                if (e.isNullOrEmpty()) {
-                    viewModel.suggestions = emptyList()
-                } else {
-                    val l = mutableListOf<Operation>()
-                    val s = e.toString()
-                    l.add(Operation.GoToForum(s))
-                    s.toLongOrNull()?.also { l.add(Operation.GoToThread(it)) }
-                    THREAD_REGEX.find(s)?.let {
-                        val tid = it.groupValues[1].toLongOrNull()
-                        val pid = it.groupValues[3].toLongOrNull() ?: 0L
-                        if (tid != null) {
-                            l.add(Operation.GoToThread(tid, pid))
-                        }
-                    }
-                    if (s.matches(USER_REGEX)) {
-                        l.add(Operation.GoToUser(s))
-                    }
-                    l.add(Operation.SearchForum(s))
-                    l.add(Operation.SearchPosts(s))
-                    l.add(Operation.SearchUsers(s))
-                    viewModel.suggestions = l
-                }
-                myAdapter.notifyDataSetChanged()
+                mSearchText = e?.toString() ?: ""
+                updateOperations()
             }
             binding.searchSuggestions.apply {
                 layoutManager = LinearLayoutManager(requireContext())
-                adapter = myAdapter
+                adapter = mSuggestionAdapter
             }
         }
         return binding.root
+    }
+
+    private fun updateOperations() {
+        mSuggestions.clear()
+        val l = mSuggestions
+        val s = mSearchText
+        if (s.isNotEmpty()) {
+            l.add(Operation.GoToForum(s))
+            s.toLongOrNull()?.also { l.add(Operation.GoToThread(PostId.Thread(it))) }
+            s.parseThreadLink()?.also { l.add(Operation.GoToThread(it)) }
+            if (s.matches(USER_REGEX)) {
+                l.add(Operation.GoToUser(s))
+            }
+            l.add(Operation.SearchForum(s))
+            l.add(Operation.SearchPosts(s))
+            l.add(Operation.SearchUsers(s))
+        }
+        mClipboardContent?.also { clip ->
+            clip.toString().parseThreadLink()?.also {
+                l.add(Operation.GoToThread(it, true))
+            }
+        }
+        mSuggestionAdapter.notifyDataSetChanged()
     }
 
     private fun performSearch(t: String, tab: Int) {
@@ -178,9 +197,9 @@ class SearchFragment : BaseFragment() {
         RecyclerView.ViewHolder(binding.root)
 
     inner class SearchSuggestionAdapter : RecyclerView.Adapter<SearchSuggestionViewHolder>() {
+        @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: SearchSuggestionViewHolder, position: Int) {
-            val op = viewModel.suggestions[position]
-            when (op) {
+            when (val op = mSuggestions[position]) {
                 is Operation.GoToForum -> {
                     holder.binding.title.text = "进吧：${op.name}"
                     holder.binding.root.setOnClickListener {
@@ -190,11 +209,10 @@ class SearchFragment : BaseFragment() {
 
                 is Operation.GoToThread -> {
                     holder.binding.title.text =
-                        "进帖：${op.tid}${if (op.pid != 0L) " / ${op.pid}" else ""}"
+                        if (op.fromClip) "打开剪切板的帖子：${op.id.tid}" else
+                            "进帖：${op.id.tid}"
                     holder.binding.root.setOnClickListener {
-                        findNavController().navigate(
-                            ThreadFragmentDirections.goToThread(op.tid).setPid(op.pid)
-                        )
+                        findNavController().navigateToPost(op.id)
                     }
                 }
 
@@ -242,7 +260,7 @@ class SearchFragment : BaseFragment() {
         }
 
         override fun getItemCount(): Int {
-            return viewModel.suggestions.size
+            return mSuggestions.size
         }
     }
 

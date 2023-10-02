@@ -27,11 +27,11 @@ import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchPostLoadStateBinding
 import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
-import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.displayImageInList
+import io.github.a13e300.ro_tieba.utils.navigateToPost
 import io.github.a13e300.ro_tieba.utils.replaceEm
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -210,21 +210,7 @@ class SearchPostFragment : Fragment() {
                 findNavController().navigate(MobileNavigationDirections.showProfile(uid.toString()))
             })
             holder.binding.root.setOnClickListener {
-                val id = item.id
-                findNavController().navigate(
-                    when (id) {
-                        is PostId.Comment -> MobileNavigationDirections.showComments(
-                            id.tid,
-                            id.pid,
-                            id.spid
-                        )
-
-                        is PostId.Post -> MobileNavigationDirections.goToThread(id.tid)
-                            .setPid(id.pid)
-
-                        is PostId.Thread -> MobileNavigationDirections.goToThread(id.tid)
-                    }
-                )
+                findNavController().navigateToPost(item.id)
             }
             holder.binding.threadInfo.setOnClickListener {
                 val (ks, vs) = item.toDetail()
