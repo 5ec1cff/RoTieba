@@ -81,6 +81,9 @@ class HistoryFragment : BaseFragment() {
             binding.resultTips.isVisible = empty
             binding.toolbar.menu.findItem(R.id.remove_all).isVisible = !empty
         }
+        binding.toolbar.setOnClickListener {
+            binding.list.scrollToPosition(0)
+        }
         return binding.root
     }
 
