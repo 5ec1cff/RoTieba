@@ -7,7 +7,7 @@
     android:focusable="true"
     android:background="?selectableItemBackground">
 
-    <androidx.constraintlayout.utils.widget.ImageFilterView
+    <io.github.a13e300.ro_tieba.view.MyImageFilterView
         android:layout_margin="8dp"
         android:layout_width="40dp"
         android:layout_height="40dp"

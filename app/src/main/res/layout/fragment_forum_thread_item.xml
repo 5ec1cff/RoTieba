@@ -21,7 +21,7 @@
             android:layout_height="match_parent"
             android:padding="16dp">
 
-            <androidx.constraintlayout.utils.widget.ImageFilterView
+            <io.github.a13e300.ro_tieba.view.MyImageFilterView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 app:round="24dp"
@@ -107,7 +107,7 @@
                 app:constraint_referenced_ids="preview_image1,preview_image2,preview_image3"
                 app:barrierDirection="top" />
 
-            <androidx.constraintlayout.utils.widget.ImageFilterView
+            <io.github.a13e300.ro_tieba.view.MyImageFilterView
                 app:round="8dp"
                 app:layout_goneMarginTop="0dp"
                 android:layout_marginEnd="4dp"
@@ -124,7 +124,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/preview_image2" />
 
-            <androidx.constraintlayout.utils.widget.ImageFilterView
+            <io.github.a13e300.ro_tieba.view.MyImageFilterView
                 app:round="8dp"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
@@ -141,7 +141,7 @@
                 app:layout_constraintStart_toEndOf="@id/preview_image1"
                 app:layout_constraintEnd_toStartOf="@id/preview_image3" />
 
-            <androidx.constraintlayout.utils.widget.ImageFilterView
+            <io.github.a13e300.ro_tieba.view.MyImageFilterView
                 app:round="8dp"
                 android:layout_marginStart="4dp"
                 android:layout_width="0dp"

@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.utils.widget.ImageFilterView
+        <io.github.a13e300.ro_tieba.view.MyImageFilterView
             android:layout_width="40dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="parent"

@@ -78,4 +78,5 @@
     <color name="help_span_text">#FFFFFF</color>
     <color name="top_span_background">#1173C8</color>
     <color name="top_span_text">#FFFFFF</color>
+    <color name="image_shadow">#00000000</color>
 </resources>

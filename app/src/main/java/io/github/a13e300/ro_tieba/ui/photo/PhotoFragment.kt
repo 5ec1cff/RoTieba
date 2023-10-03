@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.photo
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.ContextMenu
@@ -206,6 +207,8 @@ class PhotoFragment : BaseFragment() {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+
+                foreground = ColorDrawable(requireContext().getColor(R.color.image_shadow))
 
                 setOnClickListener {
                     isFullscreen = !isFullscreen

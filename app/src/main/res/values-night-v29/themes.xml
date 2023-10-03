@@ -1,6 +1,8 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
 
-    <style name="Theme.RoTieba.Base" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.RoTieba" parent="Theme.RoTieba.Base">
+        <item name="android:forceDarkAllowed">false</item>
         <item name="colorPrimary">@color/md_theme_dark_primary</item>
         <item name="colorOnPrimary">@color/md_theme_dark_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_dark_primaryContainer</item>
@@ -31,8 +33,8 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
-
-    <style name="Theme.RoTieba" parent="Theme.RoTieba.Base" />
 </resources>
