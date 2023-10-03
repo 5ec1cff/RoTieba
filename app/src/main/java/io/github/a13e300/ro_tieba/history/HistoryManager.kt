@@ -17,4 +17,11 @@ class HistoryManager {
             dao.purge(MAX_HISTORY_ENTRY_COUNT)
         }
     }
+
+    suspend fun deleteHistory(entry: HistoryEntry) {
+        withContext(Dispatchers.IO) {
+            val dao = App.instance.db.historyDao()
+            dao.deleteHistory(entry)
+        }
+    }
 }

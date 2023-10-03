@@ -1,7 +1,9 @@
 package io.github.a13e300.ro_tieba.ui.history
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -28,6 +30,7 @@ import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.history.HistoryManager
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
+import io.github.a13e300.ro_tieba.utils.forceShowIcon
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -85,6 +88,7 @@ class HistoryFragment : BaseFragment() {
     class ForumViewHolder(val binding: FragmentHistoryForumItemBinding) : ViewHolder(binding.root)
     class UserViewHolder(val binding: FragmentHistoryUserItemBinding) : ViewHolder(binding.root)
 
+    @SuppressLint("SetTextI18n")
     inner class HistoryAdapter : PagingDataAdapter<HistoryEntry, ViewHolder>(HistoryComparator) {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = getItem(position) ?: return
@@ -130,9 +134,23 @@ class HistoryFragment : BaseFragment() {
                 }
             }
             holder.itemView.setOnLongClickListener {
-                val (ks, kv) = item.toDetail()
-                DetailDialogFragment.newInstance(ks, kv).show(childFragmentManager, "detail")
-                true
+                it.setOnCreateContextMenuListener { contextMenu, _, _ ->
+                    MenuInflater(requireContext()).inflate(R.menu.history_item_menu, contextMenu)
+                    contextMenu.forceShowIcon()
+                    contextMenu.findItem(R.id.delete).setOnMenuItemClickListener {
+                        lifecycleScope.launch {
+                            App.instance.historyManager.deleteHistory(item)
+                        }
+                        true
+                    }
+                    contextMenu.findItem(R.id.detail).setOnMenuItemClickListener {
+                        val (ks, kv) = item.toDetail()
+                        DetailDialogFragment.newInstance(ks, kv)
+                            .show(childFragmentManager, "detail")
+                        true
+                    }
+                }
+                false
             }
         }
 
@@ -157,6 +175,8 @@ class HistoryFragment : BaseFragment() {
                 )
 
                 else -> throw IllegalArgumentException("")
+            }.also {
+                registerForContextMenu(it.itemView)
             }
         }
 

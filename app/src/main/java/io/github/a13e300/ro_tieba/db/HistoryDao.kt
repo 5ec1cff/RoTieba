@@ -2,6 +2,7 @@ package io.github.a13e300.ro_tieba.db
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -46,4 +47,7 @@ interface HistoryDao {
 
     @Query("SELECT COUNT(*) FROM HistoryEntry")
     fun count(): Flow<Int>
+
+    @Delete
+    suspend fun deleteHistory(entry: HistoryEntry)
 }
