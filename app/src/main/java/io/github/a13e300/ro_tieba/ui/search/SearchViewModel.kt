@@ -58,11 +58,13 @@ class SearchViewModel : ViewModel() {
     // search forums
     val searchForumEvent = MutableLiveData<Event<String>>()
     var searchedForums = MutableLiveData<SearchState<List<Forum>>>(SearchState.Uninitialized)
+    val forumCount = MutableLiveData<Int?>(null)
     private var searchForumJob: Job? = null
 
     // search users
     val searchUserEvent = MutableLiveData<Event<String>>()
     var searchedUsers = MutableLiveData<SearchState<List<User>>>(SearchState.Uninitialized)
+    val userCount = MutableLiveData<Int?>(null)
     private var searchUserJob: Job? = null
 
     fun fetchForums(keyword: String) {
@@ -77,10 +79,12 @@ class SearchViewModel : ViewModel() {
                     r.fuzzyMatch.forEach { list.add(it.toForum()) }
                 }
                 searchedForums.value = SearchState.Result(list)
+                forumCount.value = list.size
             }.onFailure {
                 if (it !is CancellationException) {
                     Logger.e("failed to search forum $keyword", it)
                     searchedForums.value = SearchState.Error(it)
+                    forumCount.value = null
                 }
             }
         }
@@ -99,10 +103,12 @@ class SearchViewModel : ViewModel() {
                     r.fuzzyMatch.forEach { list.add(it.toUser()) }
                 }
                 searchedUsers.value = SearchState.Result(list)
+                userCount.value = list.size
             }.onFailure {
                 if (it !is CancellationException) {
                     Logger.e("failed to search user $keyword", it)
                     searchedUsers.value = SearchState.Error(it)
+                    userCount.value = null
                 }
             }
         }

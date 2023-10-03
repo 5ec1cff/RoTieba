@@ -157,6 +157,16 @@ class SearchFragment : BaseFragment() {
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = mSuggestionAdapter
             }
+            viewModel.forumCount.observe(viewLifecycleOwner) {
+                binding.searchTabLayout.getTabAt(0)?.text =
+                    if (it == null) getString(R.string.search_tab_bar_title)
+                    else getString(R.string.search_tab_bar_title) + "($it)"
+            }
+            viewModel.userCount.observe(viewLifecycleOwner) {
+                binding.searchTabLayout.getTabAt(2)?.text =
+                    if (it == null) getString(R.string.search_tab_user_title)
+                    else getString(R.string.search_tab_user_title) + "($it)"
+            }
         }
         return binding.root
     }
@@ -193,6 +203,8 @@ class SearchFragment : BaseFragment() {
         viewModel.searchForumEvent.value = Event(t)
         viewModel.searchUserEvent.value = Event(t)
         viewModel.searchPostEvent.value = Event(t)
+        viewModel.forumCount.value = null
+        viewModel.userCount.value = null
     }
 
     class SearchSuggestionViewHolder(val binding: SearchSuggestionItemBinding) :
