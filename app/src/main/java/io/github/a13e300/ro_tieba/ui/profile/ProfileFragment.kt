@@ -8,6 +8,7 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -84,19 +85,27 @@ class ProfileFragment : BaseFragment() {
         }
         viewModel.user.observe(viewLifecycleOwner) { p ->
             p.fold({ profile ->
+                val showName = profile.nick.ifEmpty { profile.name }
                 binding.userName.text = SpannableStringBuilder()
                     .append(
-                        profile.name,
+                        showName,
                         StyleSpan(Typeface.BOLD),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
-                    .apply {
-                        if (profile.nick.isNotEmpty() && profile.nick != profile.name) {
-                            append("(")
-                            append(profile.nick)
-                            append(")")
-                        }
+                binding.userName.setOnLongClickListener {
+                    copyText(showName)
+                    true
+                }
+                if (profile.nick.isEmpty() || profile.name.isEmpty()) {
+                    binding.userRealName.isVisible = false
+                } else {
+                    binding.userRealName.isVisible = true
+                    binding.userRealName.text = profile.name
+                    binding.userRealName.setOnLongClickListener {
+                        copyText(profile.name)
+                        true
                     }
+                }
                 binding.userAvatar.displayImage(profile.avatarUrl)
                 binding.userAvatar.setOnClickListener {
                     photoViewModel.currentIndex.value = 0
