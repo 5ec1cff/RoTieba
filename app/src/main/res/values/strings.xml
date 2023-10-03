@@ -74,4 +74,5 @@
     <string name="no_history">还没有历史记录</string>
     <string name="login_tips_text">登录后可查看关注的吧</string>
     <string name="login">登录</string>
+    <string name="open_forum_title">打开所在贴吧</string>
 </resources>

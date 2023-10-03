@@ -186,6 +186,13 @@ class ThreadFragment : BaseFragment() {
                         true
                     }
 
+                    R.id.open_forum -> {
+                        viewModel.threadInfo.value?.forum?.name?.let {
+                            findNavController().navigate(MobileNavigationDirections.goToForum(it))
+                        }
+                        true
+                    }
+
                     else -> false
                 }
             }
