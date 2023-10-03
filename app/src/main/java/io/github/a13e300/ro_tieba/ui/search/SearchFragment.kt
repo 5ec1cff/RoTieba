@@ -93,11 +93,13 @@ class SearchFragment : BaseFragment() {
             if (newState == SearchView.TransitionState.HIDDEN) viewModel.needShowSearch = false
             else if (newState == SearchView.TransitionState.SHOWN) {
                 viewModel.needShowSearch = true
-                mClipboardContent =
-                    requireContext().getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(
-                        0
-                    )?.text
-                updateOperations()
+                if (!viewModel.searchAtForum) {
+                    mClipboardContent =
+                        requireContext().getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(
+                            0
+                        )?.text
+                    updateOperations()
+                }
             }
         }
         binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
