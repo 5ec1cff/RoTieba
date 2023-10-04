@@ -38,6 +38,7 @@ import java.util.Date
 
 class HistoryFragment : BaseFragment() {
     private val viewModel by viewModels<HistoryViewModel>()
+    private var mPendingScrollToTop = false
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -80,9 +81,22 @@ class HistoryFragment : BaseFragment() {
                 state.append is LoadState.NotLoading && state.append.endOfPaginationReached && adapter.itemCount == 0
             binding.resultTips.isVisible = empty
             binding.toolbar.menu.findItem(R.id.remove_all).isVisible = !empty
+            if (mPendingScrollToTop && state.prepend is LoadState.NotLoading) {
+                val first = if (adapter.itemCount != 0) adapter.peek(0) else null
+                if (first != null) {
+                    binding.list.scrollToPosition(0)
+                    mPendingScrollToTop = false
+                }
+            }
         }
         binding.toolbar.setOnClickListener {
-            binding.list.scrollToPosition(0)
+            if (adapter.itemCount == 0) return@setOnClickListener
+            val first = adapter.requestItem(0)
+            if (first != null && !mPendingScrollToTop) {
+                binding.list.scrollToPosition(0)
+            } else {
+                mPendingScrollToTop = true
+            }
         }
         return binding.root
     }
@@ -93,6 +107,7 @@ class HistoryFragment : BaseFragment() {
 
     @SuppressLint("SetTextI18n")
     inner class HistoryAdapter : PagingDataAdapter<HistoryEntry, ViewHolder>(HistoryComparator) {
+        fun requestItem(pos: Int) = getItem(pos)
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = getItem(position) ?: return
             when (holder) {
@@ -184,7 +199,8 @@ class HistoryFragment : BaseFragment() {
         }
 
         override fun getItemViewType(position: Int): Int {
-            return when (peek(position)!!.type) {
+            val item = peek(position)
+            return when (item!!.type) {
                 EntryType.THREAD -> R.layout.fragment_history_post_item
                 EntryType.FORUM -> R.layout.fragment_history_forum_item
                 EntryType.USER -> R.layout.fragment_history_user_item
