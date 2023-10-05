@@ -48,6 +48,7 @@ import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendTextAutoLink
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
+import io.github.a13e300.ro_tieba.utils.configureDefaults
 import io.github.a13e300.ro_tieba.utils.configureImageForContent
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
@@ -295,7 +296,9 @@ class CommentFragment : BaseFragment() {
                             ImageContentBinding.inflate(layoutInflater, contentView, false)
                                 .root.apply {
                                     configureImageForContent(content)
-                                    displayImage(content.previewSrc)
+                                    displayImage(content.previewSrc) {
+                                        configureDefaults(context)
+                                    }
                                     setOnClickListener {
                                         val photos =
                                             post.content.filterIsInstance<Content.ImageContent>()

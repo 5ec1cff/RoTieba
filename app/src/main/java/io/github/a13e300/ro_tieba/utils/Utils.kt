@@ -20,12 +20,16 @@ import androidx.navigation.NavController
 import com.github.panpf.sketch.displayImage
 import com.github.panpf.sketch.request.DisplayRequest
 import com.github.panpf.sketch.request.pauseLoadWhenScrolling
+import com.github.panpf.sketch.stateimage.ColorStateImage
+import com.github.panpf.sketch.stateimage.IconStateImage
+import com.github.panpf.sketch.stateimage.IntColor
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
 import io.github.a13e300.ro_tieba.Emotions
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
+import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.api.json.UserPostResponse
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
@@ -388,4 +392,13 @@ fun MyImageFilterView.configureImageForContent(content: Content.ImageContent) {
     // backend returns max width is 560
     imageScale = content.width.div(560f)
     imageRatio = content.width.toFloat().div(content.height)
+}
+
+fun DisplayRequest.Builder.configureDefaults(context: Context) {
+    val ta =
+        context.obtainStyledAttributes(intArrayOf(com.google.android.material.R.attr.colorSurfaceVariant))
+    val color = ta.getColor(0, 0x1a1c1e)
+    ta.recycle()
+    placeholder(ColorStateImage(color))
+    error(IconStateImage(R.drawable.ic_error, IntColor(color)))
 }

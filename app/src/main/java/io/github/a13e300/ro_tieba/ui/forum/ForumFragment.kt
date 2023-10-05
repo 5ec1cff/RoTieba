@@ -47,6 +47,7 @@ import io.github.a13e300.ro_tieba.ui.photo.PhotoViewModel
 import io.github.a13e300.ro_tieba.ui.photo.toPhoto
 import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
+import io.github.a13e300.ro_tieba.utils.configureDefaults
 import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.utils.setSelectedData
@@ -374,7 +375,9 @@ class ForumFragment : BaseFragment() {
             val image3 = images.getOrNull(2)
             if (image1 != null) {
                 holder.binding.previewImage1.visibility = View.VISIBLE
-                holder.binding.previewImage1.displayImageInList(image1.previewSrc)
+                holder.binding.previewImage1.displayImageInList(image1.previewSrc) {
+                    configureDefaults(requireContext())
+                }
                 holder.binding.previewImage1.setOnClickListener {
                     photoViewModel.currentIndex.value = 0
                     photoViewModel.photos = images.map {
@@ -393,7 +396,9 @@ class ForumFragment : BaseFragment() {
             }
             if (image2 != null) {
                 holder.binding.previewImage2.visibility = View.VISIBLE
-                holder.binding.previewImage2.displayImageInList(image2.previewSrc)
+                holder.binding.previewImage2.displayImageInList(image2.previewSrc) {
+                    configureDefaults(requireContext())
+                }
                 holder.binding.previewImage2.setOnClickListener {
                     photoViewModel.currentIndex.value = 1
                     photoViewModel.photos = images.map {
@@ -412,7 +417,9 @@ class ForumFragment : BaseFragment() {
             }
             if (image3 != null) {
                 holder.binding.previewImage3.visibility = View.VISIBLE
-                holder.binding.previewImage3.displayImageInList(image3.previewSrc)
+                holder.binding.previewImage3.displayImageInList(image3.previewSrc) {
+                    configureDefaults(requireContext())
+                }
                 holder.binding.previewImage3.setOnClickListener {
                     photoViewModel.currentIndex.value = 2
                     photoViewModel.photos = images.map {
