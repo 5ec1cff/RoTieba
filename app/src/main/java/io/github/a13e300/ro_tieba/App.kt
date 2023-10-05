@@ -15,9 +15,12 @@ import com.github.panpf.sketch.request.PauseLoadWhenScrollingDrawableDecodeInter
 import com.google.gson.Gson
 import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.api.TiebaClient
+import io.github.a13e300.ro_tieba.datastore.SearchHistory
 import io.github.a13e300.ro_tieba.datastore.Settings
 import io.github.a13e300.ro_tieba.db.AppDataBase
 import io.github.a13e300.ro_tieba.history.HistoryManager
+import io.github.a13e300.ro_tieba.serializer.SearchHistorySerializer
+import io.github.a13e300.ro_tieba.serializer.SettingsSerializer
 import io.github.a13e300.ro_tieba.utils.ignoreAllSSLErrorsIfDebug
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -35,17 +38,23 @@ class App : Application(), SketchFactory {
     lateinit var db: AppDataBase
     lateinit var client: TiebaClient
     val accountManager = AccountManager()
-    val historyManager = HistoryManager()
+    lateinit var historyManager: HistoryManager
 
     val settingsDataStore: DataStore<Settings> by dataStore(
         fileName = "settings.pb",
         serializer = SettingsSerializer
     )
 
+    val searchHistoryDataStore: DataStore<SearchHistory> by dataStore(
+        fileName = "search_history.pb",
+        serializer = SearchHistorySerializer
+    )
+
     override fun onCreate() {
         super.onCreate()
         instance = this
         db = Room.databaseBuilder(this, AppDataBase::class.java, "app-db").build()
+        historyManager = HistoryManager()
         runBlocking {
             accountManager.initAccount()
         }

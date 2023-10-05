@@ -1,4 +1,4 @@
-package io.github.a13e300.ro_tieba
+package io.github.a13e300.ro_tieba.serializer
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
@@ -23,4 +23,3 @@ object SettingsSerializer : Serializer<Settings> {
         output: OutputStream
     ) = t.writeTo(output)
 }
-

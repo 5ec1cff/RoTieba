@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba.ui.search
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.text.InputFilter.LengthFilter
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -10,31 +11,39 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.search.SearchView
 import com.google.android.material.tabs.TabLayoutMediator
+import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.arch.Event
 import io.github.a13e300.ro_tieba.databinding.FragmentSearchBinding
 import io.github.a13e300.ro_tieba.databinding.SearchSuggestionItemBinding
+import io.github.a13e300.ro_tieba.datastore.SearchHistory
 import io.github.a13e300.ro_tieba.misc.OnPreImeBackPressedListener
 import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
 import io.github.a13e300.ro_tieba.utils.navigateToPost
 import io.github.a13e300.ro_tieba.utils.parseThreadLink
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 val USER_REGEX = Regex("\\d+|tb\\.1\\..*")
-val THREAD_REGEX = Regex("tieba\\.baidu\\.com/p/(\\d+)(.*[\\?&]pid=(\\d+))?")
 
 @SuppressLint("NotifyDataSetChanged")
 class SearchFragment : BaseFragment() {
@@ -72,6 +81,10 @@ class SearchFragment : BaseFragment() {
         else getString(R.string.searchbar_hint)
         binding.searchView.hint = hint
         binding.searchBar.hint = hint
+        binding.searchView.editText.apply {
+            filters = arrayOf(LengthFilter(100))
+            maxLines = 1
+        }
         binding.searchView.editText.setOnEditorActionListener { textView, i, keyEvent ->
             if (i != EditorInfo.IME_ACTION_SEARCH &&
                 !(keyEvent?.action == KeyEvent.ACTION_DOWN
@@ -98,8 +111,8 @@ class SearchFragment : BaseFragment() {
                         requireContext().getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(
                             0
                         )?.text
-                    updateOperations()
                 }
+                updateOperations()
             }
         }
         binding.searchViewPager.adapter = object : FragmentStateAdapter(this) {
@@ -127,6 +140,11 @@ class SearchFragment : BaseFragment() {
             else navigateUp()
             return@OnPreImeBackPressedListener true
         }
+        mSuggestionAdapter = SearchSuggestionAdapter()
+        binding.searchSuggestions.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = mSuggestionAdapter
+        }
         if (viewModel.searchAtForum) {
             binding.searchTabLayout.isGone = true
             binding.searchViewPager.isUserInputEnabled = false
@@ -141,7 +159,6 @@ class SearchFragment : BaseFragment() {
                     )
                 }
             })
-            mSuggestionAdapter = SearchSuggestionAdapter()
             TabLayoutMediator(binding.searchTabLayout, binding.searchViewPager) { tab, position ->
                 tab.text = when (position) {
                     0 -> getString(R.string.search_tab_bar_title)
@@ -152,10 +169,6 @@ class SearchFragment : BaseFragment() {
             binding.searchView.editText.doAfterTextChanged { e ->
                 mSearchText = e?.toString() ?: ""
                 updateOperations()
-            }
-            binding.searchSuggestions.apply {
-                layoutManager = LinearLayoutManager(requireContext())
-                adapter = mSuggestionAdapter
             }
             viewModel.forumCount.observe(viewLifecycleOwner) {
                 binding.searchTabLayout.getTabAt(0)?.text =
@@ -168,6 +181,11 @@ class SearchFragment : BaseFragment() {
                     else getString(R.string.search_tab_user_title) + "($it)"
             }
         }
+        lifecycleScope.launch {
+            App.instance.searchHistoryDataStore.data.collectLatest {
+                updateOperations()
+            }
+        }
         return binding.root
     }
 
@@ -175,21 +193,29 @@ class SearchFragment : BaseFragment() {
         mSuggestions.clear()
         val l = mSuggestions
         val s = mSearchText
-        if (s.isNotEmpty()) {
-            l.add(Operation.GoToForum(s))
-            s.toLongOrNull()?.also { l.add(Operation.GoToThread(PostId.Thread(it))) }
-            s.parseThreadLink()?.also { l.add(Operation.GoToThread(it)) }
-            if (s.matches(USER_REGEX)) {
-                l.add(Operation.GoToUser(s))
+        if (!viewModel.searchAtForum) {
+            if (s.isNotEmpty()) {
+                l.add(Operation.GoToForum(s))
+                s.toLongOrNull()?.also { l.add(Operation.GoToThread(PostId.Thread(it))) }
+                s.parseThreadLink()?.also { l.add(Operation.GoToThread(it)) }
+                if (s.matches(USER_REGEX)) {
+                    l.add(Operation.GoToUser(s))
+                }
+                l.add(Operation.SearchForum(s))
+                l.add(Operation.SearchPosts(s))
+                l.add(Operation.SearchUsers(s))
             }
-            l.add(Operation.SearchForum(s))
-            l.add(Operation.SearchPosts(s))
-            l.add(Operation.SearchUsers(s))
+            mClipboardContent?.also { clip ->
+                clip.toString().parseThreadLink()?.also {
+                    l.add(Operation.GoToThread(it, true))
+                }
+            }
         }
-        mClipboardContent?.also { clip ->
-            clip.toString().parseThreadLink()?.also {
-                l.add(Operation.GoToThread(it, true))
-            }
+        if (s.isEmpty()) {
+            val histories =
+                runBlocking { App.instance.searchHistoryDataStore.data.first().entriesList }
+            l.addAll(histories.map { Operation.History(it) })
+            if (histories.isNotEmpty()) l.add(Operation.RemoveHistories)
         }
         mSuggestionAdapter.notifyDataSetChanged()
     }
@@ -205,6 +231,36 @@ class SearchFragment : BaseFragment() {
         viewModel.searchPostEvent.value = Event(t)
         viewModel.forumCount.value = null
         viewModel.userCount.value = null
+        lifecycleScope.launch {
+            App.instance.historyManager.addSearch(
+                SearchHistory.Entry.newBuilder().setKeyword(t).build()
+            )
+        }
+    }
+
+    private fun removeHistoryDialog(entry: SearchHistory.Entry) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("确定要删除吗？")
+            .setMessage(entry.keyword)
+            .setPositiveButton("删除") { _, _ ->
+                lifecycleScope.launch {
+                    App.instance.historyManager.removeSearch(entry)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun removeAllHistoriesDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("确定要删除所有历史记录吗？")
+            .setPositiveButton("删除") { _, _ ->
+                lifecycleScope.launch {
+                    App.instance.historyManager.clearSearch()
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     class SearchSuggestionViewHolder(val binding: SearchSuggestionItemBinding) :
@@ -213,7 +269,34 @@ class SearchFragment : BaseFragment() {
     inner class SearchSuggestionAdapter : RecyclerView.Adapter<SearchSuggestionViewHolder>() {
         @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: SearchSuggestionViewHolder, position: Int) {
-            when (val op = mSuggestions[position]) {
+            holder.binding.root.setOnClickListener(null)
+            holder.binding.root.setOnLongClickListener(null)
+            val op = mSuggestions[position]
+            holder.binding.inputButton.isVisible =
+                op is Operation.History && !viewModel.searchAtForum
+            when (op) {
+                is Operation.History -> {
+                    val kw = op.entry.keyword
+                    holder.binding.title.text = kw
+                    holder.binding.root.setOnClickListener {
+                        performSearch(kw, -1)
+                    }
+                    holder.binding.root.setOnLongClickListener {
+                        removeHistoryDialog(op.entry)
+                        true
+                    }
+                    holder.binding.inputButton.setOnClickListener {
+                        binding.searchView.editText.setText(kw)
+                    }
+                }
+
+                is Operation.RemoveHistories -> {
+                    holder.binding.title.text = "清空历史记录"
+                    holder.binding.root.setOnClickListener {
+                        removeAllHistoriesDialog()
+                    }
+                }
+
                 is Operation.GoToForum -> {
                     holder.binding.title.text = "进吧：${op.name}"
                     holder.binding.root.setOnClickListener {

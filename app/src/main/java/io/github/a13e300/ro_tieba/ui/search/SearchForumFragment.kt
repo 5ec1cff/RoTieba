@@ -97,7 +97,7 @@ class SearchForumFragment : Fragment() {
                 (viewModel.searchedForums.value as? SearchState.Result)?.data?.get(position)
                     ?: return
             holder.binding.barName.text = item.name
-            item.avatarUrl?.let { holder.binding.barAvatar.displayImageInList(it) }
+            item.avatarUrl.let { holder.binding.barAvatar.displayImageInList(it) }
             holder.binding.barDesc.apply {
                 if (!item.desc.isNullOrEmpty()) {
                     text = item.desc

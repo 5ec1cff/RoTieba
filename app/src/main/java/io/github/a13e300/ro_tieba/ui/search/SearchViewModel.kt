@@ -14,6 +14,7 @@ import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.api.web.SearchFilter
 import io.github.a13e300.ro_tieba.api.web.SearchOrder
 import io.github.a13e300.ro_tieba.arch.Event
+import io.github.a13e300.ro_tieba.datastore.SearchHistory
 import io.github.a13e300.ro_tieba.models.Forum
 import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.SearchedPost
@@ -28,6 +29,8 @@ import kotlinx.coroutines.withContext
 import java.util.Date
 
 sealed class Operation {
+    data class History(val entry: SearchHistory.Entry) : Operation()
+    data object RemoveHistories : Operation()
     data class GoToForum(val name: String) : Operation()
     data class GoToThread(val id: PostId, val fromClip: Boolean = false) : Operation()
 
