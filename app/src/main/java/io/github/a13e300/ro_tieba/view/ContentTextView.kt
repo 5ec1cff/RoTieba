@@ -6,16 +6,38 @@ import android.text.Spanned
 import android.text.style.URLSpan
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
 import androidx.appcompat.widget.AppCompatTextView
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
 import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 
+data class SelectedLink(
+    val url: String
+)
+
+data class SelectedUser(
+    val uid: Long
+)
+
 class ContentTextView : AppCompatTextView {
     companion object {
         private const val LONG_PRESS_THRESHOLD = 200L
     }
+
+    class CheckForLongClick(
+        private val targetView: View,
+        private val x: Float, private val y: Float
+    ) : Runnable {
+        override fun run() {
+            targetView.showContextMenu(x, y)
+        }
+    }
+
+    data class LastClick(
+        val span: URLSpan
+    )
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
@@ -37,10 +59,10 @@ class ContentTextView : AppCompatTextView {
                 invalidate()
                 setTag(
                     R.id.tag_movement_method_last_click,
-                    MyLinkMovementMethod.LastClick(span)
+                    LastClick(span)
                 )
                 val checkForLongClick =
-                    MyLinkMovementMethod.CheckForLongClick(this, event.x, event.y)
+                    CheckForLongClick(this, event.x, event.y)
                 postDelayed(checkForLongClick, LONG_PRESS_THRESHOLD)
                 setTag(R.id.tag_movement_method_longclick, checkForLongClick)
                 if (span is UserSpan) {
@@ -53,12 +75,12 @@ class ContentTextView : AppCompatTextView {
 
             MotionEvent.ACTION_UP -> {
                 val link =
-                    (getTag(R.id.tag_movement_method_last_click) as? MyLinkMovementMethod.LastClick)?.span
+                    (getTag(R.id.tag_movement_method_last_click) as? LastClick)?.span
                         ?: return false
                 if (link is MyURLSpan) link.pressed = false
                 invalidate()
                 if (event.eventTime - event.downTime < LONG_PRESS_THRESHOLD) {
-                    (getTag(R.id.tag_movement_method_longclick) as? MyLinkMovementMethod.CheckForLongClick)?.let {
+                    (getTag(R.id.tag_movement_method_longclick) as? CheckForLongClick)?.let {
                         removeCallbacks(it)
                     }
                     link.onClick(this)
@@ -69,11 +91,11 @@ class ContentTextView : AppCompatTextView {
 
             MotionEvent.ACTION_CANCEL -> {
                 val link =
-                    (getTag(R.id.tag_movement_method_last_click) as? MyLinkMovementMethod.LastClick)?.span
+                    (getTag(R.id.tag_movement_method_last_click) as? LastClick)?.span
                         ?: return false
                 if (link is MyURLSpan) link.pressed = false
                 invalidate()
-                (getTag(R.id.tag_movement_method_longclick) as? MyLinkMovementMethod.CheckForLongClick)?.let {
+                (getTag(R.id.tag_movement_method_longclick) as? CheckForLongClick)?.let {
                     removeCallbacks(it)
                 }
                 setTag(R.id.tag_movement_method_last_click, null)
