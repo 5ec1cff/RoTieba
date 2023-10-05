@@ -34,6 +34,7 @@ import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.models.UserProfile
 import io.github.a13e300.ro_tieba.view.ItemView
+import io.github.a13e300.ro_tieba.view.MyImageFilterView
 import okhttp3.OkHttpClient
 import tbclient.MediaOuterClass.Media
 import tbclient.PbContentOuterClass
@@ -381,4 +382,10 @@ fun NavController.navigateToPost(id: PostId) {
             is PostId.Thread -> MobileNavigationDirections.goToThread(id.tid)
         }
     )
+}
+
+fun MyImageFilterView.configureImageForContent(content: Content.ImageContent) {
+    // backend returns max width is 560
+    imageScale = content.width.div(560f)
+    imageRatio = content.width.toFloat().div(content.height)
 }

@@ -37,7 +37,6 @@ import io.github.a13e300.ro_tieba.db.HistoryEntry
 import io.github.a13e300.ro_tieba.misc.EmojiSpan
 import io.github.a13e300.ro_tieba.misc.IconSpan
 import io.github.a13e300.ro_tieba.misc.MyURLSpan
-import io.github.a13e300.ro_tieba.misc.PlaceHolderDrawable
 import io.github.a13e300.ro_tieba.misc.UserSpan
 import io.github.a13e300.ro_tieba.models.Comment
 import io.github.a13e300.ro_tieba.models.Content
@@ -49,6 +48,7 @@ import io.github.a13e300.ro_tieba.ui.toDetail
 import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.appendTextAutoLink
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
+import io.github.a13e300.ro_tieba.utils.configureImageForContent
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
@@ -294,15 +294,8 @@ class CommentFragment : BaseFragment() {
                         val imageView =
                             ImageContentBinding.inflate(layoutInflater, contentView, false)
                                 .root.apply {
-                                    displayImage(content.previewSrc) {
-                                        placeholder(
-                                            PlaceHolderDrawable(
-                                                content.width,
-                                                content.height
-                                            )
-                                        )
-                                        resize(content.width, content.height)
-                                    }
+                                    configureImageForContent(content)
+                                    displayImage(content.previewSrc)
                                     setOnClickListener {
                                         val photos =
                                             post.content.filterIsInstance<Content.ImageContent>()

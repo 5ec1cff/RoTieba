@@ -11,7 +11,7 @@ sealed class Content : Parcelable {
         val src: String,
         val width: Int,
         val height: Int,
-        val order: Int
+        val order: Int,
     ) : Content()
 
     data class EmojiContent(
