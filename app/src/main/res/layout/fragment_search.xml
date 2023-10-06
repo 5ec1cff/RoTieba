@@ -57,6 +57,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/search_suggestions" />
+            android:id="@+id/search_suggestions"
+            android:requiresFadingEdge="vertical"
+            app:fitsSystemWindowsInsets="bottom" />
     </io.github.a13e300.ro_tieba.view.MySearchView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

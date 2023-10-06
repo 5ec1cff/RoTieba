@@ -276,6 +276,7 @@ class SearchFragment : BaseFragment() {
                 op is Operation.History && !viewModel.searchAtForum
             when (op) {
                 is Operation.History -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_history)
                     val kw = op.entry.keyword
                     holder.binding.title.text = kw
                     holder.binding.root.setOnClickListener {
@@ -291,6 +292,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.RemoveHistories -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_delete)
                     holder.binding.title.text = "清空历史记录"
                     holder.binding.root.setOnClickListener {
                         removeAllHistoriesDialog()
@@ -298,6 +300,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.GoToForum -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text = "进吧：${op.name}"
                     holder.binding.root.setOnClickListener {
                         findNavController().navigate(ThreadFragmentDirections.goToForum(op.name))
@@ -305,6 +308,10 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.GoToThread -> {
+                    if (op.fromClip)
+                        holder.binding.icon.setImageResource(R.drawable.ic_copy)
+                    else
+                        holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text =
                         if (op.fromClip) "打开剪切板的帖子：${op.id.tid}" else
                             "进帖：${op.id.tid}"
@@ -314,6 +321,8 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.SearchForum -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
+                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text = "搜吧：${op.name}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.name, 0)
@@ -321,6 +330,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.SearchPosts -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text = "搜帖：${op.keyword}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.keyword, 1)
@@ -328,6 +338,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.SearchUsers -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text = "搜人：${op.keyword}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.keyword, 2)
@@ -335,6 +346,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.GoToUser -> {
+                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text = "查看用户：${op.uidOrPortrait}"
                     holder.binding.root.setOnClickListener {
                         findNavController().navigate(MobileNavigationDirections.showProfile(op.uidOrPortrait))
