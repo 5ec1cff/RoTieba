@@ -581,8 +581,6 @@ class ThreadFragment : BaseFragment() {
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                     }
-
-                    else -> {}
                 }
             }
             addTextView()

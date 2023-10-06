@@ -221,7 +221,7 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun performSearch(t: String, tab: Int) {
-        binding.searchBar.text = t
+        binding.searchBar.setText(t)
         viewModel.currentKeyword = t
         binding.searchView.hide()
         if (tab >= 0)

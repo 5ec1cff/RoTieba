@@ -105,11 +105,9 @@ class ForumFragment : BaseFragment() {
             binding.forumDesc.text = it.desc
             binding.forumAvatar.displayImage(it.avatarUrl)
             binding.forumAvatar.setOnClickListener { _ ->
-                if (it.avatarUrl != null) {
-                    photoViewModel.currentIndex.value = 0
-                    photoViewModel.photos = listOf(Photo(it.avatarUrl, 0, "rotieba"))
-                    findNavController().navigate(MobileNavigationDirections.viewPhotos())
-                }
+                photoViewModel.currentIndex.value = 0
+                photoViewModel.photos = listOf(Photo(it.avatarUrl, 0, "rotieba"))
+                findNavController().navigate(MobileNavigationDirections.viewPhotos())
             }
             if (!viewModel.historyAdded) {
                 updateHistory()
@@ -182,7 +180,7 @@ class ForumFragment : BaseFragment() {
         }
         binding.orderButton.apply {
             viewModel.forumSortType.observe(viewLifecycleOwner) { sort ->
-                text = when (sort) {
+                text = when (sort!!) {
                     ForumSortType.REPLY_TIME -> getString(R.string.sort_by_reply_time)
                     ForumSortType.CREATE_TIME -> getString(R.string.sort_by_create_time)
                 }
@@ -218,7 +216,7 @@ class ForumFragment : BaseFragment() {
                     id = forumInfo.id.toString(),
                     time = System.currentTimeMillis(),
                     forumName = forumInfo.name,
-                    forumAvatar = forumInfo.avatarUrl!!
+                    forumAvatar = forumInfo.avatarUrl
                 )
             )
         }

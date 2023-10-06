@@ -11,6 +11,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
 
+@Suppress("Unchecked_Cast")
 class WebAPIResultConverter(
     private val gson: Gson,
     val type: Type
@@ -24,7 +25,7 @@ class WebAPIResultConverter(
 
     override fun convert(value: ResponseBody): Any {
         val jsonReader = gson.newJsonReader(value.charStream())
-        return value.use { v ->
+        return value.use { _ ->
             val result = adapter.read(jsonReader)
             if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
                 throw JsonIOException("JSON document was not fully consumed.")

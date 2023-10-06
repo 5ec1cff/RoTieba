@@ -73,6 +73,7 @@ object PhotoUtils {
         }
     }
 
+    @Suppress("deprecation")
     private fun savePreQ(context: Context, fileName: String, input: InputStream, isVideo: Boolean) {
         val imagesDir =
             Environment.getExternalStoragePublicDirectory(if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES)

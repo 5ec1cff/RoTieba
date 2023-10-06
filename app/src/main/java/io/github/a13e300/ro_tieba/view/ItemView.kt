@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.FrameLayout
 import java.lang.ref.WeakReference
 
+@Suppress("Unchecked_Cast")
 class ItemView : FrameLayout {
     data class ContextMenuInfo(
         val data: Any?,

@@ -95,6 +95,11 @@ android {
     }
 }
 
+// https://discuss.gradle.org/t/what-is-xlint-deprecation-and-how-to-use-it/40270
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+
 dependencies {
 
     implementation(libs.core.ktx)

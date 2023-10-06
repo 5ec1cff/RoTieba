@@ -90,7 +90,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/thread_title" />
 
-            <androidx.legacy.widget.Space
+            <Space
                 android:layout_height="4dp"
                 android:layout_width="match_parent"
                 android:id="@+id/image_space"
