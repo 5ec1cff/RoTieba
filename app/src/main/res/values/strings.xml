@@ -75,4 +75,9 @@
     <string name="login_tips_text">登录后可查看关注的吧</string>
     <string name="login">登录</string>
     <string name="open_forum_title">打开所在贴吧</string>
+    <string name="login_with_cookies">使用 cookies 登录</string>
+    <string name="login_with_webview">网页登录</string>
+    <string name="username">用户名</string>
+    <string name="bduss_title">BDUSS（必填）</string>
+    <string name="edit_account_title">编辑账户信息</string>
 </resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:text="@string/login_with_cookies"
+        style="@style/Widget.Material3.Button.TextButton.Dialog"
+        android:id="@+id/login_with_cookies" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:text="@string/login_with_webview"
+        style="@style/Widget.Material3.Button.TextButton.Dialog"
+        android:id="@+id/login_with_webview" />
+</LinearLayout>

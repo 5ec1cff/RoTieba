@@ -49,9 +49,9 @@ class AccountManager {
         }
     }
 
-    suspend fun addAccount(bduss: String) {
+    suspend fun addAccount(bduss: String, sToken: String? = null, baiduId: String? = null) {
         withContext(Dispatchers.IO) {
-            val account = TiebaLoginClient().login(bduss)
+            val account = TiebaLoginClient().login(bduss, sToken, baiduId)
             updateAccount(account)
         }
     }

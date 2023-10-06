@@ -31,14 +31,16 @@ class TiebaLoginClient {
         .build()
         .create(TiebaLoginAPI::class.java)
 
-    suspend fun login(bduss: String): Account {
+    suspend fun login(bduss: String, sToken: String? = null, baiduId: String? = null): Account {
         val r = loginAPI.login(bduss)
         return Account(
             uid = r.user.id,
             name = r.user.name,
             portrait = r.user.portrait,
             tbs = r.anti.tbs,
-            bduss = bduss
+            bduss = bduss,
+            stoken = sToken,
+            baiduId = baiduId
         )
     }
 }

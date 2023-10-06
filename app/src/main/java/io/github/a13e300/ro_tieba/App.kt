@@ -3,6 +3,7 @@ package io.github.a13e300.ro_tieba
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.webkit.WebView
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.room.Room
@@ -57,6 +58,9 @@ class App : Application(), SketchFactory {
         historyManager = HistoryManager()
         runBlocking {
             accountManager.initAccount()
+        }
+        if (BuildConfig.DEBUG) {
+            WebView.setWebContentsDebuggingEnabled(true)
         }
     }
 

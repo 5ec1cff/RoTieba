@@ -18,7 +18,8 @@ data class Account(
     val portrait: String? = null,
     val tbs: String? = null,
     val bduss: String? = null,
-    val stoken: String? = null
+    val stoken: String? = null,
+    val baiduId: String? = null
 )
 
 @Dao
