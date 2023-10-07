@@ -147,7 +147,6 @@ class ThreadFragment : BaseFragment() {
         viewModel.threadInfo.observe(viewLifecycleOwner) {
             binding.toolbar.title = it.forum?.name
             if (!viewModel.historyAdded) {
-                Logger.d("initial update")
                 updateHistory()
                 viewModel.historyAdded = true
             }

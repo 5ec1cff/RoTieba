@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isGone
@@ -38,10 +39,12 @@ import io.github.a13e300.ro_tieba.models.PostId
 import io.github.a13e300.ro_tieba.ui.thread.ThreadFragmentDirections
 import io.github.a13e300.ro_tieba.utils.navigateToPost
 import io.github.a13e300.ro_tieba.utils.parseThreadLink
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 val USER_REGEX = Regex("\\d+|tb\\.1\\..*")
 
@@ -57,12 +60,47 @@ class SearchFragment : BaseFragment() {
     private val mSuggestions = mutableListOf<Operation>()
     private lateinit var mSuggestionAdapter: SearchSuggestionAdapter
 
+    private var mFocusListener = ViewTreeObserver.OnWindowFocusChangeListener { focused ->
+        if (focused) updateClipboard()
+    }
+
+    private fun updateClipboard() {
+        if (!viewModel.searchAtForum) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val clip = withContext(Dispatchers.IO) {
+                    requireContext().getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(
+                        0
+                    )?.text
+                }
+                if (clip == mClipboardContent) return@launch
+                mClipboardContent = clip
+                if (viewModel.needShowSearch)
+                    updateOperations()
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         if (viewModel.needShowSearch) {
             binding.searchView.show()
             binding.searchView.requestFocusAndShowKeyboard()
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        requireActivity().window.decorView.viewTreeObserver.addOnWindowFocusChangeListener(
+            mFocusListener
+        )
+        if (activity?.hasWindowFocus() == true) updateClipboard()
+    }
+
+    override fun onDestroyView() {
+        requireActivity().window.decorView.viewTreeObserver.removeOnWindowFocusChangeListener(
+            mFocusListener
+        )
+        super.onDestroyView()
     }
 
     override fun onCreateView(
@@ -106,12 +144,6 @@ class SearchFragment : BaseFragment() {
             if (newState == SearchView.TransitionState.HIDDEN) viewModel.needShowSearch = false
             else if (newState == SearchView.TransitionState.SHOWN) {
                 viewModel.needShowSearch = true
-                if (!viewModel.searchAtForum) {
-                    mClipboardContent =
-                        requireContext().getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(
-                            0
-                        )?.text
-                }
                 updateOperations()
             }
         }
@@ -309,7 +341,7 @@ class SearchFragment : BaseFragment() {
 
                 is Operation.GoToThread -> {
                     if (op.fromClip)
-                        holder.binding.icon.setImageResource(R.drawable.ic_copy)
+                        holder.binding.icon.setImageResource(R.drawable.ic_paste)
                     else
                         holder.binding.icon.setImageResource(R.drawable.ic_idea)
                     holder.binding.title.text =

@@ -31,7 +31,6 @@ class LoginFragment : BaseFragment() {
         override fun onPageFinished(view: WebView?, url: String) {
             val cm = CookieManager.getInstance()
             val cookie = cm.getCookie(url)
-            Logger.d("url=$url cookie=$cookie")
             if (url.startsWith("https://tieba.baidu.com/index/tbwise/") || url.startsWith("https://tiebac.baidu.com/index/tbwise/")) {
                 var bduss: String? = null
                 var sToken: String? = null
