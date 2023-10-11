@@ -81,6 +81,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ThreadFragment : BaseFragment() {
+    private data class LastSeenThreadInfo(
+        val lastTid: Long,
+        val lastPid: Long,
+        val page: Int,
+        val floor: Int,
+        val offset: Int,
+        val seeLz: Boolean,
+        val reverse: Boolean
+    )
+
+    companion object {
+        const val FIRST_PAGE = 0
+        private var sLastSeenThreadInfo: LastSeenThreadInfo? = null
+    }
 
     private val viewModel: ThreadViewModel by viewModels()
     private val photoViewModel: PhotoViewModel by viewModels({ findNavController().currentBackStackEntry!! })
@@ -96,9 +110,26 @@ class ThreadFragment : BaseFragment() {
     ): View {
         binding = FragmentThreadBinding.inflate(inflater, container, false)
         if (!viewModel.initialized) {
-            val pn = if (args.pn > 0 && args.pid == 0L) args.pn else 0
+            var seeLz = args.seeLz != 0
+            var reverse = false
+            val lastSeen = sLastSeenThreadInfo
+            val pn = if (lastSeen != null && args.tid == lastSeen.lastTid
+                && (!seeLz || lastSeen.seeLz) // TODO: set an unspecified value
+                && args.pid == 0L // TODO: if args.pid == lastSeen.lastPid ?
+                && args.pn == FIRST_PAGE
+            ) {
+                    // TODO: thread cache
+                    viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByFloor(
+                        lastSeen.floor,
+                        highlight = false,
+                        offset = lastSeen.offset
+                    )
+                seeLz = lastSeen.seeLz
+                reverse = lastSeen.reverse
+                lastSeen.page
+            } else if (args.pn > 0 && args.pid == 0L) args.pn else FIRST_PAGE
             viewModel.threadConfig =
-                ThreadConfig(args.tid, args.pid, page = pn, seeLz = args.seeLz != 0)
+                ThreadConfig(args.tid, args.pid, page = pn, seeLz = seeLz, reverse = reverse)
         }
         postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->
@@ -117,19 +148,29 @@ class ThreadFragment : BaseFragment() {
                 recycler: RecyclerView.Recycler?,
                 state: RecyclerView.State?
             ) {
-                val request = viewModel.requestedScrollToPid
-                if (request != 0L) {
+                val request = viewModel.scrollRequest
+                if (request != null) {
                     val items = postAdapter.snapshot().items
                     if (items.isEmpty()) return
                     val idx =
-                        items.indexOfFirst { it is ThreadViewModel.PostModel.Post && it.post.postId == request }
+                        items.indexOfFirst {
+                            when (request) {
+                                is ThreadViewModel.ScrollRequest.ByPid ->
+                                    it is ThreadViewModel.PostModel.Post && it.post.postId == request.pid
+
+                                is ThreadViewModel.ScrollRequest.ByFloor ->
+                                    (request.floor != -1 && it is ThreadViewModel.PostModel.Post && it.post.floor == request.floor)
+                                            || (request.floor == -1 && it is ThreadViewModel.PostModel.Header)
+                            }
+                        }
                     if (idx != -1) {
-                        scrollToPosition(idx)
-                        mHighlightIdx = idx
+                        scrollToPositionWithOffset(idx, request.offset)
+                        if (request.highlight)
+                            mHighlightIdx = idx
                     } else {
                         Logger.e("could not find the position of $request at first load!")
                     }
-                    viewModel.requestedScrollToPid = 0L
+                    viewModel.scrollRequest = null
                 }
                 super.onLayoutChildren(recycler, state)
             }
@@ -276,6 +317,32 @@ class ThreadFragment : BaseFragment() {
         // context.getSystemService(InputMethodManager::class.java).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
     }
 
+    private fun saveLastSeenInfo() {
+        val pos = postLayoutManager.findFirstVisibleItemPosition()
+        if (pos == RecyclerView.NO_POSITION) return
+        val off = postLayoutManager.findViewByPosition(pos)?.top ?: return
+        val item = postAdapter.snapshot().items.getOrNull(pos) ?: return
+        val page: Int
+        val floor: Int
+        when (item) {
+            is ThreadViewModel.PostModel.Header -> {
+                page =
+                    (postAdapter.snapshot().items.getOrNull(pos + 1) as? ThreadViewModel.PostModel.Post)?.post?.page
+                        ?: 0
+                floor = -1
+            }
+
+            is ThreadViewModel.PostModel.Post -> {
+                page = item.post.page
+                floor = item.post.floor
+            }
+        }
+        sLastSeenThreadInfo = LastSeenThreadInfo(
+            args.tid, args.pid,
+            page, floor, off, viewModel.threadConfig.seeLz, viewModel.threadConfig.reverse
+        )
+    }
+
     private fun findCurrentPost() = postLayoutManager.findFirstVisibleItemPosition().let {
         if (it == RecyclerView.NO_POSITION) null
         else {
@@ -315,6 +382,7 @@ class ThreadFragment : BaseFragment() {
     override fun onPause() {
         super.onPause()
         updateHistory()
+        saveLastSeenInfo()
     }
 
     class MyItemDecoration(private val mMargin: Int) : ItemDecoration() {

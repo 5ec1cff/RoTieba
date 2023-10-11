@@ -37,7 +37,22 @@ data class ThreadConfig(
 )
 
 class ThreadViewModel : ViewModel() {
-    var requestedScrollToPid: Long = 0L
+    sealed class ScrollRequest {
+        abstract val offset: Int
+        abstract val highlight: Boolean
+
+        data class ByPid(
+            val pid: Long, override val offset: Int = 0,
+            override val highlight: Boolean = true
+        ) : ScrollRequest()
+
+        data class ByFloor(
+            val floor: Int, override val offset: Int = 0,
+            override val highlight: Boolean = true
+        ) : ScrollRequest()
+    }
+
+    var scrollRequest: ScrollRequest? = null
     var totalPage = 0
     var currentUid: String? = null
     lateinit var threadConfig: ThreadConfig
@@ -76,7 +91,7 @@ class ThreadViewModel : ViewModel() {
                         seeLz = threadConfig.seeLz
                     ).page
                     totalPage = pageInfo.totalPage
-                    requestedScrollToPid = pid
+                    scrollRequest = ScrollRequest.ByPid(pid)
                     pageInfo.currentPage
                 } catch (t: Throwable) {
                     // maybe pid not exists
