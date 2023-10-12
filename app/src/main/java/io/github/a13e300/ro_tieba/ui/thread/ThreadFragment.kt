@@ -118,7 +118,6 @@ class ThreadFragment : BaseFragment() {
                 && args.pid == 0L // TODO: if args.pid == lastSeen.lastPid ?
                 && args.pn == FIRST_PAGE
             ) {
-                    // TODO: thread cache
                     viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByFloor(
                         lastSeen.floor,
                         highlight = false,
@@ -130,6 +129,9 @@ class ThreadFragment : BaseFragment() {
             } else if (args.pn > 0 && args.pid == 0L) args.pn else FIRST_PAGE
             viewModel.threadConfig =
                 ThreadConfig(args.tid, args.pid, page = pn, seeLz = seeLz, reverse = reverse)
+            viewModel.init()
+            if (args.pid != 0L && viewModel.scrollRequest == null)
+                viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByPid(args.pid)
         }
         postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->
@@ -161,6 +163,9 @@ class ThreadFragment : BaseFragment() {
                                 is ThreadViewModel.ScrollRequest.ByFloor ->
                                     (request.floor != -1 && it is ThreadViewModel.PostModel.Post && it.post.floor == request.floor)
                                             || (request.floor == -1 && it is ThreadViewModel.PostModel.Header)
+
+                                is ThreadViewModel.ScrollRequest.ByPage ->
+                                    it is ThreadViewModel.PostModel.Post && it.post.page == request.page
                             }
                         }
                     if (idx != -1) {
@@ -201,6 +206,7 @@ class ThreadFragment : BaseFragment() {
                 return when (menuItem.itemId) {
                     R.id.refresh -> {
                         viewModel.threadConfig = viewModel.threadConfig.copy(pid = 0L, page = 0)
+                        viewModel.invalidateCache()
                         postAdapter.refresh()
                         true
                     }
@@ -277,6 +283,7 @@ class ThreadFragment : BaseFragment() {
 
         fun jump(pn: Int) {
             viewModel.threadConfig = viewModel.threadConfig.copy(pid = 0L, page = pn)
+            viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByPage(pn)
             postAdapter.refresh()
             dialog.dismiss()
         }
