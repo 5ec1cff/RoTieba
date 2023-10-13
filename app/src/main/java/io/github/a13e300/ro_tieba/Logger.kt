@@ -6,7 +6,8 @@ object Logger {
     private const val TAG = "RoTieba"
 
     fun d(msg: String) {
-        Log.d(TAG, msg)
+        if (BuildConfig.DEBUG)
+            Log.d(TAG, msg)
     }
 
     fun e(msg: String) {
