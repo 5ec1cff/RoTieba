@@ -266,6 +266,12 @@ class AccountFragment : Fragment() {
                         true
                     }
                 }
+                contextMenu.findItem(R.id.open_profile).apply {
+                    setOnMenuItemClickListener {
+                        findNavController().navigate(MobileNavigationDirections.showProfile(item.uid))
+                        true
+                    }
+                }
             }
         }
 

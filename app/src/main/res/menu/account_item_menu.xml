@@ -7,4 +7,7 @@
     <item
         android:title="@string/edit_account_title"
         android:id="@+id/edit_account" />
+    <item
+        android:title="@string/open_profile"
+        android:id="@+id/open_profile" />
 </menu>

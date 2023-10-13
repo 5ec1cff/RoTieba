@@ -81,4 +81,6 @@
     <string name="bduss_title">BDUSS（必填）</string>
     <string name="edit_account_title">编辑账户信息</string>
     <string name="input_to_search_box">输入到搜索框</string>
+    <string name="open_my_profile">打开我的个人资料</string>
+    <string name="open_profile">打开个人资料</string>
 </resources>

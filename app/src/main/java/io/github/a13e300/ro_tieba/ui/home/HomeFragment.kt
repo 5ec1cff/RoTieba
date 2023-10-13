@@ -3,12 +3,8 @@ package io.github.a13e300.ro_tieba.ui.home
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -21,6 +17,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.panpf.sketch.displayImage
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
@@ -29,6 +26,7 @@ import io.github.a13e300.ro_tieba.account.AccountManager
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBarItemBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentHomeBinding
 import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
+import io.github.a13e300.ro_tieba.models.AVATAR_THUMBNAIL
 import io.github.a13e300.ro_tieba.models.UserForum
 import io.github.a13e300.ro_tieba.ui.profile.UserForumComparator
 import io.github.a13e300.ro_tieba.utils.appendLevelSpan
@@ -52,29 +50,23 @@ class HomeFragment : BaseFragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding.toolbar.title = getString(R.string.title_home)
-        binding.toolbar.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.home_menu, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.search -> {
-                        findMainNavController()
-                            .navigate(MobileNavigationDirections.homeSearch())
-                        true
-                    }
-
-                    R.id.history -> {
-                        findMainNavController()
-                            .navigate(MobileNavigationDirections.showHistory())
-                        true
-                    }
-
-                    else -> false
+        binding.toolbar.setOnMenuItemClickListener { menuItem ->
+            return@setOnMenuItemClickListener when (menuItem.itemId) {
+                R.id.search -> {
+                    findMainNavController()
+                        .navigate(MobileNavigationDirections.homeSearch())
+                    true
                 }
+
+                R.id.history -> {
+                    findMainNavController()
+                        .navigate(MobileNavigationDirections.showHistory())
+                    true
+                }
+
+                else -> false
             }
-        })
+        }
         val forumAdapter = ForumAdapter(UserForumComparator)
         binding.barList.apply {
             layoutManager = GridLayoutManager(context, 2)
@@ -88,15 +80,36 @@ class HomeFragment : BaseFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 val currentUid = App.instance.accountManager.currentAccount.first().uid
                 viewModel.updateUid(currentUid)
-                binding.loginTipsScreen.isVisible = currentUid == AccountManager.ACCOUNT_ANONYMOUS
+                val anon = currentUid == AccountManager.ACCOUNT_ANONYMOUS
+                binding.loginTipsScreen.isVisible = anon
+                binding.accountIcon.apply {
+                    isVisible = !anon
+                    if (!anon) {
+                        val portrait = App.instance.client.account.portrait
+                        displayImage("$AVATAR_THUMBNAIL/$portrait") {
+                            placeholder(R.drawable.ic_account)
+                            error(R.drawable.ic_account)
+                        }
+                        setOnClickListener {
+                            lifecycleScope.launch {
+                                findMainNavController().navigate(
+                                    MobileNavigationDirections.showProfile(
+                                        currentUid
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        setOnClickListener(null)
+                    }
+                }
                 viewModel.flow.collect {
                     forumAdapter.submitData(it)
                 }
             }
         }
         forumAdapter.addLoadStateListener {
-            val state = it.refresh
-            when (state) {
+            when (val state = it.refresh) {
                 is LoadState.Error -> {
                     binding.tipsScreen.isVisible = true
                     binding.errorTips.text = state.error.message

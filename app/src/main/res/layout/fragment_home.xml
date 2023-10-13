@@ -15,9 +15,24 @@
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
+            app:menu="@menu/home_menu"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
-            app:layout_collapseMode="pin" />
+            app:layout_collapseMode="pin">
+
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="8dp"
+                app:round="16dp"
+                android:id="@+id/account_icon"
+                android:contentDescription="@string/open_my_profile"
+                android:tooltipText="@string/open_my_profile"
+                android:foreground="?selectableItemBackground"
+                android:layout_gravity="end"
+                android:visibility="gone"
+                android:src="@drawable/ic_account" />
+        </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
