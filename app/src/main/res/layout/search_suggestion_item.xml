@@ -29,18 +29,18 @@
         android:ellipsize="end"
         android:id="@+id/title" />
 
-    <Button
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_margin="16dp"
+    <ImageView
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:contentDescription="@string/input_to_search_box"
+        android:tooltipText="@string/input_to_search_box"
+        android:padding="20dp"
         android:visibility="gone"
-        android:padding="0dp"
-        style="@style/Widget.Material3.Button.TextButton.Icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/title"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="?selectableItemBackground"
-        app:icon="@drawable/ic_input"
+        android:src="@drawable/ic_input"
         android:id="@+id/input_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

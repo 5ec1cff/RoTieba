@@ -80,4 +80,5 @@
     <string name="username">用户名</string>
     <string name="bduss_title">BDUSS（必填）</string>
     <string name="edit_account_title">编辑账户信息</string>
+    <string name="input_to_search_box">输入到搜索框</string>
 </resources>

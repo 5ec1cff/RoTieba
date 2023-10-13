@@ -353,8 +353,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.SearchForum -> {
-                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
-                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
+                    holder.binding.icon.setImageResource(R.drawable.ic_search)
                     holder.binding.title.text = "搜吧：${op.name}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.name, 0)
@@ -362,7 +361,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.SearchPosts -> {
-                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
+                    holder.binding.icon.setImageResource(R.drawable.ic_search)
                     holder.binding.title.text = "搜帖：${op.keyword}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.keyword, 1)
@@ -370,7 +369,7 @@ class SearchFragment : BaseFragment() {
                 }
 
                 is Operation.SearchUsers -> {
-                    holder.binding.icon.setImageResource(R.drawable.ic_idea)
+                    holder.binding.icon.setImageResource(R.drawable.ic_search)
                     holder.binding.title.text = "搜人：${op.keyword}"
                     holder.binding.root.setOnClickListener {
                         performSearch(op.keyword, 2)
