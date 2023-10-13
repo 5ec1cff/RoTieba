@@ -96,7 +96,8 @@ class CachedThread private constructor(val tid: Long) {
             val totalPageLiveData = if (seeLz) mPageWithSeeLz else mPageNoSeeLz
             var totalPage: Int? = totalPageLiveData.value
             if (totalPage == null) {
-                totalPage = fetchAndCache(page, seeLz, reverse, false).totalPage
+                // DO NOT USE page 0
+                totalPage = fetchAndCache(1, seeLz, reverse, false).totalPage
             }
             val realPage = if (page == FIRST_PAGE) {
                 if (reverse) totalPage else 1
@@ -114,7 +115,7 @@ class CachedThread private constructor(val tid: Long) {
                 // so we query the last page
                 // this may not happen because there is no way to open a thread
                 // with specified pid and reversed order (for now)
-                totalPage = fetchAndCache(0, seeLz, reverse = false, useCache = false).totalPage
+                totalPage = fetchAndCache(1, seeLz, reverse = false, useCache = false).totalPage
             }
             val realPage = if (pageForPid == FIRST_PAGE) {
                 if (reverse) totalPage else 1
@@ -165,7 +166,8 @@ class CachedThread private constructor(val tid: Long) {
         reverse: Boolean,
         useCache: Boolean
     ): LoadResult {
-        if (useCache && page > 0) {
+        require(page > 0) { "invalid page $page" }
+        if (useCache) {
             if (mNeedInvalidate.getAndSet(false)) {
                 Logger.d("invalidate requested")
                 mPageCache.clear()
@@ -218,17 +220,13 @@ class CachedThread private constructor(val tid: Long) {
         val totalPage = response.page.totalPage
         val totalPageLiveData = if (seeLz) mPageWithSeeLz else mPageNoSeeLz
         totalPageLiveData.postValue(totalPage)
-        if ((page != 0 || !reverse) // reverse + page 0 does not return a normal page
-        // && (currentPage != totalPage) // we don't cache the last page
-        ) {
-            Logger.d("cached: tid=$tid page=$page seeLz=$seeLz reverse=$reverse totalPage=$totalPage")
-            mPageCache[PageCacheKey(currentPage, seeLz)] = PageCache(
-                posts = posts,
-                reverse = reverse,
-                hasPrev = response.page.hasPrev != 0,
-                hasNext = response.page.hasMore != 0
-            )
-        }
+        Logger.d("cached: tid=$tid page=$page (current=$currentPage) seeLz=$seeLz reverse=$reverse totalPage=$totalPage")
+        mPageCache[PageCacheKey(currentPage, seeLz)] = PageCache(
+            posts = posts,
+            reverse = reverse,
+            hasPrev = response.page.hasPrev != 0,
+            hasNext = response.page.hasMore != 0
+        )
         return LoadResult(
             posts = posts,
             totalPage = totalPage,
