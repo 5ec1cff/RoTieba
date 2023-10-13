@@ -2,16 +2,20 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <Preference
+        android:icon="@drawable/ic_info"
         android:key="version"
         android:title="@string/version" />
     <Preference
+        android:icon="@drawable/ic_account"
         android:key="user"
         android:title="@string/account_manage_title" />
     <SwitchPreference
+        android:icon="@drawable/ic_link"
         android:key="auto_link"
         android:title="@string/auto_link_title"
         android:persistent="false" />
     <SwitchPreference
+        android:icon="@drawable/ic_link"
         android:key="auto_bv"
         android:title="@string/auto_bv_title"
         android:persistent="false" />
