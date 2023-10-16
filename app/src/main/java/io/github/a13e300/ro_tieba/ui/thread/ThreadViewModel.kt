@@ -9,9 +9,7 @@ import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.insertHeaderItem
 import androidx.paging.map
-import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.Logger
-import io.github.a13e300.ro_tieba.api.TiebaClient
 import io.github.a13e300.ro_tieba.cache.CachedThread
 import io.github.a13e300.ro_tieba.models.Content
 import io.github.a13e300.ro_tieba.models.Photo
@@ -94,7 +92,6 @@ class ThreadViewModel : ViewModel() {
     }
 
     inner class PostPagingSource(
-        private val client: TiebaClient,
         private val threadConfig: ThreadConfig
     ) : PagingSource<Int, Post>() {
 
@@ -156,7 +153,7 @@ class ThreadViewModel : ViewModel() {
         PagingConfig(pageSize = 30)
     ) {
         photos.clear()
-        PostPagingSource(App.instance.client, threadConfig)
+        PostPagingSource(threadConfig)
     }.flow.map {
         it.map<Post, PostModel> { item -> PostModel.Post(item) }
             .insertHeaderItem(item = PostModel.Header)

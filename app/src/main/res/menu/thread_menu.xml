@@ -27,4 +27,8 @@
         android:id="@+id/open_forum"
         android:title="@string/open_forum_title"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/copy_link"
+        android:title="@string/copy_thread_link"
+        app:showAsAction="never" />
 </menu>

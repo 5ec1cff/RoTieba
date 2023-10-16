@@ -73,6 +73,7 @@ import io.github.a13e300.ro_tieba.utils.appendTextAutoLink
 import io.github.a13e300.ro_tieba.utils.appendUserInfo
 import io.github.a13e300.ro_tieba.utils.configureDefaults
 import io.github.a13e300.ro_tieba.utils.configureImageForContent
+import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
@@ -237,6 +238,13 @@ class ThreadFragment : BaseFragment() {
                     R.id.open_forum -> {
                         viewModel.threadInfo.value?.forum?.name?.let {
                             findNavController().navigate(MobileNavigationDirections.goToForum(it))
+                        }
+                        true
+                    }
+
+                    R.id.copy_link -> {
+                        viewModel.threadInfo.value?.let {
+                            copyText("https://tieba.baidu.com/p/${it.tid}?pid=${it.postId}${if (viewModel.threadConfig.seeLz) "&see_lz=1" else ""}")
                         }
                         true
                     }

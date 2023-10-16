@@ -83,4 +83,5 @@
     <string name="input_to_search_box">输入到搜索框</string>
     <string name="open_my_profile">打开我的个人资料</string>
     <string name="open_profile">打开个人资料</string>
+    <string name="copy_thread_link">复制帖子链接</string>
 </resources>
