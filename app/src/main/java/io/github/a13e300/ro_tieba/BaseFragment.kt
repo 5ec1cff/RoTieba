@@ -27,6 +27,7 @@ import io.github.a13e300.ro_tieba.utils.forceShowIcon
 import io.github.a13e300.ro_tieba.utils.openPostAtOtherClient
 import io.github.a13e300.ro_tieba.view.ItemView
 import io.github.a13e300.ro_tieba.view.SelectedLink
+import io.github.a13e300.ro_tieba.view.SelectedUser
 import kotlinx.coroutines.launch
 
 data class StatusBarConfig(
@@ -92,6 +93,9 @@ abstract class BaseFragment : Fragment() {
         }
         if (selected is Photo) {
             menu.setGroupVisible(R.id.group_photo, true)
+        }
+        if (selected is SelectedUser) {
+            menu.setGroupVisible(R.id.group_user, true)
         }
         ((menuInfo as? ItemView.ContextMenuInfo)?.data as? IPost)?.content?.find { it is Content.VideoContent }
             ?.let { menu.setGroupVisible(R.id.group_video, true) }
@@ -267,6 +271,13 @@ abstract class BaseFragment : Fragment() {
                     (selected as? Post)?.content?.find { it is Content.VideoContent } as? Content.VideoContent
                 video?.src?.also {
                     copyText(it)
+                }
+                return true
+            }
+
+            R.id.open_profile -> {
+                (selected as? SelectedUser)?.let {
+                    findNavController().navigate(MobileNavigationDirections.showProfile(it.uid.toString()))
                 }
                 return true
             }

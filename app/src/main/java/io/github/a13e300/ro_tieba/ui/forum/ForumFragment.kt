@@ -52,6 +52,7 @@ import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.openForumAtOtherClient
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
+import io.github.a13e300.ro_tieba.view.SelectedUser
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -301,6 +302,20 @@ class ForumFragment : BaseFragment() {
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile(thread.author.uidOrPortrait)
                 )
+            }
+
+            holder.binding.threadAvatar.setOnLongClickListener {
+                it.setSelectedData(SelectedUser(thread.author.uid))
+                false
+            }
+            holder.binding.threadUserName.setOnClickListener {
+                findNavController().navigate(
+                    MobileNavigationDirections.showProfile(thread.author.uidOrPortrait)
+                )
+            }
+            holder.binding.threadUserName.setOnLongClickListener {
+                it.setSelectedData(SelectedUser(thread.author.uid))
+                false
             }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {
                 append(

@@ -22,6 +22,7 @@
             android:layout_height="48dp"
             app:round="24dp"
             android:id="@+id/avatar"
+            android:foreground="?selectableItemBackground"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

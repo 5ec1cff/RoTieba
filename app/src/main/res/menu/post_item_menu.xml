@@ -40,6 +40,14 @@
             android:title="@string/copy_video_link_title"
             android:icon="@drawable/ic_copy" />
     </group>
+    <group
+        android:id="@+id/group_user"
+        android:visible="false">
+        <item
+            android:id="@+id/open_profile"
+            android:title="@string/open_profile"
+            android:icon="@drawable/ic_account" />
+    </group>
     <group android:id="@+id/group_post">
         <item
             android:id="@+id/copy_post_content"

@@ -53,6 +53,7 @@ import io.github.a13e300.ro_tieba.utils.configureImageForContent
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
+import io.github.a13e300.ro_tieba.view.SelectedUser
 import kotlinx.coroutines.launch
 
 class CommentFragment : BaseFragment() {
@@ -211,6 +212,19 @@ class CommentFragment : BaseFragment() {
             holder.binding.avatar.setOnClickListener {
                 findNavController().navigate(MobileNavigationDirections.showProfile(comment.user.uidOrPortrait))
             }
+            holder.binding.avatar.setOnLongClickListener {
+                it.setSelectedData(SelectedUser(comment.user.uid))
+                false
+            }
+            holder.binding.accountName.setOnClickListener {
+                findNavController().navigate(
+                    MobileNavigationDirections.showProfile(comment.user.uidOrPortrait)
+                )
+            }
+            holder.binding.accountName.setOnLongClickListener {
+                it.setSelectedData(SelectedUser(comment.user.uid))
+                false
+            }
             holder.binding.description.text = SpannableStringBuilder()
                 .append(
                     "时间 ",
@@ -246,6 +260,19 @@ class CommentFragment : BaseFragment() {
                 findNavController().navigate(
                     MobileNavigationDirections.showProfile(post.user.uidOrPortrait)
                 )
+            }
+            holder.binding.avatar.setOnLongClickListener {
+                it.setSelectedData(SelectedUser(post.user.uid))
+                false
+            }
+            holder.binding.accountName.setOnClickListener {
+                findNavController().navigate(
+                    MobileNavigationDirections.showProfile(post.user.uidOrPortrait)
+                )
+            }
+            holder.binding.accountName.setOnLongClickListener {
+                it.setSelectedData(SelectedUser(post.user.uid))
+                false
             }
             fun addTextView() {
                 if (lastString == null) return
