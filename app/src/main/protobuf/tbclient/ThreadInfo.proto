@@ -6,6 +6,7 @@ import "PollInfo.proto";
 import "PbContent.proto";
 import "Agree.proto";
 import "Media.proto";
+import "Abstract.proto";
 
 message ThreadInfo {
   int64 id = 1;
@@ -17,6 +18,7 @@ message ThreadInfo {
   int32 is_good = 10;
   int32 is_voice_thread = 15;
   User author = 18;
+  repeated Abstract abstracts = 21;
   repeated Media media = 22;
   int32 thread_type = 26;
   int64 fid = 27;

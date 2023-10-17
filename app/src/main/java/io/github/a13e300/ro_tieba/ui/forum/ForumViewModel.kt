@@ -86,7 +86,7 @@ class ForumViewModel : ViewModel() {
                 TiebaThread(
                     p.id,
                     p.firstPostId,
-                    p.title,
+                    p.title.ifEmpty { if (p.isTop == 1) p.abstractsList.joinToString(" ") { it.text } else "" },
                     users[p.authorId] ?: User(),
                     p.firstPostContentList.toPostContent(),
                     Date(p.lastTimeInt.toLong() * 1000),
