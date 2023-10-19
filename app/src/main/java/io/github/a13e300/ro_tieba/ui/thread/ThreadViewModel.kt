@@ -8,6 +8,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.insertHeaderItem
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.cache.CachedThread
@@ -31,20 +32,24 @@ class ThreadViewModel : ViewModel() {
     sealed class ScrollRequest {
         abstract val offset: Int
         abstract val highlight: Boolean
+        abstract val offsetToBar: Boolean
 
         data class ByPid(
             val pid: Long, override val offset: Int = 0,
-            override val highlight: Boolean = true
+            override val highlight: Boolean = true,
+            override val offsetToBar: Boolean = true
         ) : ScrollRequest()
 
         data class ByFloor(
             val floor: Int, override val offset: Int = 0,
-            override val highlight: Boolean = true
+            override val highlight: Boolean = true,
+            override val offsetToBar: Boolean = false
         ) : ScrollRequest()
 
         data class ByPage(
             val page: Int, override val offset: Int = 0,
-            override val highlight: Boolean = false
+            override val highlight: Boolean = false,
+            override val offsetToBar: Boolean = true
         ) : ScrollRequest()
     }
 
@@ -89,6 +94,7 @@ class ThreadViewModel : ViewModel() {
     sealed class PostModel {
         data class Post(val post: io.github.a13e300.ro_tieba.models.Post) : PostModel()
         data object Header : PostModel()
+        data object Bar : PostModel()
     }
 
     inner class PostPagingSource(
@@ -156,6 +162,12 @@ class ThreadViewModel : ViewModel() {
         PostPagingSource(threadConfig)
     }.flow.map {
         it.map<Post, PostModel> { item -> PostModel.Post(item) }
+            .insertSeparators { before: PostModel?, after: PostModel? ->
+                if ((!threadConfig.reverse && (before as? PostModel.Post)?.post?.floor == 1)
+                    || (threadConfig.reverse && before == null)
+                ) PostModel.Bar
+                else null
+            }
             .insertHeaderItem(item = PostModel.Header)
     }.cachedIn(viewModelScope)
 }

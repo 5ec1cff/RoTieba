@@ -22,6 +22,7 @@ import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -32,7 +33,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.LoadState
-import androidx.paging.LoadStateAdapter
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,12 +47,12 @@ import io.github.a13e300.ro_tieba.Logger
 import io.github.a13e300.ro_tieba.MobileNavigationDirections
 import io.github.a13e300.ro_tieba.R
 import io.github.a13e300.ro_tieba.databinding.DialogJumpPageBinding
+import io.github.a13e300.ro_tieba.databinding.FragmentThreadBarBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadCommentPreviewBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadHeaderBinding
 import io.github.a13e300.ro_tieba.databinding.FragmentThreadPostItemBinding
 import io.github.a13e300.ro_tieba.databinding.ImageContentBinding
-import io.github.a13e300.ro_tieba.databinding.ThreadListFooterBinding
 import io.github.a13e300.ro_tieba.databinding.VideoViewBinding
 import io.github.a13e300.ro_tieba.db.EntryType
 import io.github.a13e300.ro_tieba.db.HistoryEntry
@@ -75,6 +75,8 @@ import io.github.a13e300.ro_tieba.utils.configureDefaults
 import io.github.a13e300.ro_tieba.utils.configureImageForContent
 import io.github.a13e300.ro_tieba.utils.copyText
 import io.github.a13e300.ro_tieba.utils.displayImageInList
+import io.github.a13e300.ro_tieba.utils.firstOrNullFrom
+import io.github.a13e300.ro_tieba.utils.indexOfFrom
 import io.github.a13e300.ro_tieba.utils.setSelectedData
 import io.github.a13e300.ro_tieba.utils.toSimpleString
 import io.github.a13e300.ro_tieba.view.ContentTextView
@@ -172,6 +174,8 @@ class ThreadFragment : BaseFragment() {
                         }
                     if (idx != -1) {
                         scrollToPositionWithOffset(idx, request.offset)
+                        if (request.offsetToBar)
+                            prepareScrollOffsetToBar()
                         if (request.highlight)
                             mHighlightIdx = idx
                     } else {
@@ -191,15 +195,18 @@ class ThreadFragment : BaseFragment() {
                 )
             )
             addOnScrollListener(PauseLoadOnQuickScrollListener())
+            addOnScrollListener(mScrollListener)
         }
         viewModel.threadInfo.observe(viewLifecycleOwner) {
             binding.toolbar.title = it.forum?.name
+            notifyBarUpdate()
             if (!viewModel.historyAdded) {
                 updateHistory()
                 viewModel.historyAdded = true
             }
         }
         setupToolbar(binding.toolbar)
+        bindBar(binding.includeThreadBar)
         binding.toolbar.setOnClickListener {
             binding.list.scrollToPosition(0)
         }
@@ -215,18 +222,13 @@ class ThreadFragment : BaseFragment() {
 
                     R.id.sort -> {
                         val v = !menuItem.isChecked
-                        menuItem.setChecked(v)
-                        viewModel.threadConfig = viewModel.threadConfig.copy(reverse = v)
-                        postAdapter.refresh()
+                        setReverse(v)
                         true
                     }
 
                     R.id.see_lz -> {
                         val v = !menuItem.isChecked
-                        menuItem.setChecked(v)
-                        viewModel.threadConfig =
-                            viewModel.threadConfig.copy(seeLz = v, pid = 0L, page = 0)
-                        postAdapter.refresh()
+                        setSeeLz(v)
                         true
                     }
 
@@ -274,6 +276,93 @@ class ThreadFragment : BaseFragment() {
             }
         }
         return binding.root
+    }
+
+    private fun setSeeLz(v: Boolean) {
+        viewModel.threadConfig =
+            viewModel.threadConfig.copy(seeLz = v, pid = 0L, page = 0)
+        notifyBarUpdate()
+        postAdapter.refresh()
+        binding.toolbar.menu.findItem(R.id.see_lz).setChecked(viewModel.threadConfig.seeLz)
+    }
+
+    private fun setReverse(v: Boolean) {
+        viewModel.threadConfig = viewModel.threadConfig.copy(reverse = v)
+        notifyBarUpdate()
+        postAdapter.refresh()
+        binding.toolbar.menu.findItem(R.id.sort).setChecked(viewModel.threadConfig.reverse)
+    }
+
+    private fun notifyBarUpdate() {
+        val barIdx =
+            postAdapter.snapshot().items.indexOfFirst { it is ThreadViewModel.PostModel.Bar }
+        if (barIdx != -1)
+            postAdapter.notifyItemChanged(barIdx)
+        updateBar(binding.includeThreadBar)
+    }
+
+    private fun bindBar(bar: FragmentThreadBarBinding) {
+        bar.seeLzBtn.setOnClickListener {
+            setSeeLz(!bar.seeLzBtn.isChecked)
+        }
+        bar.sortBtn.setOnClickListener {
+            setReverse(!bar.sortBtn.isChecked)
+        }
+        bar.jumpBtn.setOnClickListener {
+            handleJumpPage()
+        }
+    }
+
+    private fun updateBar(bar: FragmentThreadBarBinding) {
+        val data = viewModel.threadInfo.value ?: return
+        val current = findCurrentPost()
+        bar.count.text = "${data.replyNum} 条回复"
+        bar.seeLzBtn.isChecked = viewModel.threadConfig.seeLz
+        bar.sortBtn.isChecked = viewModel.threadConfig.reverse
+        bar.jumpBtn.text = "第 ${current?.page} / ${viewModel.totalPage} 页"
+    }
+
+    private var mScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            val pos = postLayoutManager.findFirstVisibleItemPosition()
+            if (pos == RecyclerView.NO_POSITION) return
+            val shouldHide = when (val item = postAdapter.snapshot()[pos]) {
+                is ThreadViewModel.PostModel.Header -> true
+                is ThreadViewModel.PostModel.Bar -> false
+                is ThreadViewModel.PostModel.Post -> {
+                    item.post.floor == 1
+                }
+
+                null -> return
+            }
+            updateBar(binding.includeThreadBar)
+            ViewCompat.postOnAnimation(binding.mainStickyContainerLayout) {
+                binding.mainStickyContainerLayout.isGone = shouldHide
+            }
+        }
+    }
+
+    private val mScrollOffsetToBarListener =
+        object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(
+                view: View,
+                p1: Int,
+                p2: Int,
+                p3: Int,
+                p4: Int,
+                p5: Int,
+                p6: Int,
+                p7: Int,
+                p8: Int
+            ) {
+                val h = view.height
+                binding.list.scrollBy(0, -h)
+                view.removeOnLayoutChangeListener(this)
+            }
+        }
+
+    private fun prepareScrollOffsetToBar() {
+        binding.mainStickyContainerLayout.addOnLayoutChangeListener(mScrollOffsetToBarListener)
     }
 
     private fun handleJumpPage() {
@@ -334,25 +423,16 @@ class ThreadFragment : BaseFragment() {
     }
 
     private fun saveLastSeenInfo() {
-        val pos = postLayoutManager.findFirstVisibleItemPosition()
-        if (pos == RecyclerView.NO_POSITION) return
-        val off = postLayoutManager.findViewByPosition(pos)?.top ?: return
-        val item = postAdapter.snapshot().items.getOrNull(pos) ?: return
-        val page: Int
-        val floor: Int
-        when (item) {
-            is ThreadViewModel.PostModel.Header -> {
-                page =
-                    (postAdapter.snapshot().items.getOrNull(pos + 1) as? ThreadViewModel.PostModel.Post)?.post?.page
-                        ?: 0
-                floor = -1
-            }
-
-            is ThreadViewModel.PostModel.Post -> {
-                page = item.post.page
-                floor = item.post.floor
-            }
+        val pos = postLayoutManager.findFirstVisibleItemPosition().let {
+            if (it == RecyclerView.NO_POSITION) return
+            postAdapter.snapshot().items.indexOfFrom(it) { item -> item is ThreadViewModel.PostModel.Post }
         }
+        if (pos == -1) return
+        val off = postLayoutManager.findViewByPosition(pos)?.top ?: return
+        val item = postAdapter.snapshot().items[pos] as ThreadViewModel.PostModel.Post
+        val page = item.post.page
+        val floor = item.post.floor
+        // TODO: remove floor = -1
         sLastSeenThreadInfo = LastSeenThreadInfo(
             args.tid, args.pid,
             page, floor, off, viewModel.threadConfig.seeLz, viewModel.threadConfig.reverse
@@ -362,13 +442,8 @@ class ThreadFragment : BaseFragment() {
     private fun findCurrentPost() = postLayoutManager.findFirstVisibleItemPosition().let {
         if (it == RecyclerView.NO_POSITION) null
         else {
-            postAdapter.snapshot().items.let { items ->
-                (items[it].let { a ->
-                    if (a is ThreadViewModel.PostModel.Header) {
-                        items.getOrNull(it + 1)?.let { b -> (b as? ThreadViewModel.PostModel.Post) }
-                    } else (a as? ThreadViewModel.PostModel.Post)
-                })?.post
-            }
+            (postAdapter.snapshot().items.firstOrNullFrom(it) { item -> item is ThreadViewModel.PostModel.Post }
+                    as? ThreadViewModel.PostModel.Post)?.post
         }
     }
 
@@ -401,7 +476,7 @@ class ThreadFragment : BaseFragment() {
         saveLastSeenInfo()
     }
 
-    class MyItemDecoration(private val mMargin: Int) : ItemDecoration() {
+    inner class MyItemDecoration(private val mMargin: Int) : ItemDecoration() {
         override fun getItemOffsets(
             outRect: Rect,
             view: View,
@@ -409,25 +484,11 @@ class ThreadFragment : BaseFragment() {
             state: RecyclerView.State
         ) {
             val pos = parent.getChildAdapterPosition(view)
-            if (pos >= 2) {
+            if (pos == RecyclerView.NO_POSITION) return
+            val item = postAdapter.snapshot().items[pos]
+            val minMarginFloor = if (viewModel.threadConfig.reverse) 0 else 2
+            if (item is ThreadViewModel.PostModel.Post && item.post.floor > minMarginFloor) {
                 outRect.set(0, mMargin, 0, 0)
-            }
-        }
-    }
-
-    class FooterHolder(val binding: ThreadListFooterBinding) : ViewHolder(binding.root)
-
-    inner class FooterAdapter : LoadStateAdapter<FooterHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): FooterHolder {
-            return FooterHolder(ThreadListFooterBinding.inflate(layoutInflater, parent, false))
-        }
-
-        override fun onBindViewHolder(holder: FooterHolder, loadState: LoadState) {
-            val isErr = loadState is LoadState.Error
-            holder.binding.retryButton.isVisible = isErr
-            holder.binding.errorMessage.isVisible = isErr
-            if (loadState is LoadState.Error) {
-                holder.binding.errorMessage.text = loadState.error.message
             }
         }
     }
@@ -436,6 +497,9 @@ class ThreadFragment : BaseFragment() {
         ViewHolder(binding.root)
 
     class HeaderViewHolder(val binding: FragmentThreadHeaderBinding) :
+        ViewHolder(binding.root)
+
+    class BarViewHolder(val binding: FragmentThreadBarBinding) :
         ViewHolder(binding.root)
 
 
@@ -448,6 +512,7 @@ class ThreadFragment : BaseFragment() {
             return when (peek(position)) {
                 is ThreadViewModel.PostModel.Post -> R.layout.fragment_thread_post_item
                 is ThreadViewModel.PostModel.Header -> R.layout.fragment_thread_header
+                is ThreadViewModel.PostModel.Bar -> R.layout.fragment_thread_bar
                 else -> throw IllegalStateException("unknown item")
             }
         }
@@ -462,6 +527,9 @@ class ThreadFragment : BaseFragment() {
                 }
             } else if (holder is HeaderViewHolder) {
                 bindForHeader(holder)
+            } else if (holder is BarViewHolder) {
+                bindBar(holder.binding)
+                updateBar(holder.binding)
             }
         }
 
@@ -786,6 +854,12 @@ class ThreadFragment : BaseFragment() {
 
                 R.layout.fragment_thread_header -> HeaderViewHolder(
                     FragmentThreadHeaderBinding.inflate(
+                        LayoutInflater.from(parent.context), parent, false
+                    )
+                )
+
+                R.layout.fragment_thread_bar -> BarViewHolder(
+                    FragmentThreadBarBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false
                     )
                 )

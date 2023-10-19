@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background_with_divider"
+    android:orientation="vertical"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="16dp">
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/count"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/jump_btn"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tooltipText="@string/jump_page_title"
+        app:icon="@drawable/ic_jump"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:id="@+id/jump_btn"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/count"
+        app:layout_constraintEnd_toStartOf="@id/sort_btn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tooltipText="@string/sort_title"
+        app:icon="@drawable/ic_sort"
+        app:toggleCheckedStateOnClick="false"
+        style="?materialIconButtonStyle"
+        android:id="@+id/sort_btn"
+        android:checkable="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/jump_btn"
+        app:layout_constraintEnd_toStartOf="@id/see_lz_btn" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tooltipText="@string/see_lz_title"
+        app:icon="@drawable/ic_account"
+        app:toggleCheckedStateOnClick="false"
+        style="?materialIconButtonStyle"
+        android:id="@+id/see_lz_btn"
+        android:checkable="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sort_btn"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

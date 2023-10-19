@@ -243,7 +243,7 @@ class CachedThread private constructor(val tid: Long) {
                 title = response.thread.title,
                 author = response.thread.author.toUser(),
                 content = listOf(),
-                replyNum = response.thread.replyNum,
+                replyNum = response.thread.replyNum - 1, // TODO: fix reply num
                 time = Date(response.thread.createTime.toLong() * 1000), // TODO: remove this useless date
                 postId = response.thread.postId,
                 isGood = response.thread.isGood == 1,

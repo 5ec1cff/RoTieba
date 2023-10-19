@@ -402,3 +402,19 @@ fun DisplayRequest.Builder.configureDefaults(context: Context) {
     placeholder(ColorStateImage(color))
     error(IconStateImage(R.drawable.ic_error, IntColor(color)))
 }
+
+inline fun <T> List<T>.firstOrNullFrom(from: Int = 0, predicate: (T) -> Boolean): T? {
+    for (i in from until size) {
+        val item = this[i]
+        if (predicate(item)) return item
+    }
+    return null
+}
+
+inline fun <T> List<T>.indexOfFrom(from: Int = 0, predicate: (T) -> Boolean): Int {
+    for (i in from until size) {
+        val item = this[i]
+        if (predicate(item)) return i
+    }
+    return -1
+}

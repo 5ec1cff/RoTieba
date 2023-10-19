@@ -31,4 +31,16 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:fitsSystemWindowsInsets="bottom" />
 
+    <FrameLayout
+        android:id="@+id/mainStickyContainerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="io.github.a13e300.ro_tieba.misc.ContainerBehavior"
+        android:visibility="gone">
+
+        <include
+            android:id="@+id/include_thread_bar"
+            layout="@layout/fragment_thread_bar" />
+    </FrameLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
