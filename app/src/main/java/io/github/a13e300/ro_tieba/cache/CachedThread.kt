@@ -79,7 +79,8 @@ class CachedThread private constructor(val tid: Long) {
         val posts: List<Post>,
         val hasPrev: Boolean,
         val hasNext: Boolean,
-        val reverse: Boolean
+        val reverse: Boolean,
+        val broken: Boolean
     )
 
     data class LoadResult(
@@ -173,7 +174,7 @@ class CachedThread private constructor(val tid: Long) {
                 mPageCache.clear()
             }
             mPageCache[PageCacheKey(page, seeLz)]?.let { cached ->
-                Logger.d("use cached: tid=$tid page=$page seeLz=$seeLz reverse=$reverse")
+                Logger.d("use cached: tid=$tid page=$page seeLz=$seeLz reverse=$reverse broken=${cached.broken}")
                 return LoadResult(
                     posts = if (reverse xor cached.reverse) cached.posts.asReversed() else cached.posts,
                     totalPage = 0, // from cache
@@ -187,8 +188,9 @@ class CachedThread private constructor(val tid: Long) {
             tid, page = page,
             sort = if (reverse) 1 else 0, seeLz = seeLz
         )
-        updateThreadInfo(response)
-        val currentPage = response.page.currentPage
+        if (response.hasThread() && response.hasForum())
+            updateThreadInfo(response)
+        val currentPage = if (response.hasPage()) response.page.currentPage else page
         val users = response.userListList.associateBy({ it.id },
             { it.toUser() })
         val posts = response.postListList.map { p ->
@@ -217,22 +219,40 @@ class CachedThread private constructor(val tid: Long) {
                 page = currentPage
             )
         }
-        val totalPage = response.page.totalPage
+        val totalPage: Int
         val totalPageLiveData = if (seeLz) mPageWithSeeLz else mPageNoSeeLz
-        totalPageLiveData.postValue(totalPage)
+        val hasPrev: Boolean
+        val hasNext: Boolean
+        val broken: Boolean
+        if (response.hasPage()) {
+            totalPage = response.page.totalPage
+            totalPageLiveData.postValue(totalPage)
+            hasPrev = response.page.hasPrev != 0
+            hasNext = response.page.hasMore != 0
+            broken = false
+        } else {
+            // broken page
+            // example: tid 7781163966 page 2
+            totalPage = totalPageLiveData.value!!
+            hasPrev = if (reverse) page < totalPage else page > 1
+            hasNext = if (!reverse) page < totalPage else page > 1
+            broken = true
+            Logger.e("received broken page in $tid page=$page seeLz=$seeLz total=$totalPage reverse=$reverse hasPrev=$hasPrev hasNext=$hasNext")
+        }
         Logger.d("cached: tid=$tid page=$page (current=$currentPage) seeLz=$seeLz reverse=$reverse totalPage=$totalPage")
         mPageCache[PageCacheKey(currentPage, seeLz)] = PageCache(
             posts = posts,
             reverse = reverse,
-            hasPrev = response.page.hasPrev != 0,
-            hasNext = response.page.hasMore != 0
+            hasPrev = hasPrev,
+            hasNext = hasNext,
+            broken = broken
         )
         return LoadResult(
             posts = posts,
             totalPage = totalPage,
             page = currentPage,
-            hasPrev = response.page.hasPrev != 0,
-            hasNext = response.page.hasMore != 0
+            hasPrev = hasPrev,
+            hasNext = hasNext
         )
     }
 
