@@ -148,6 +148,7 @@ class ThreadFragment : BaseFragment() {
                     }
                     .show()
             }
+            if (state.refresh is LoadState.NotLoading) notifyBarUpdate()
         }
         postLayoutManager = object : LinearLayoutManager(context) {
             override fun onLayoutChildren(
@@ -440,8 +441,9 @@ class ThreadFragment : BaseFragment() {
     }
 
     private fun findCurrentPost() = postLayoutManager.findFirstVisibleItemPosition().let {
-        if (it == RecyclerView.NO_POSITION) null
-        else {
+        if (it == RecyclerView.NO_POSITION) {
+            null
+        } else {
             (postAdapter.snapshot().items.firstOrNullFrom(it) { item -> item is ThreadViewModel.PostModel.Post }
                     as? ThreadViewModel.PostModel.Post)?.post
         }
