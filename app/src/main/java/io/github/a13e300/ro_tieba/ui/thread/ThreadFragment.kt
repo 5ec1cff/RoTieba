@@ -116,10 +116,11 @@ class ThreadFragment : BaseFragment() {
         if (!viewModel.initialized) {
             var seeLz = args.seeLz != 0
             var reverse = false
+            var pid = args.pid
             val lastSeen = sLastSeenThreadInfo
             val pn = if (lastSeen != null && args.tid == lastSeen.lastTid
                 && (!seeLz || lastSeen.seeLz) // TODO: set an unspecified value
-                && args.pid == 0L // TODO: if args.pid == lastSeen.lastPid ?
+                && (args.pid == 0L || args.pid == lastSeen.lastPid)
                 && args.pn == FIRST_PAGE
             ) {
                     viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByFloor(
@@ -129,13 +130,14 @@ class ThreadFragment : BaseFragment() {
                     )
                 seeLz = lastSeen.seeLz
                 reverse = lastSeen.reverse
+                pid = 0L
                 lastSeen.page
             } else if (args.pn > 0 && args.pid == 0L) args.pn else FIRST_PAGE
             viewModel.threadConfig =
-                ThreadConfig(args.tid, args.pid, page = pn, seeLz = seeLz, reverse = reverse)
+                ThreadConfig(args.tid, pid, page = pn, seeLz = seeLz, reverse = reverse)
             viewModel.init()
-            if (args.pid != 0L && viewModel.scrollRequest == null)
-                viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByPid(args.pid)
+            if (pid != 0L && viewModel.scrollRequest == null)
+                viewModel.scrollRequest = ThreadViewModel.ScrollRequest.ByPid(pid)
         }
         postAdapter = PostAdapter(PostComparator)
         postAdapter.addLoadStateListener { state ->
