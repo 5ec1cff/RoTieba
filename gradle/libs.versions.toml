@@ -14,7 +14,7 @@ material = "1.10.0"
 constraintlayout = "2.1.4"
 lifecycle-livedata-ktx = "2.6.2"
 lifecycle-viewmodel-ktx = "2.6.2"
-navigation = "2.7.4"
+navigation = "2.7.5"
 
 paging-runtime = "3.2.1"
 preference = "1.2.1"
