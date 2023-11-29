@@ -22,7 +22,7 @@ protobuf = "3.25.1"
 retrofit = "2.9.0"
 legacy-support-v4 = "1.0.0"
 recyclerview = "1.3.2"
-room-runtime = "2.6.0"
+room-runtime = "2.6.1"
 sketch = "3.2.5"
 
 [libraries]
