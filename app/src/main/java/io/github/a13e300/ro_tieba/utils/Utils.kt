@@ -105,26 +105,35 @@ fun Date.toSimpleString(): String {
 
 fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
     var imageOrder = 0
-    return map {
+    val result = mutableListOf<Content>()
         // https://github.com/Starry-OvO/aiotieba/blob/ed8867f6ac73b523389dd1dcbdd4b5f62a16ff81/aiotieba/api/get_posts/_classdef.py
-        when (it.type) {
+    for (item in this) {
+        val content = when (item.type) {
             0, // plain text
             9, // phone number
             18, // hash tag
             27, // keyword?
-            -> Content.TextContent(it.text)
+            -> {
+                val last = result.lastOrNull() as? Content.TextContent
+                if (last == null)
+                    Content.TextContent(item.text)
+                else {
+                    result.removeLast()
+                    Content.TextContent(last.text + item.text)
+                }
+            }
 
-            1 -> Content.LinkContent(it.text, it.link.convertTiebaUrl())
-            4 -> Content.UserContent(it.text, it.uid)
+            1 -> Content.LinkContent(item.text, item.link.convertTiebaUrl())
+            4 -> Content.UserContent(item.text, item.uid)
 
-            2, 11 -> Content.EmojiContent(it.text)
+            2, 11 -> Content.EmojiContent(item.text)
 
             3, 20 -> {
                 imageOrder += 1
-                val sizes = it.bsize.split(",")
+                val sizes = item.bsize.split(",")
                 Content.ImageContent(
-                    it.cdnSrc.ifEmpty { it.originSrc },
-                    it.originSrc,
+                    item.cdnSrc.ifEmpty { item.originSrc },
+                    item.originSrc,
                     sizes[0].toInt(),
                     sizes[1].toInt(),
                     imageOrder
@@ -132,18 +141,20 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
             }
 
             5 -> Content.VideoContent(
-                src = Uri.parse(it.link).buildUpon().scheme("https").build().toString(),
-                previewSrc = it.src,
-                width = it.width,
-                height = it.height,
-                duration = it.duringTime,
-                size = it.originSize,
-                text = it.text
+                src = Uri.parse(item.link).buildUpon().scheme("https").build().toString(),
+                previewSrc = item.src,
+                width = item.width,
+                height = item.height,
+                duration = item.duringTime,
+                size = item.originSize,
+                text = item.text
             )
 
-            else -> Content.UnknownContent(it.type, it.text, it.toString())
+            else -> Content.UnknownContent(item.type, item.text, item.toString())
         }
+        result.add(content)
     }
+    return result
 }
 
 fun List<UserPostResponse.PostContent>.replyContentToPostContent(): List<Content> = map { c ->
