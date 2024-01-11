@@ -305,7 +305,7 @@ class ForumFragment : BaseFragment() {
             }
 
             holder.binding.threadAvatar.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(thread.author.uid))
+                it.setSelectedData(SelectedUser(thread.author.uidOrPortrait))
                 false
             }
             holder.binding.threadUserName.setOnClickListener {
@@ -314,7 +314,7 @@ class ForumFragment : BaseFragment() {
                 )
             }
             holder.binding.threadUserName.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(thread.author.uid))
+                it.setSelectedData(SelectedUser(thread.author.uidOrPortrait))
                 false
             }
             holder.binding.threadInfo.text = SpannableStringBuilder().apply {

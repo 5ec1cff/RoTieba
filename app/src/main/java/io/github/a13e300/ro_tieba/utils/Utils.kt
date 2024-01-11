@@ -124,7 +124,7 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
             }
 
             1 -> Content.LinkContent(item.text, item.link.convertTiebaUrl())
-            4 -> Content.UserContent(item.text, item.uid)
+            4 -> Content.UserContent(item.text, item.uid.toString())
 
             2, 11 -> Content.EmojiContent(item.text)
 
@@ -201,8 +201,8 @@ fun SpannableStringBuilder.appendSimpleContent(
             is Content.UserContent -> {
                 if (useUrlSpan) {
                     append(
-                        content.text.ifEmpty { "UID:${content.uid}" },
-                        UserSpan(content.uid),
+                        content.text.ifEmpty { "UID:${content.uidOrPortrait}" },
+                        UserSpan(content.uidOrPortrait),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 } else append(content.text)
@@ -428,4 +428,45 @@ inline fun <T> List<T>.indexOfFrom(from: Int = 0, predicate: (T) -> Boolean): In
         if (predicate(item)) return i
     }
     return -1
+}
+
+const val USER_REGEX =
+    "<a .* portrait=\"(?<portrait>.*?)\" target=\"_blank\" class=\"at\"> (?<name>.*?)</a>"
+const val EMOTION_REGEX =
+    "<img class=\"BDE_Smiley\" .* src=\"http://static\\.tieba\\.baidu\\.com/tb/editor/images/client/(?<emotionname>.*?)\\.png\" >"
+const val LINK_REGEX = "<a href=\"(?<url>.*?)\" .*?>(?<linktext>.*?)</a>"
+val HTML_REGEX by lazy { Regex("(?<user>$USER_REGEX)|(?<emotion>$EMOTION_REGEX)|(?<link>$LINK_REGEX)") }
+
+fun String.htmlToContent(): List<Content> {
+    replace("<br>", "\n").apply {
+        val result = mutableListOf<Content>()
+        var start = 0
+        var matched = HTML_REGEX.find(this, start)
+        while (matched != null) {
+            val s = matched.range.first
+            if (s > start)
+                result.add(Content.TextContent(substring(start, s)))
+            if (matched.groups["user"] != null) {
+                result.add(
+                    Content.UserContent(
+                        text = matched.groups["name"]!!.value,
+                        uidOrPortrait = matched.groups["portrait"]!!.value
+                    )
+                )
+            } else if (matched.groups["emotion"] != null) {
+                result.add(Content.EmojiContent(id = matched.groups["emotionname"]!!.value))
+            } else if (matched.groups["link"] != null) {
+                result.add(
+                    Content.LinkContent(
+                        text = matched.groups["linktext"]!!.value,
+                        link = matched.groups["url"]!!.value
+                    )
+                )
+            }
+            start = matched.range.last + 1
+            matched = HTML_REGEX.find(this, start)
+        }
+        if (start < length) result.add(Content.TextContent(substring(start, length)))
+        return result
+    }
 }

@@ -1,6 +1,7 @@
 package io.github.a13e300.ro_tieba.ui.search
 
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,6 +31,7 @@ import io.github.a13e300.ro_tieba.misc.PauseLoadOnQuickScrollListener
 import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.ui.DetailDialogFragment
 import io.github.a13e300.ro_tieba.ui.toDetail
+import io.github.a13e300.ro_tieba.utils.appendSimpleContent
 import io.github.a13e300.ro_tieba.utils.displayImageInList
 import io.github.a13e300.ro_tieba.utils.navigateToPost
 import io.github.a13e300.ro_tieba.utils.replaceEm
@@ -187,8 +189,8 @@ class SearchPostFragment : Fragment() {
         ) {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = getItem(position) ?: return
-            holder.binding.threadContent.text =
-                if (viewModel.searchAtForum) item.content.replaceEm(requireContext()) else item.content
+            holder.binding.threadContent.text = SpannableStringBuilder()
+                .appendSimpleContent(item.content, requireContext(), true)
             holder.binding.threadUserName.text = item.user.showName
             holder.binding.threadTitle.text =
                 if (viewModel.searchAtForum) item.title.replaceEm(requireContext()) else item.title

@@ -11,4 +11,5 @@ open class MyURLSpan(url: String) : URLSpan(url) {
     }
 }
 
-class UserSpan(val uid: Long) : MyURLSpan("rotieba://user/profile?uid_or_portrait=$uid")
+class UserSpan(val uidOrPortrait: String) :
+    MyURLSpan("rotieba://user/profile?uid_or_portrait=$uidOrPortrait")

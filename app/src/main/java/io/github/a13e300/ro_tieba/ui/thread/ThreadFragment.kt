@@ -617,7 +617,7 @@ class ThreadFragment : BaseFragment() {
                 )
             }
             holder.binding.avatar.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(post.user.uid))
+                it.setSelectedData(SelectedUser(post.user.uidOrPortrait))
                 false
             }
             holder.binding.accountName.setOnClickListener {
@@ -626,7 +626,7 @@ class ThreadFragment : BaseFragment() {
                 )
             }
             holder.binding.accountName.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(post.user.uid))
+                it.setSelectedData(SelectedUser(post.user.uidOrPortrait))
                 false
             }
             fun addTextView() {
@@ -666,8 +666,8 @@ class ThreadFragment : BaseFragment() {
                     is Content.UserContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         lastString!!.append(
-                            content.text.ifEmpty { "UID:${content.uid}" },
-                            UserSpan(content.uid),
+                            content.text.ifEmpty { "UID:${content.uidOrPortrait}" },
+                            UserSpan(content.uidOrPortrait),
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
                     }
@@ -815,7 +815,7 @@ class ThreadFragment : BaseFragment() {
                     val sb = SpannableStringBuilder()
                     sb.append(
                         comment.user.showName,
-                        UserSpan(comment.user.uid),
+                        UserSpan(comment.user.uidOrPortrait),
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     sb.setSpan(

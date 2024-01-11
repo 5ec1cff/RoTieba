@@ -8,5 +8,5 @@ data class SearchedPost(
     val time: Date,
     val title: String,
     val forum: Forum,
-    val content: String
+    val content: List<Content>
 )

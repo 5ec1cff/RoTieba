@@ -18,7 +18,7 @@ data class SelectedLink(
 )
 
 data class SelectedUser(
-    val uid: Long
+    val uidOrPortrait: String
 )
 
 class ContentTextView : AppCompatTextView {
@@ -66,7 +66,7 @@ class ContentTextView : AppCompatTextView {
                 postDelayed(checkForLongClick, LONG_PRESS_THRESHOLD)
                 setTag(R.id.tag_movement_method_longclick, checkForLongClick)
                 if (span is UserSpan) {
-                    setSelectedData(SelectedUser(span.uid))
+                    setSelectedData(SelectedUser(span.uidOrPortrait))
                 } else {
                     setSelectedData(SelectedLink(span.url))
                 }

@@ -11,6 +11,11 @@ data class Emotion(
 object Emotions {
     val emotionMap = HashMap<String, Emotion>().apply {
         put("image_emoticon", Emotion("#(呵呵)", "image_emoticon", R.drawable.emoji_image_emoticon))
+        // alias
+        put(
+            "image_emoticon1",
+            Emotion("#(呵呵)", "image_emoticon1", R.drawable.emoji_image_emoticon)
+        )
         put(
             "image_emoticon2",
             Emotion("#(哈哈)", "image_emoticon2", R.drawable.emoji_image_emoticon2)

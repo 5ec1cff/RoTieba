@@ -21,6 +21,7 @@ import io.github.a13e300.ro_tieba.models.SearchedPost
 import io.github.a13e300.ro_tieba.models.User
 import io.github.a13e300.ro_tieba.models.toForum
 import io.github.a13e300.ro_tieba.models.toUser
+import io.github.a13e300.ro_tieba.utils.htmlToContent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -142,7 +143,7 @@ class SearchViewModel : ViewModel() {
                     time = Date(p.time.toLong() * 1000),
                     title = p.title,
                     forum = Forum(p.forumName, p.forumId, p.forumInfo.avatar),
-                    content = p.content
+                    content = p.content.htmlToContent()
                 )
             }
         }
@@ -170,7 +171,7 @@ class SearchViewModel : ViewModel() {
                         time = Date(p.time.toLong() * 1000),
                         title = p.title,
                         forum = Forum(p.forumName, 0),
-                        content = p.content
+                        content = p.content.htmlToContent()
                     )
                 }
             }

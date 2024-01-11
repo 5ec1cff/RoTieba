@@ -277,7 +277,7 @@ abstract class BaseFragment : Fragment() {
 
             R.id.open_profile -> {
                 (selected as? SelectedUser)?.let {
-                    findNavController().navigate(MobileNavigationDirections.showProfile(it.uid.toString()))
+                    findNavController().navigate(MobileNavigationDirections.showProfile(it.uidOrPortrait.toString()))
                 }
                 return true
             }

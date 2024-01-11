@@ -19,7 +19,7 @@ sealed class Content : Parcelable {
     ) : Content()
 
     data class LinkContent(val text: String, val link: String) : Content()
-    data class UserContent(val text: String, val uid: Long) : Content()
+    data class UserContent(val text: String, val uidOrPortrait: String) : Content()
 
     data class VideoContent(
         val src: String,

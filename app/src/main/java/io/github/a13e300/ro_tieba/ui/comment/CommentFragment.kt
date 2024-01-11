@@ -213,7 +213,7 @@ class CommentFragment : BaseFragment() {
                 findNavController().navigate(MobileNavigationDirections.showProfile(comment.user.uidOrPortrait))
             }
             holder.binding.avatar.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(comment.user.uid))
+                it.setSelectedData(SelectedUser(comment.user.uidOrPortrait))
                 false
             }
             holder.binding.accountName.setOnClickListener {
@@ -222,7 +222,7 @@ class CommentFragment : BaseFragment() {
                 )
             }
             holder.binding.accountName.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(comment.user.uid))
+                it.setSelectedData(SelectedUser(comment.user.uidOrPortrait))
                 false
             }
             holder.binding.description.text = SpannableStringBuilder()
@@ -262,7 +262,7 @@ class CommentFragment : BaseFragment() {
                 )
             }
             holder.binding.avatar.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(post.user.uid))
+                it.setSelectedData(SelectedUser(post.user.uidOrPortrait))
                 false
             }
             holder.binding.accountName.setOnClickListener {
@@ -271,7 +271,7 @@ class CommentFragment : BaseFragment() {
                 )
             }
             holder.binding.accountName.setOnLongClickListener {
-                it.setSelectedData(SelectedUser(post.user.uid))
+                it.setSelectedData(SelectedUser(post.user.uidOrPortrait))
                 false
             }
             fun addTextView() {
@@ -311,8 +311,8 @@ class CommentFragment : BaseFragment() {
                     is Content.UserContent -> {
                         if (lastString == null) lastString = SpannableStringBuilder()
                         lastString!!.append(
-                            content.text.ifEmpty { "UID:${content.uid}" },
-                            UserSpan(content.uid),
+                            content.text.ifEmpty { "UID:${content.uidOrPortrait}" },
+                            UserSpan(content.uidOrPortrait),
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
                     }
