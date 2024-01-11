@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.github.panpf.sketch.displayImage
 import com.github.panpf.sketch.viewability.showSectorProgressIndicator
-import com.github.panpf.sketch.zoom.SketchZoomImageView
+import com.github.panpf.zoomimage.SketchZoomImageView
 import com.google.android.material.snackbar.Snackbar
 import io.github.a13e300.ro_tieba.BaseFragment
 import io.github.a13e300.ro_tieba.R
@@ -222,12 +222,12 @@ class PhotoFragment : BaseFragment() {
 
         override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
             holder.imageView.apply {
-                displayImage(items[position].url)
                 val ta =
                     requireContext().obtainStyledAttributes(intArrayOf(androidx.appcompat.R.attr.colorPrimary))
                 val color = ta.getColor(0, Color.WHITE)
                 ta.recycle()
                 showSectorProgressIndicator(color = color)
+                displayImage(items[position].url)
                 ViewCompat.setTransitionName(this, "${TRANSITION_NAME_PREFIX}_$position")
             }
         }

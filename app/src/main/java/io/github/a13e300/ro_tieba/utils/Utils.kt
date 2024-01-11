@@ -22,7 +22,6 @@ import com.github.panpf.sketch.request.DisplayRequest
 import com.github.panpf.sketch.request.pauseLoadWhenScrolling
 import com.github.panpf.sketch.stateimage.ColorStateImage
 import com.github.panpf.sketch.stateimage.IconStateImage
-import com.github.panpf.sketch.stateimage.IntColor
 import io.github.a13e300.ro_tieba.App
 import io.github.a13e300.ro_tieba.BuildConfig
 import io.github.a13e300.ro_tieba.EXTRA_DONT_USE_NAV
@@ -411,7 +410,7 @@ fun DisplayRequest.Builder.configureDefaults(context: Context) {
     val color = ta.getColor(0, 0x1a1c1e)
     ta.recycle()
     placeholder(ColorStateImage(color))
-    error(IconStateImage(R.drawable.ic_error, IntColor(color)))
+    error(IconStateImage(R.drawable.ic_error) { colorBackground(color) })
 }
 
 inline fun <T> List<T>.firstOrNullFrom(from: Int = 0, predicate: (T) -> Boolean): T? {

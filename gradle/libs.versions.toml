@@ -24,6 +24,7 @@ legacy-support-v4 = "1.0.0"
 recyclerview = "1.3.2"
 room-runtime = "2.6.1"
 sketch = "3.3.0"
+zoom-image = "1.0.1"
 
 [libraries]
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
@@ -67,7 +68,7 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 
 sketch-main = { module = "io.github.panpf.sketch3:sketch", version.ref = "sketch" }
 sketch-okhttp = { module = "io.github.panpf.sketch3:sketch-okhttp", version.ref = "sketch" }
-sketch-zoom = { module = "io.github.panpf.sketch3:sketch-zoom", version.ref = "sketch" }
+sketch-zoom = { module = "io.github.panpf.zoomimage:zoomimage-view-sketch", version.ref = "zoom-image" }
 sketch-movie = { module = "io.github.panpf.sketch3:sketch-gif-movie", version.ref = "sketch" }
 sketch-extension = { module = "io.github.panpf.sketch3:sketch-extensions", version.ref = "sketch" }
 
