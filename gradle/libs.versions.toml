@@ -1,5 +1,5 @@
 [versions]
-com-android-application = "8.2.1"
+com-android-application = "8.2.2"
 datastore = "1.0.0"
 gson = "2.10.1"
 okhttp = "4.12.0"
