@@ -11,15 +11,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
-      CCACHE_NOHASHDIR: "true"
-      CCACHE_HARDLINK: "true"
-      CCACHE_BASEDIR: "${{ github.workspace }}"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: "recursive"
           fetch-depth: 0
@@ -36,34 +31,32 @@ jobs:
           fi
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: "17"
+          java-version: "21"
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-cleanup: true
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build with Gradle
         run: |
           ./gradlew assemble
 
       - name: Upload release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "RoTieba-release-ci"
           path: "./app/build/outputs/apk/release/app-release.apk"
 
       - name: Upload release mapping
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "release-mappings"
           path: "./app/build/outputs/mapping/release/"
 
       - name: Upload debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "RoTieba-debug-ci"
           path: "./app/build/outputs/apk/debug/app-debug.apk"
