@@ -22,9 +22,13 @@ val keystoreProperties = if (keystorePropertiesFile.exists() && keystoreProperti
 var verCode: Int by rootProject.extra
 var verName: String by rootProject.extra
 
+kotlin {
+    jvmToolchain(21)
+}
+
 android {
     namespace = "io.github.a13e300.ro_tieba"
-    compileSdk = 34
+    compileSdk = 35
 
     signingConfigs {
         if (keystoreProperties != null) {
@@ -40,7 +44,7 @@ android {
     defaultConfig {
         applicationId = "io.github.a13e300.ro_tieba"
         minSdk = 27
-        targetSdk = 34
+        targetSdk = 35
         versionCode = verCode
         versionName = verName
 
@@ -66,11 +70,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "21"
     }
     buildFeatures {
         viewBinding = true
@@ -112,9 +116,6 @@ dependencies {
     implementation(libs.navigation.ui.ktx)
     implementation(libs.legacy.support.v4)
     implementation(libs.recyclerview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
     implementation(libs.protobuf.kotlin)
     implementation(libs.protobuf.java)
     implementation(libs.bundles.rikkax)
@@ -151,15 +152,6 @@ protobuf {
                     option("lite")
                 }
             }
-        }
-    }
-}
-
-// https://github.com/google/ksp/issues/1288#issuecomment-1510633127
-allprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
         }
     }
 }

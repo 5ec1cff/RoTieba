@@ -51,6 +51,7 @@ import java.util.Date
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
+import kotlin.collections.removeLast as removeLastKt
 
 fun ByteArray.toHexString() = this.joinToString("") {
     String.format("%02x", it)
@@ -117,7 +118,7 @@ fun List<PbContentOuterClass.PbContent>.toPostContent(): List<Content> {
                 if (last == null)
                     Content.TextContent(item.text)
                 else {
-                    result.removeLast()
+                    result.removeLastKt()
                     Content.TextContent(last.text + item.text)
                 }
             }

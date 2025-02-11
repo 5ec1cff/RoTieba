@@ -22,7 +22,6 @@ import android.widget.MediaController
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.MenuProvider
-import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -339,7 +338,7 @@ class ThreadFragment : BaseFragment() {
                 null -> return
             }
             updateBar(binding.includeThreadBar)
-            ViewCompat.postOnAnimation(binding.mainStickyContainerLayout) {
+            binding.mainStickyContainerLayout.postOnAnimation {
                 binding.mainStickyContainerLayout.isGone = shouldHide
             }
         }
