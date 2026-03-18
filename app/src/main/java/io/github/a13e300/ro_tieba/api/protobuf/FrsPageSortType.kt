@@ -9,5 +9,7 @@ enum class FrsPageSortType(val value: Int) {
     HOT(0),
     CREATE_TIME(1),
     FOLLOW(2),
-    REPLY_TIME(5)
+    // https://github.com/lumina37/aiotieba/issues/345
+    // >= 6 -> Reply
+    REPLY_TIME(6)
 }
