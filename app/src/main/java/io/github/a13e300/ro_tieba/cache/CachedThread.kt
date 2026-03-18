@@ -216,7 +216,8 @@ class CachedThread private constructor(val tid: Long) {
                 p.subPostNumber,
                 agreeNum = p.agree.agreeNum,
                 disagreeNum = p.agree.disagreeNum,
-                page = currentPage
+                page = currentPage,
+                title = if (p.floor == 1) response.thread.title else null
             )
         }
         val totalPage: Int

@@ -106,7 +106,7 @@ abstract class BaseFragment : Fragment() {
         val selected = info?.selectedData
         val post = if (selected is Comment) selected else info?.data
         when (item.itemId) {
-            R.id.copy_post_content -> {
+            R.id.copy_post_content_link, R.id.copy_post_content -> {
                 val content = when (post) {
                     is TiebaThread -> post.content
                     is Post -> post.content
@@ -124,8 +124,27 @@ abstract class BaseFragment : Fragment() {
                         is Content.UnknownContent -> it.source
                     }
                 }
-                if (post is TiebaThread) copyText("${post.title}\n$text")
-                else copyText(text)
+                val finalText = StringBuilder()
+                if (post is TiebaThread && post.title.isNotEmpty()) {
+                    finalText.append(post.title)
+                    finalText.append("\n")
+                }
+                if (post is Post && !post.title.isNullOrEmpty()) {
+                    finalText.append(post.title)
+                    finalText.append("\n")
+                }
+                if (item.itemId == R.id.copy_post_content_link) {
+                    val url = when (post) {
+                        is TiebaThread -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
+                        is Post -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}"
+                        is Comment -> "https://tieba.baidu.com/p/${post.tid}?pid=${post.postId}&cid=${post.ppid}"
+                        else -> ""
+                    }
+                    finalText.append(url)
+                    finalText.append("\n")
+                }
+                finalText.append(text)
+                copyText(finalText)
                 return true
             }
 

@@ -15,6 +15,7 @@
     <string name="refresh_title">刷新</string>
     <string name="copy_title">复制帖子内容</string>
     <string name="link_title">复制帖子链接</string>
+    <string name="copy_content_link_title">复制帖子内容和链接</string>
     <string name="open_link_title">打开所选链接</string>
     <string name="copy_link_title">复制所选链接</string>
     <string name="download_photo_title">下载图片</string>

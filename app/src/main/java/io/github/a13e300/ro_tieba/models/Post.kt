@@ -13,7 +13,8 @@ data class Post(
     val commentCount: Int,
     val agreeNum: Long = 0,
     val disagreeNum: Long = 0,
-    val page: Int = 0
+    val page: Int = 0,
+    val title: String? = null,
 ) : IPost {
     override val id: Long
         get() = postId
