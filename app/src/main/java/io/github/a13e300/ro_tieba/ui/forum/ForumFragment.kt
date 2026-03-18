@@ -69,29 +69,6 @@ class ForumFragment : BaseFragment() {
     ): View {
         binding = FragmentForumBinding.inflate(inflater, container, false)
         viewModel.forumName = args.fname
-        binding.toolbar.setOnMenuItemClickListener {
-            return@setOnMenuItemClickListener when (it.itemId) {
-                R.id.search -> {
-                    findNavController().navigate(
-                        MobileNavigationDirections.homeSearch().setForum(viewModel.forumName)
-                    )
-                    true
-                }
-
-                R.id.open_at_other_client -> {
-                    if (!openForumAtOtherClient(viewModel.forumName, requireContext())) {
-                        Snackbar.make(
-                            binding.root,
-                            getString(R.string.no_other_apps_tips),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
-                    true
-                }
-
-                else -> false
-            }
-        }
         setupToolbar(binding.toolbar)
         binding.appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
             binding.toolbarLayout.title = if (abs(verticalOffset) >= appBarLayout.totalScrollRange)
@@ -137,6 +114,34 @@ class ForumFragment : BaseFragment() {
                 else -> {
                     binding.loadError.isVisible = false
                 }
+            }
+        }
+        binding.toolbar.setOnMenuItemClickListener {
+            return@setOnMenuItemClickListener when (it.itemId) {
+                R.id.search -> {
+                    findNavController().navigate(
+                        MobileNavigationDirections.homeSearch().setForum(viewModel.forumName)
+                    )
+                    true
+                }
+
+                R.id.open_at_other_client -> {
+                    if (!openForumAtOtherClient(viewModel.forumName, requireContext())) {
+                        Snackbar.make(
+                            binding.root,
+                            getString(R.string.no_other_apps_tips),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                    true
+                }
+
+                R.id.refresh -> {
+                    threadAdapter.refresh()
+                    true
+                }
+
+                else -> false
             }
         }
         binding.loadErrorRefresh.setOnClickListener {
